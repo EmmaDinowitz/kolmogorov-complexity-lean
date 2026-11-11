@@ -6,6 +6,10 @@ Authors: Alexey Milovanov
 import KolmogorovMathlib.PointToSet.ComputableMetric.Presentation
 import KolmogorovMathlib.PointToSet.ComputableMetric.StaticDimensions
 import KolmogorovMathlib.PointToSet.ComputableMetric.DimensionAlongScales
+import KolmogorovMathlib.PointToSet.ComputableMetric.Points
+import KolmogorovMathlib.PointToSet.ComputableMetric.CeOpen
+import KolmogorovMathlib.PointToSet.ComputableMetric.Compact
+import KolmogorovMathlib.PointToSet.ComputableMetric.Represented
 
 /-!
 # Fixed metric presentations, represented maps and static point dimensions
@@ -24,6 +28,16 @@ dynamical data.
   (`exists_admissible_base`), precision complexity, and the static point dimensions.
 * `ComputableMetric.DimensionAlongScales`: invariance of the static point dimensions under the
   choice of scales and of presentation.
+* `ComputableMetric.Points`: relatively computable points and the strict distance certificates
+  (membership in a basic ball, rational lower bounds on distances) that every effective search
+  semidecides from uniformly computable names.
+* `ComputableMetric.CeOpen`: relatively c.e. open sets and families, their closure under
+  unions, reindexing and (above the metric table) intersections, and coded basic balls inside
+  open sets.
+* `ComputableMetric.Compact`: effective compactness as semidecidable containment in finite
+  unions of basic balls.
+* `ComputableMetric.Represented`: families of maps represented uniformly in a primcodable index
+  and maps represented on a subset, with their evaluation and pullback lemmas.
 
 All point dimensions live in `ENNReal` and use positive radii tending to zero. Computability of
 the presentation is a hypothesis for algorithms, not part of the definition of complexity. The

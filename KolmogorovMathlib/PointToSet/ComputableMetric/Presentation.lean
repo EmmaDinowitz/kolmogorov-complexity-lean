@@ -123,7 +123,7 @@ noncomputable def realPresentation : Presentation ℝ where
 private abbrev BallPair := (ℕ × ℚ) × (ℕ × ℚ)
 
 /-- The rational power `2⁻ᵖ` casts to the dyadic radius. -/
-private lemma cast_inv_two_pow (p : ℕ) : (((2 : ℚ)⁻¹ ^ p : ℚ) : ℝ) = dyadicRadius p := by
+lemma cast_inv_two_pow (p : ℕ) : (((2 : ℚ)⁻¹ ^ p : ℚ) : ℝ) = dyadicRadius p := by
   simp only [dyadicRadius, Rat.cast_pow, Rat.cast_inv, Rat.cast_ofNat]
 
 /-- Comparing a rational with `2⁻ᵖ` is the same as comparing its cast with `dyadicRadius p`. -/
@@ -138,7 +138,7 @@ private lemma add_inv_two_pow_lt_iff {r s : ℚ} {k m : ℕ} :
   rw [← cast_inv_two_pow k, ← cast_inv_two_pow m, ← Rat.cast_add, ← Rat.cast_add, Rat.cast_lt]
 
 /-- The rational dyadic radii `2⁻ᵖ` are computable from the precision index. -/
-private lemma computable_inv_two_pow : Computable (fun p : ℕ => (2 : ℚ)⁻¹ ^ p) := by
+lemma computable_inv_two_pow : Computable (fun p : ℕ => (2 : ℚ)⁻¹ ^ p) := by
   have hc := ComputableReals.computable_invSucc.comp
     ((Primrec.nat_sub.comp primrec_two_pow_aux (Primrec.const 1)).to_comp)
   refine hc.of_eq fun p => ?_
@@ -153,7 +153,7 @@ private lemma computable_inv_two_pow : Computable (fun p : ℕ => (2 : ℚ)⁻¹
 /-- A point lies in an open rational ball exactly when some name stage and the rational
 distance approximation certify it; the two added dyadic errors account for the metric
 approximation and for the name. -/
-private lemma mem_basicBall_iff_exists_certificate
+lemma mem_basicBall_iff_exists_certificate
     (P : Presentation X) (q : (ℕ × ℕ) × ℕ → ℚ)
     (hq : ∀ ij p, |(q (ij, p) : ℝ) - dist (P.ι ij.1) (P.ι ij.2)| < dyadicRadius p)
     (x : X) (a : ℕ → ℕ) (ha : IsCauchyName P x a) (b : ℕ × ℚ) :
@@ -181,7 +181,7 @@ private lemma mem_basicBall_iff_exists_certificate
 
 /-- Every point of a presented space has a rational basic neighborhood whose radius is below
 any requested dyadic error. -/
-private lemma exists_basicBall_radius_lt (Q : Presentation Y) (y : Y) (p : ℕ) :
+lemma exists_basicBall_radius_lt (Q : Presentation Y) (y : Y) (p : ℕ) :
     ∃ c : ℕ × ℚ, y ∈ basicBall Q c ∧ (c.2 : ℝ) < dyadicRadius p := by
   have hpos : 0 < dyadicRadius p := by unfold dyadicRadius; positivity
   obtain ⟨j, hj⟩ := Metric.denseRange_iff.mp Q.dense y (dyadicRadius p / 2) (by positivity)

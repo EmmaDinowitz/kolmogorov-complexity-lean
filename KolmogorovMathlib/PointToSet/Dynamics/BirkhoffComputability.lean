@@ -3,7 +3,10 @@ Copyright (c) 2024 Alexey Milovanov. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Alexey Milovanov
 -/
-import KolmogorovMathlib.PointToSet.ComputableMetric
+import KolmogorovMathlib.PointToSet.ComputableMetric.Presentation
+import KolmogorovMathlib.PointToSet.ComputableMetric.StaticDimensions
+import KolmogorovMathlib.PointToSet.ComputableMetric.DimensionAlongScales
+import KolmogorovMathlib.Oracle.Closure
 import KolmogorovMathlib.AlgorithmicRandomness.RatComputable
 import KolmogorovMathlib.AlgorithmicRandomness.LowerSemicomputableFun
 import KolmogorovMathlib.AlgorithmicRandomness.ProbabilityBounded
@@ -44,7 +47,7 @@ def bowenBall (T : X → X) (n : ℕ) (x : X) (ε : ℝ) : Set X :=
   {y | (x, y) ∈ _root_.Dynamics.dynEntourage T {z : X × X | dist z.1 z.2 < ε} n}
 
 /-- Constant functions have oracle program indices computable uniformly in their values. -/
-private lemma exists_constant_oracle_indices
+lemma exists_constant_oracle_indices
     (A : Set ℕ) :
     ∃ c : ℕ → ℕ, Computable c ∧
       ∀ i p, oracleEval A (c i) p = Part.some i := by
@@ -90,7 +93,7 @@ private lemma exists_constant_oracle_indices
   exact ⟨t, Option.mem_def.mpr ht⟩
 
 /-- A relative partial computation admits computable specialization of its first argument. -/
-private lemma exists_oracle_specialization
+lemma exists_oracle_specialization
     (A : Set ℕ) (E : ℕ × ℕ →. ℕ) (hE : PartrecIn {charOracle A} E) :
     ∃ s : ℕ → ℕ, Computable s ∧
       ∀ e p, oracleEval A (s e) p = E (e, p) := by
@@ -162,7 +165,7 @@ private lemma exists_oracle_specialization
       exact congrArg some (Part.mem_unique (hmem r.unpair.1 r.unpair.2 w hr) hv)
 
 /-- Computable initialization and update functions give computable iteration indices. -/
-private lemma exists_iterate_indices
+lemma exists_iterate_indices
     (c s : ℕ → ℕ) (hc : Computable c) (hs : Computable s) :
     ∃ e : ℕ × ℕ → ℕ, Computable (fun p : ℕ × ℕ ↦ e p) ∧
       (∀ i, e (0, i) = c i) ∧
@@ -176,7 +179,7 @@ private lemma exists_iterate_indices
   · intro n i; rfl
 
 /-- Iterating indices for a represented map produces valid names for its orbit points. -/
-private lemma isCauchyName_of_iterate_indices
+lemma isCauchyName_of_iterate_indices
     (P : Presentation X) (T : X → X) (A : Set ℕ)
     (E : ℕ × ℕ →. ℕ)
     (hE : ∀ x a e, IsCauchyName P x a → (∀ p, a p ∈ oracleEval A e p) →
@@ -221,7 +224,7 @@ private lemma isCauchyName_of_iterate_indices
       exact h_next_mem p
 
 /-- A computable family of total oracle programs gives a uniformly computable family of names. -/
-private lemma computable_names_of_total_oracle_indices
+lemma computable_names_of_total_oracle_indices
     (A : Set ℕ) (e : ℕ × ℕ → ℕ) (hcomp : Computable (fun p : ℕ × ℕ ↦ e p))
     (htotal : ∀ n i p, (oracleEval A (e (n, i)) p).Dom) :
     ∃ a : (ℕ × ℕ) → ℕ → ℕ,
@@ -239,7 +242,7 @@ private lemma computable_names_of_total_oracle_indices
   exact ⟨hf, fun n i p ↦ Part.get_mem (htotal n i p)⟩
 
 /-- Ideal-point orbits have Cauchy names computable uniformly in time, center and precision. -/
-private theorem exists_computable_orbit_names
+theorem exists_computable_orbit_names
     (P : Presentation X) (T : X → X) (A : Set ℕ)
     (hP : ComputablePresentationIn P A)
     (hT : IsRepresentedMapIn P P A T) :
@@ -668,7 +671,7 @@ private lemma abs_orbit_dist_approx_lt {X : Type*} [MetricSpace X] (P : Presenta
   exact lt_of_le_of_lt H (lt_of_le_of_lt (add_le_add le_rfl h_tri) (lt_of_lt_of_le H3 H4.le))
 
 /-- Distances between ideal-point orbits are computable uniformly in time and both centers. -/
-private theorem computable_orbit_distances {k : ℕ} (P : Presentation X)
+theorem computable_orbit_distances {k : ℕ} (P : Presentation X)
     (T : X → X) (v : Fin k → X → ℝ) (A : Set ℕ) (hA : IsAdmissible P T v A) :
     IsComputableRealFamilyIn A (fun t_ij : ℕ × (ℕ × ℕ) ↦ dist (T^[t_ij.1] (P.ι t_ij.2.1))
         (T^[t_ij.1] (P.ι t_ij.2.2))) := by
@@ -763,18 +766,6 @@ private theorem computable_real_family_max {α β : Type*} [Primcodable α] [Pri
   · intro x p
     have Hbound := abs_running_max_approx_lt F q hq_bound h_nonneg
     exact Hbound x p
-
-/-- Reindexing a computable real family by a computable function preserves computability. -/
-theorem IsComputableRealFamilyIn.comp {α β : Type*} [Primcodable α] [Primcodable β] (A : Set ℕ)
-    (v : β → ℝ) (hv : IsComputableRealFamilyIn A v) (f : α → β) (hf : Computable f) :
-    IsComputableRealFamilyIn A (v ∘ f) := by
-  rcases hv with ⟨q, hq_comp, hq_bound⟩
-  use fun ap ↦ q (f ap.1, ap.2)
-  constructor
-  · apply hq_comp.comp
-    exact (hf.comp Computable.fst).pair Computable.snd |>.computableIn
-  · intro i p
-    exact hq_bound (f i) p
 
 /-- Finite orbit distances at ideal points have approximations uniform in both centers,
 time and precision. Blueprint node `metric:birkhoff`. -/

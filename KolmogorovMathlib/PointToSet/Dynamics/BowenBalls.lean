@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Alexey Milovanov
 -/
 import KolmogorovMathlib.PointToSet.Dynamics.BirkhoffComputability
+import KolmogorovMathlib.Oracle.Closure
 
 /-!
 # Bowen balls and finite-scale costs
@@ -14,8 +15,9 @@ Uniformly continuous potentials have vanishing small-scale oscillation, which al
 controls their Birkhoff sums. These facts implement blueprint nodes `metric:bowen`
 and `metric:oscillation`.
 
-We also prove enumerability of strict comparisons with computable real families
-(`metric:birkhoff`) and define finite-scale pressure and BS costs as indexed infima.
+Enumerability of strict comparisons with computable real families (`metric:birkhoff`) is the
+library lemma `birkhoff_computableIn_lt`/`_gt` of `Oracle/Closure.lean`; here we define
+finite-scale pressure and BS costs as indexed infima.
 Finite complexity sublevels give attainment under local bounds (`metric:min`).
 The pointwise quantities and presentation-change results use these comparisons,
 dense realizers, and attained costs.
@@ -25,198 +27,6 @@ namespace Kolmogorov.PointToSet
 open Filter
 open scoped Topology ENNReal Computability
 variable {X : Type*} [MetricSpace X]
-
-/-- Twice an inverse power of two is smaller than any positive real tolerance. -/
-lemma exists_two_mul_inv_two_pow_lt (d : ℝ) (hd : 0 < d) : ∃ p : ℕ, (2 : ℝ) * (2^p : ℝ)⁻¹ < d := by
-  have ⟨p, hp⟩ : ∃ p : ℕ, (2:ℝ)⁻¹ ^ p < d / 2 := by
-    exact exists_pow_lt_of_lt_one (half_pos hd) (by norm_num)
-  use p
-  have h_pow : (2⁻¹ : ℝ) ^ p = (2^p : ℝ)⁻¹ := by simp [inv_pow]
-  rw [h_pow] at hp
-  linarith
-
-/-- The rational sequence of inverse powers of two is computable. -/
-lemma computable_rat_inv_two_pow : Computable (fun (p : ℕ) ↦ (2^p : ℚ)⁻¹) := by
-  have H : (fun (p : ℕ) ↦ (2^p : ℚ)⁻¹) = fun p ↦ (1 : ℚ) / ((2^p : ℕ) : ℚ) := by
-    ext p
-    have h2 : ((2^p : ℕ) : ℚ) = (2:ℚ)^p := by simp
-    rw [h2, inv_eq_one_div]
-  rw [H]
-  apply computable_of_num_den (Computable.const (1 : ℤ)) comp_pow
-  · intro p
-    positivity
-  · intro p
-    rfl
-
-/-- A Boolean conditional preserves computability relative to a fixed oracle family. -/
-lemma computable_in_cond {α σ : Type*} [Primcodable α] [Primcodable σ]
-    {O : Set (ℕ →. ℕ)} {c : α → Bool} {f g : α → σ}
-    (hc : ComputableIn O c) (hf : ComputableIn O f) (hg : ComputableIn O g) :
-    ComputableIn O (fun a ↦ cond (c a) (f a) (g a)) :=
-  (Computable.cond Computable.fst (Computable.fst.comp Computable.snd)
-    (Computable.snd.comp Computable.snd)).computableIn.comp (hc.pair (hf.pair hg))
-
-/-- Strict rational upper comparisons with a uniform computable real family are enumerable,
-with the threshold part of the ambient index.
-Blueprint node `metric:birkhoff`. -/
-theorem birkhoff_computableIn_lt {α : Type*} [Primcodable α] (A : Set ℕ) (v : α → ℝ)
-    (hv : IsComputableRealFamilyIn A v) :
-    IsREIn A (fun iq : α × ℚ => v iq.1 < (iq.2 : ℝ)) := by
-  rcases hv with ⟨q, hq_comp, hq_approx⟩
-  let f : α × ℚ →. ℕ := fun iq ↦
-    Nat.rfindOpt (fun p ↦ cond (decide (q (iq.1, p) + (2^p : ℚ)⁻¹ < iq.2)) (some p) none)
-  have hf : PartrecIn {charOracle A} f := by
-    apply PartrecIn.rfindOpt
-    have hqArg : ComputableIn {charOracle A} (fun w : (α × ℚ) × ℕ ↦ q (w.1.1, w.2)) :=
-      hq_comp.comp ((Computable.fst.comp Computable.fst).pair Computable.snd).computableIn
-    have hεArg : ComputableIn {charOracle A} (fun w : (α × ℚ) × ℕ ↦ (2^w.2 : ℚ)⁻¹) :=
-      computable_rat_inv_two_pow.computableIn.comp Computable.snd.computableIn
-    have hsum : ComputableIn {charOracle A}
-        (fun w : (α × ℚ) × ℕ ↦ q (w.1.1, w.2) + (2^w.2 : ℚ)⁻¹) :=
-      (Computable₂.computableIn₂ computable₂_ratAdd).comp hqArg hεArg
-    have hrArg : ComputableIn {charOracle A} (fun w : (α × ℚ) × ℕ ↦ w.1.2) :=
-      (Computable.snd.comp Computable.fst).computableIn
-    have hcmp : ComputableIn {charOracle A}
-        (fun w : (α × ℚ) × ℕ ↦ decide (q (w.1.1, w.2) + (2^w.2 : ℚ)⁻¹ < w.1.2)) :=
-      (Computable₂.computableIn₂ computable₂_ratLt).comp hsum hrArg
-    have hsome : ComputableIn {charOracle A} (fun w : (α × ℚ) × ℕ ↦ some w.2) :=
-      (Primrec.option_some.to_comp.comp Computable.snd).computableIn
-    have hnone : ComputableIn {charOracle A} (fun w : (α × ℚ) × ℕ ↦ (none : Option ℕ)) :=
-      (Computable.const none).computableIn
-    have H : ComputableIn {charOracle A}
-        (fun (w : (α × ℚ) × ℕ) ↦
-          cond (decide (q (w.1.1, w.2) + (2^w.2 : ℚ)⁻¹ < w.1.2)) (some w.2) none) :=
-      computable_in_cond hcmp hsome hnone
-    exact ComputableIn₂.mk H
-  use f
-  constructor
-  · exact hf
-  · intro ⟨i, r⟩
-    simp only [f]
-    rw [Nat.rfindOpt_dom]
-    constructor
-    · intro h
-      have h_sub : 0 < (r : ℝ) - v i := sub_pos.mpr h
-      obtain ⟨p, hp⟩ := exists_two_mul_inv_two_pow_lt _ h_sub
-      use p, p
-      have h_lt : q (i, p) + (2^p : ℚ)⁻¹ < r := by
-        rw [← Rat.cast_lt (K := ℝ)]
-        push_cast
-        have h1 := hq_approx i p
-        have h1' : (q (i, p) : ℝ) < v i + 2⁻¹ ^ p := sub_lt_iff_lt_add'.mp (abs_lt.mp h1).2
-        have h_pow : (2⁻¹ : ℝ) ^ p = (2^p : ℝ)⁻¹ := by simp [inv_pow]
-        rw [h_pow] at h1'
-        linarith
-      simp [h_lt, Option.mem_def]
-    · intro h_dom
-      rcases h_dom with ⟨p, a, hhp⟩
-      simp only [Option.mem_def, Bool.cond_decide] at hhp
-      split_ifs at hhp with h_lt
-      have h_approx := hq_approx i p
-      have h_pow : (2⁻¹ : ℝ) ^ p = (2^p : ℝ)⁻¹ := by simp [inv_pow]
-      rw [h_pow] at h_approx
-      have h_lt' : (q (i, p) : ℝ) + (2^p : ℝ)⁻¹ < (r : ℝ) := by
-        have h2 : ((q (i, p) + (2^p : ℚ)⁻¹ : ℚ) : ℝ) < (r : ℝ) :=
-          Rat.cast_lt.mpr (decide_eq_true_iff.mp h_lt)
-        push_cast at h2
-        exact h2
-      have h_approx2 : -(2^p : ℝ)⁻¹ < (q (i, p) : ℝ) - v i := (abs_lt.mp h_approx).1
-      linarith
-
-/-- A strict lower comparison holds exactly when some rational approximation is separated. -/
-private lemma rat_lt_iff_exists_separated_approx {α : Type*}
-    (v : α → ℝ) (q : α × ℕ → ℚ)
-    (hq_err : ∀ i p, |(q (i, p) : ℝ) - v i| < (2 : ℝ)⁻¹ ^ p)
-    (iq : α × ℚ) :
-    (iq.2 : ℝ) < v iq.1 ↔ ∃ p : ℕ, iq.2 + (2 : ℚ)⁻¹ ^ p < q (iq.1, p) := by
-  constructor
-  · intro h
-    have h_sub : 0 < v iq.1 - (iq.2 : ℝ) := sub_pos.mpr h
-    obtain ⟨p, hp⟩ := exists_two_mul_inv_two_pow_lt _ h_sub
-    use p
-    rw [← Rat.cast_lt (K := ℝ)]
-    push_cast
-    have h1 := hq_err iq.1 p
-    have h1' : v iq.1 - (2:ℝ)⁻¹ ^ p < (q (iq.1, p) : ℝ) := by
-      have h2 : -(2:ℝ)⁻¹ ^ p < (q (iq.1, p) : ℝ) - v iq.1 := (abs_lt.mp h1).1
-      linarith
-    have h_pow : (2^p : ℝ)⁻¹ = (2⁻¹ : ℝ) ^ p := by simp [inv_pow]
-    rw [h_pow] at hp
-    linarith
-  · intro h
-    rcases h with ⟨p, hp⟩
-    have hp' : (iq.2 : ℝ) + (2:ℝ)⁻¹ ^ p < (q (iq.1, p) : ℝ) := by
-      have : ((iq.2 + (2 : ℚ)⁻¹ ^ p : ℚ) : ℝ) < (q (iq.1, p) : ℝ) := Rat.cast_lt.mpr hp
-      push_cast at this
-      exact this
-    have h1 := hq_err iq.1 p
-    have h1' : (q (iq.1, p) : ℝ) < v iq.1 + (2:ℝ)⁻¹ ^ p := by
-      have h2 : (q (iq.1, p) : ℝ) - v iq.1 < (2:ℝ)⁻¹ ^ p := (abs_lt.mp h1).2
-      linarith
-    linarith
-
-/-- Searching for a rational approximation above a threshold is relatively enumerable. -/
-private lemma isREIn_exists_separated_approx {α : Type*} [Primcodable α] (A : Set ℕ)
-    (q : α × ℕ → ℚ) (hq : ComputableIn {charOracle A} q) :
-    IsREIn A (fun iq : α × ℚ ↦ ∃ p : ℕ, iq.2 + (2 : ℚ)⁻¹ ^ p < q (iq.1, p)) := by
-  let f : α × ℚ →. ℕ := fun iq ↦
-    Nat.rfindOpt (fun p ↦ cond (decide (iq.2 + (2^p : ℚ)⁻¹ < q (iq.1, p))) (some p) none)
-  have hf : PartrecIn {charOracle A} f := by
-    apply PartrecIn.rfindOpt
-    have hqArg : ComputableIn {charOracle A} (fun w : (α × ℚ) × ℕ ↦ q (w.1.1, w.2)) :=
-      hq.comp ((Computable.fst.comp Computable.fst).pair Computable.snd).computableIn
-    have hεArg : ComputableIn {charOracle A} (fun w : (α × ℚ) × ℕ ↦ (2^w.2 : ℚ)⁻¹) :=
-      computable_rat_inv_two_pow.computableIn.comp Computable.snd.computableIn
-    have hrArg : ComputableIn {charOracle A} (fun w : (α × ℚ) × ℕ ↦ w.1.2) :=
-      (Computable.snd.comp Computable.fst).computableIn
-    have hsum : ComputableIn {charOracle A} (fun w : (α × ℚ) × ℕ ↦ w.1.2 + (2^w.2 : ℚ)⁻¹) :=
-      (Computable₂.computableIn₂ computable₂_ratAdd).comp hrArg hεArg
-    have hcmp : ComputableIn {charOracle A}
-        (fun w : (α × ℚ) × ℕ ↦ decide (w.1.2 + (2^w.2 : ℚ)⁻¹ < q (w.1.1, w.2))) :=
-      (Computable₂.computableIn₂ computable₂_ratLt).comp hsum hqArg
-    have hsome : ComputableIn {charOracle A} (fun w : (α × ℚ) × ℕ ↦ some w.2) :=
-      (Primrec.option_some.to_comp.comp Computable.snd).computableIn
-    have hnone : ComputableIn {charOracle A} (fun w : (α × ℚ) × ℕ ↦ (none : Option ℕ)) :=
-      (Computable.const none).computableIn
-    have H : ComputableIn {charOracle A}
-        (fun (w : (α × ℚ) × ℕ) ↦
-          cond (decide (w.1.2 + (2^w.2 : ℚ)⁻¹ < q (w.1.1, w.2))) (some w.2) none) :=
-      computable_in_cond hcmp hsome hnone
-    exact ComputableIn₂.mk H
-  use f
-  constructor
-  · exact hf
-  · intro ⟨i, r⟩
-    simp only [f]
-    rw [Nat.rfindOpt_dom]
-    constructor
-    · intro h
-      rcases h with ⟨p, hp⟩
-      use p, p
-      have h_lt : r + (2^p : ℚ)⁻¹ < q (i, p) := by
-        have h_pow : (2 : ℚ)⁻¹ ^ p = (2^p : ℚ)⁻¹ := by simp [inv_pow]
-        rwa [← h_pow]
-      simp [h_lt, Option.mem_def]
-    · intro h_dom
-      rcases h_dom with ⟨p, a, hhp⟩
-      simp only [Option.mem_def, Bool.cond_decide] at hhp
-      split_ifs at hhp with h_lt
-      use p
-      have h_pow : (2 : ℚ)⁻¹ ^ p = (2^p : ℚ)⁻¹ := by simp [inv_pow]
-      rwa [h_pow]
-
-/-- Strict rational lower comparisons with a uniform computable real family are also
-enumerable. Blueprint node `metric:birkhoff`. -/
-theorem birkhoff_computableIn_gt {α : Type*} [Primcodable α] (A : Set ℕ) (v : α → ℝ)
-    (hv : IsComputableRealFamilyIn A v) :
-    IsREIn A (fun iq : α × ℚ => (iq.2 : ℝ) < v iq.1) := by
-  rcases hv with ⟨q, hq, hq_err⟩
-  have h_equiv : (fun iq : α × ℚ ↦ (iq.2 : ℝ) < v iq.1) =
-                 (fun iq : α × ℚ ↦ ∃ p : ℕ, iq.2 + (2 : ℚ)⁻¹ ^ p < q (iq.1, p)) := by
-    funext iq
-    exact propext (rat_lt_iff_exists_separated_approx v q hq_err iq)
-  rw [h_equiv]
-  exact isREIn_exists_separated_approx A q hq
 
 /-- Every finite-order Bowen distance vanishes on the diagonal. -/
 private lemma bowenDist_self (T : X → X) (n : ℕ) (x : X) : bowenDist T n x x = 0 := by

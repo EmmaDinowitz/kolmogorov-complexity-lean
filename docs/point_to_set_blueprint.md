@@ -950,3 +950,123 @@ All five declarations are in `Kolmogorov.PointToSet`; the files are in the node 
 * The four factorial-product modules under `PointToSet/Conformal/TheoremE/` carry no node of
   their own; they support `conf:packing-diameter-counterexample`.
 
+
+## 9. Effective localization layer
+
+Files: `Oracle/Closure.lean`, `Oracle/Search.lean`, `Oracle/PrefixComplexity/NatBounds.lean`,
+`Oracle/PrefixComplexity/Decoders.lean`, `Oracle/Encoding/Numerals.lean` (Layer 0);
+`PointToSet/ComputableMetric/Points.lean`, `CeOpen.lean`, `Compact.lean`, `Represented.lean`
+(Layer 1); `PointToSet/EffectiveLocalization/Search.lean`, `Charging.lean` (Layer 2); and the
+orbit data of `PointToSet/Geodesic/OrbitData.lean`. These are the reusable effective ingredients
+of the geodesic upper bound (`geo:*` nodes of `geodesic_upper_bound_blueprint.md`), stated for an
+arbitrary presentation and oracle.
+
+* **`eff:closure`** — Relative computability, partial recursiveness and computable real families
+  transfer to Turing-stronger oracles; relatively enumerable predicates are closed under
+  disjunction, finite uniformization over `Fin n` and bounded universal quantification over the
+  positions of a list, and have oracle-computable prefix enumerations; computable real families
+  are closed under computable reindexing and their strict comparisons with rationals are
+  relatively enumerable in both directions.
+  `Kolmogorov.PointToSet.computableIn_mono_oracle` (`Oracle/Closure.lean`); same file:
+  `partrecIn_mono`, `isComputableRealFamilyIn_mono_oracle`, `computable_in_cond`, `IsREIn.or`,
+  `isREIn_fin_uniform`, `IsREIn.exists_prefixList`, `IsREIn.list_forall_get`,
+  `PartrecIn.exists_list_mapM`, `IsComputableRealFamilyIn.comp`, `birkhoff_computableIn_lt`,
+  `birkhoff_computableIn_gt`, `computable_rat_inv_two_pow`, `exists_two_mul_inv_two_pow_lt`.
+* **`eff:search`** — Unbounded search with a certificate: a relatively enumerable relation whose
+  sections are nonempty has a relatively partial recursive (on a computable domain, a relatively
+  computable) choice function.
+  `Kolmogorov.PointToSet.IsREIn.exists_partrecIn_choice` (`Oracle/Search.lean`); same file:
+  `IsREIn.exists_computableIn_choice`.
+* **`eff:nat-bounds`** — The oracle prefix complexity of a natural number `n` is at most
+  `log₂ n + 2 log₂ log₂ n + O(1)`.
+  `Kolmogorov.PointToSet.oracleNatComplexity_le_log_add_loglog`
+  (`Oracle/PrefixComplexity/NatBounds.lean`); same file: `tsum_inv_two_pow_size_mul_le`.
+* **`eff:decoder-charging`** — Charging a relatively partial recursive decoder: an output of a
+  decoder on inputs `(i, i', T, T')` has oracle complexity at most the complexities of `i`, `i'`
+  and of the pair `(T, T')` plus a constant; the pair complexity is `O(log (T + T'))` and
+  sublinear.
+  `Kolmogorov.PointToSet.oracleNatComplexity_le_of_decoder`
+  (`Oracle/PrefixComplexity/Decoders.lean`); same file: `oraclePairComplexity_le_log`,
+  `oraclePairComplexity_sublinear`.
+* **`eff:numerals`** — Primitive recursive base-`N` digit extraction and powers, with the
+  bounds of `Nat.ofDigits` on a list extended by one digit (the itinerary encoding of
+  `geo:orbit-extension`).
+  `Kolmogorov.PointToSet.digitAt` (`Oracle/Encoding/Numerals.lean`); same file: `digitAt_eq`,
+  `primrec_digitAt`, `natPowRec`, `natPowRec_eq`, `primrec_natPowRec`,
+  `ofDigits_append_one_digit`, `ofDigits_append_one_bounds`.
+* **`eff:points`** — Relatively computable points: a point is `A`-computable when it has an
+  `A`-computable Cauchy name; ideal points are computable, computable points are preserved by
+  represented maps and by Turing-stronger oracles, and every point has a (noncomputable) name.
+  `Kolmogorov.PointToSet.IsComputablePointIn` (`PointToSet/ComputableMetric/Points.lean`); same
+  file: `isComputablePointIn_ι`, `IsComputablePointIn.map`, `isComputablePointIn_mono`,
+  `exists_isCauchyName`, `isCauchyName_const`, `exists_mem_basicBall_radius_lt`.
+* **`eff:distance-certificates`** — Strict distance certificates from uniformly computable
+  names: distances between named points and ideal points form a relatively computable real
+  family, so membership in a basic ball and rational lower bounds on distances are relatively
+  enumerable, uniformly in the index.
+  `Kolmogorov.PointToSet.isComputableRealFamilyIn_dist_names`
+  (`PointToSet/ComputableMetric/Points.lean`); same file: `isComputableRealFamilyIn_dist_name`,
+  `isComputableRealFamilyIn_dist_of_names`, `isREIn_mem_basicBall_of_name`,
+  `isREIn_mem_basicBall_of_names`, `isREIn_mem_basicBall`, `isREIn_rat_lt_dist_names`,
+  `isREIn_rat_lt_dist_of_names`.
+* **`eff:ce-open`** — Relatively c.e. open sets and families (relatively enumerable unions of
+  basic balls), closed under reindexing, finite and countable unions, conditionals and, above a
+  computable metric table, finite intersections; balls about computable points and strict
+  distance conditions are c.e. open, and every open set is a union of coded basic balls.
+  `Kolmogorov.PointToSet.IsCeOpenFamilyIn` (`PointToSet/ComputableMetric/CeOpen.lean`); same
+  file: `IsCeOpenIn`, `IsCeOpenFamilyIn.comp`, `IsCeOpenFamilyIn.compIn`,
+  `IsCeOpenFamilyIn.union`, `IsCeOpenFamilyIn.iUnion`, `IsCeOpenFamilyIn.biUnion_list`,
+  `IsCeOpenFamilyIn.ite`, `IsCeOpenFamilyIn.inter`, `isCeOpenFamilyIn_lt_dist`,
+  `isCeOpenFamilyIn_dist_lt`, `isCeOpenFamilyIn_ball`, `isCeOpenFamilyIn_mono`,
+  `isOpen_eq_biUnion_basicBall`, `exists_basicBall_code`, `ballUnion`, `ballUnion_ceOpen`.
+* **`eff:compact`** — Effective compactness: a family of compact sets is relatively computably
+  compact when containment in a finite union of basic balls is relatively enumerable; containment
+  in a c.e. open family is then relatively enumerable, and the notion is stable under
+  reindexing and Turing-stronger oracles.
+  `Kolmogorov.PointToSet.IsComputablyCompactFamilyIn` (`PointToSet/ComputableMetric/Compact.lean`);
+  same file: `IsComputablyCompactIn`, `IsComputablyCompactFamilyIn.subset_ceOpen_isREIn`,
+  `IsComputablyCompactIn.subset_ceOpen_isREIn`, `IsComputablyCompactFamilyIn.comp`,
+  `isComputablyCompactFamilyIn_mono`.
+* **`eff:represented-on`** — Maps represented on a subset: a sound and complete relatively
+  enumerable relation between basic balls, restricted to the domain, which evaluates on
+  computable points of the domain, restricts from represented maps and transfers to stronger
+  oracles; a continuous map sends some basic ball about a point into any ball about its image.
+  `Kolmogorov.PointToSet.IsRepresentedOnIn` (`PointToSet/ComputableMetric/Represented.lean`);
+  same file: `IsRepresentedOnIn.map`, `IsRepresentedMapIn.onSubset`, `isRepresentedOnIn_mono`,
+  `isRepresentedMapIn_mono_oracle`, `exists_basicBall_image_subset_of_continuousAt`.
+* **`eff:represented-family`** — Families of maps represented uniformly in a primcodable index:
+  evaluation, names of images uniform in the index and the name, and the pullback of a c.e.
+  open family along a represented family is c.e. open.
+  `Kolmogorov.PointToSet.IsRepresentedFamilyIn` (`PointToSet/ComputableMetric/Represented.lean`);
+  same file: `IsRepresentedFamilyIn.apply`, `IsRepresentedFamilyIn.names`,
+  `IsRepresentedFamilyIn.names_uniform`, `IsRepresentedFamilyIn.preimage_ceOpen`,
+  `exists_names_of_ballRel`, `exists_names_of_ballRel_uniform`, `isRepresentedFamilyIn_mono`.
+* **`eff:certified-localization`** — Certified localization: for a relatively computably
+  compact family `K` and a c.e. open family `O` above a computable metric table, one relatively
+  partial recursive program finds, at every precision, an ideal point within a dyadic radius of
+  the unique point of `K k \ O k` whenever that set is a subsingleton; a point located this way
+  along a computable input sequence is relatively computable.
+  `Kolmogorov.PointToSet.certified_localization` (`PointToSet/EffectiveLocalization/Search.lean`);
+  same file: `certified_localization_point`, `cast_inv_two_pow_eq_dyadicRadius`.
+* **`eff:certified-localization-map`** — Certified localization through a represented map: the
+  program locates the image `f k z₀` of the unique point under a family of maps represented on
+  domains containing the compact sets, in the target presentation.
+  `Kolmogorov.PointToSet.certified_localization_map`
+  (`PointToSet/EffectiveLocalization/Search.lean`).
+* **`eff:program-account`** — The complexity account of a program: if a relatively partial
+  recursive program on inputs `(i, i', T, T')` outputs ideal points within `δ` of `z`, the
+  precision complexity of `z` at `δ` is at most the oracle complexities of `i`, `i'` and of the
+  pair `(T, T')` plus a constant; precision complexity is antitone in the precision.
+  `Kolmogorov.PointToSet.precisionComplexity_le_of_program`
+  (`PointToSet/EffectiveLocalization/Charging.lean`); same file: `precisionComplexityNat_anti`,
+  `precisionComplexityNat_le_of_dist_lt`.
+* **`geo:orbit-datum`** — Orbit data: an ideal index whose orbit shadows the orbit of `x` for a
+  given number of observed times within a real tolerance; the finite orbit complexity is the
+  minimum of the oracle complexity of the index over the data of given order and tolerance, and
+  the orbit of a datum under a flow with effective data has uniformly computable names at rational
+  times, quadrature bounds for the unit potentials and computable integral scales.
+  `Kolmogorov.PointToSet.OrbitDatum` (`PointToSet/Geodesic/OrbitData.lean`); same file:
+  `OrbitDatum.ofMem`, `OrbitDatum.mem_of_le`, `OrbitDatum.mem_order`, `orbitComplexityNat_le_idx`,
+  `orbitComplexityNat_eq_iInf_orbitDatum`, `OrbitDatum.names`, `OrbitDatum.names_backward`,
+  `OrbitDatum.abs_birkhoff_sub_le`, `OrbitDatum.abs_birkhoff_sub_le_backward`,
+  `OrbitDatum.scalePlus`, `OrbitDatum.scaleMinus`.
