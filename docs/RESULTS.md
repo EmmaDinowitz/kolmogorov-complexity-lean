@@ -575,11 +575,75 @@ KolmogorovMathlib/
     │   ├── Tuples.lean                  #     Iterated products, the theorems for tuples of points
     │   ├── Euclidean.lean               #     ℝⁿ with rational names and dyadic nets
     │   └── EuclideanTheorems.lean       #     Theorems 1.8 and 4.4 for points of ℝⁿ, ℝᵗ
+    ├── Measure/                         #   Entropy of non-invariant measures (docs/entropy_noninvariant_blueprint.md)
+    │   ├── LocalEntropy.lean            #     infoBits, closed Bowen balls, local entropies, entropy law
+    │   ├── BowenCeOpen.lean, Computable.lean, Randomness.lean, EffectiveNull.lean
+    │   │                                #     (M1), (M2), computable measures, random points, effective null sets
+    │   ├── CodingByMeasure.lean, DeficiencyTest.lean, TestFunctionFinite.lean
+    │   │                                #     Lemma 3.1 (coding by measure), Lemma 3.2 (the test)
+    │   ├── Pointwise.lean               #     Theorem 3.3, Corollary 3.6 (Billingsley-type bounds)
+    │   ├── UniversalMeasure.lean        #     m^A, Proposition 6.12, Corollary 6.14 (dual principle)
+    │   ├── EssentialBounds.lean, Variational.lean
+    │   │                                #     Proposition 4.1, Theorem 4.3, Corollaries 4.2, 6.5(c), the chain of §4.4
+    │   ├── InformationRate.lean, ProbabilityRate.lean
+    │   │                                #     Propositions 4.6, 4.7, 6.10, 6.16
+    │   ├── EntropyLaw.lean              #     Proposition 6.2, Corollary 6.5(a), (b)
+    │   ├── Domination.lean, Decomposition.lean, IntegralAffinity.lean
+    │   │                                #     Lemma 7.1, Propositions 6.3, 6.4, Theorems 7.3, 7.5
+    │   ├── LocalPressure.lean, LocalPressureAux.lean, PressurePointwise.lean
+    │   │                                #     Definition 8.1, Lemma 8.2, Theorem 8.3, Corollary 8.4
+    │   ├── Shift.lean, ShiftBernoulli.lean, ShiftProduct.lean, ShiftAntiPhase.lean, ShiftBaire.lean
+    │   │                                #     Examples 5.1–5.4, 6.8, 7.4(1)
+    │   ├── ShiftDecomposition.lean, ShiftDecompositionAux.lean, ShiftSmoothAux.lean, ShiftGeneric.lean
+    │   │                                #     Examples 7.4(2), (3), 7.8, Remark 7.7, Propositions 7.6, 7.10
+    │   └── RandomNonAtom.lean           #     Example 5.5 (stated; the constructions are open)
     ├── SymbolicSet.lean                 #   Dimensions of subsets of symbolic shifts (countable alphabet)
     └── Examples.lean, Examples/         #   The middle-thirds Cantor set: presentation, pointwise and set dimensions
 ```
 
 The blueprint with the dependency graph of all nodes is [`docs/point_to_set_blueprint.md`](point_to_set_blueprint.md).
+
+## Entropy of Non-Invariant Measures
+
+`KolmogorovMathlib/PointToSet/Measure/` formalizes the note *Entropy of non-invariant measures
+and orbit complexity of random points* (Emma Dinowitz, 2026; blueprint
+[`docs/entropy_noninvariant_blueprint.md`](entropy_noninvariant_blueprint.md)). All theorems
+are in the namespace `Kolmogorov.PointToSet`.
+
+- `orbitComplexities_le_localEntropy` and `orbitComplexities_eq_localEntropy`
+  (`Measure/Pointwise.lean`): for an oracle `A` admissible for `(X, d, T, μ)`, the orbit
+  complexities are at most the local entropies of `μ` at every point and equal them at every
+  point that is `μ`-random relative to `A`. No invariance, ergodicity or compactness.
+  `pointwisePressure_eq_localPressure`, `pointwiseBSDimension_eq_localBSDimension`
+  (`Measure/PressurePointwise.lean`) are the versions for pressure and BS dimension.
+- `lowerEntropy_le_of_localEntropy_le`, `le_lowerEntropy_of_le_localEntropy` and their upper
+  versions (`Measure/Pointwise.lean`): Billingsley-type bounds for arbitrary sets.
+- `orbitComplexities_eq_localEntropy_universalMeasure`, `lowerEntropy_eq_iInf_measure`,
+  `upperEntropy_eq_iInf_measure` (`Measure/UniversalMeasure.lean`): orbit complexity is the
+  local entropy of the universal atomic measure `m^A`, and the dual form of the point-to-set
+  principle; `lowerPressure_eq_iInf_measure`, `lowerBSDimension_eq_iInf_measure` for pressure
+  and BS dimension.
+- `iSup_randomPoints_orbitComplexities_fst`, `lowerEntropy_randomPoints`,
+  `essSup_upperLocalEntropy_eq_iInf_oracle`, `essInf_localEntropy_eq_iSup_oracle`
+  (`Measure/EssentialBounds.lean`): the essential bounds of the local entropies as suprema
+  and infima of orbit complexities over random points and as entropies of sets.
+- `bowenInformation_le_expectedOrbitComplexity`, `expectedOrbitComplexity_le_bowenInformation`,
+  `entropy_chain` (`Measure/InformationRate.lean`, `Measure/Variational.lean`): information
+  rates along Bowen balls, expected orbit complexity, and the chain
+  `ess inf h̲ ≤ h̲_μ ≤ H̲_μ ≤ H̄_μ ≤ h̄_μ ≤ ess sup h̄` on a compact space.
+- `ae_eventually_measure_bowenBall_le` (`Measure/Domination.lean`) and
+  `ae_compProd_localEntropy_le`, `kernelEntropyLaw_eq_iff`, `lintegral_measureEntropy_le`,
+  `entropyLaw_sum`, `entropyLaw_absolutelyContinuous` (`Measure/Decomposition.lean`): the
+  domination lemma and the behaviour of the entropy law under absolute continuity, countable
+  convex combinations and integral decompositions.
+- Examples on shifts (`Measure/Shift*.lean`): Bernoulli mixtures, non-stationary products and
+  anti-phase mixtures, a product measure on Baire space for which `H̄_μ > h̄_μ`, and
+  decompositions for which integral affinity fails.
+
+Seven declarations are tracked `sorry`s (eleven more are derived from them): Theorem 7.5(b)
+(Brin–Katok, Jacobs), the hard half of the Feng–Huang variational principle (two statements),
+Proposition 7.10 (two statements) and the two constructions of Example 5.5. They are listed,
+with what each is missing, in the blueprint.
 
 ## Mutual Information at Split Precisions
 

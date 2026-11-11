@@ -172,6 +172,37 @@ import KolmogorovMathlib.PointToSet.Geometry.CoverCenters.PressureIndependence
 import KolmogorovMathlib.PointToSet.Geometry.InfiniteEntropy
 import KolmogorovMathlib.PointToSet.Geometry.InfiniteEntropy.FiniteAlphabetSubsystems
 import KolmogorovMathlib.PointToSet.Geometry.InfiniteEntropy.NoBowenRoot
+import KolmogorovMathlib.PointToSet.Measure.BowenCeOpen
+import KolmogorovMathlib.PointToSet.Measure.CodingByMeasure
+import KolmogorovMathlib.PointToSet.Measure.Computable
+import KolmogorovMathlib.PointToSet.Measure.Decomposition
+import KolmogorovMathlib.PointToSet.Measure.DeficiencyTest
+import KolmogorovMathlib.PointToSet.Measure.Domination
+import KolmogorovMathlib.PointToSet.Measure.EffectiveNull
+import KolmogorovMathlib.PointToSet.Measure.EntropyLaw
+import KolmogorovMathlib.PointToSet.Measure.EssentialBounds
+import KolmogorovMathlib.PointToSet.Measure.InformationRate
+import KolmogorovMathlib.PointToSet.Measure.IntegralAffinity
+import KolmogorovMathlib.PointToSet.Measure.LocalEntropy
+import KolmogorovMathlib.PointToSet.Measure.LocalPressure
+import KolmogorovMathlib.PointToSet.Measure.LocalPressureAux
+import KolmogorovMathlib.PointToSet.Measure.Pointwise
+import KolmogorovMathlib.PointToSet.Measure.PressurePointwise
+import KolmogorovMathlib.PointToSet.Measure.ProbabilityRate
+import KolmogorovMathlib.PointToSet.Measure.RandomNonAtom
+import KolmogorovMathlib.PointToSet.Measure.Randomness
+import KolmogorovMathlib.PointToSet.Measure.Shift
+import KolmogorovMathlib.PointToSet.Measure.ShiftAntiPhase
+import KolmogorovMathlib.PointToSet.Measure.ShiftBaire
+import KolmogorovMathlib.PointToSet.Measure.ShiftBernoulli
+import KolmogorovMathlib.PointToSet.Measure.ShiftDecomposition
+import KolmogorovMathlib.PointToSet.Measure.ShiftDecompositionAux
+import KolmogorovMathlib.PointToSet.Measure.ShiftGeneric
+import KolmogorovMathlib.PointToSet.Measure.ShiftProduct
+import KolmogorovMathlib.PointToSet.Measure.ShiftSmoothAux
+import KolmogorovMathlib.PointToSet.Measure.TestFunctionFinite
+import KolmogorovMathlib.PointToSet.Measure.UniversalMeasure
+import KolmogorovMathlib.PointToSet.Measure.Variational
 import KolmogorovMathlib.PointToSet.Order
 import KolmogorovMathlib.PointToSet.Order.AchievingOracles
 import KolmogorovMathlib.PointToSet.Order.NormalizedSlack
@@ -407,6 +438,9 @@ This module is the aggregate root: it imports the whole library.  Its parts are
 * `PointToSet` — the point-to-set principles for pressure and dimension in dynamical systems
   and, in `PointToSet.SplitPrecision`, mutual information of points at split precisions:
   the comparison theorem and symmetry of information with error `O(log r) + O(log s)`;
+  in `PointToSet.Measure`, local entropies of non-invariant measures, Martin-Löf randomness on
+  presented metric spaces and the identification of orbit complexity with local entropy at
+  random points;
 * `Deprecated` — the `@[deprecated] alias`es for names that have moved, generated from the
   rename tables.
 

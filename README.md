@@ -49,6 +49,17 @@ The development is based on Mathlib's computability infrastructure. Decompressor
   (`KolmogorovMathlib/PointToSet/SplitPrecision/`, blueprint `docs/split_precision_blueprint.md`),
   on top of the conditional calculus of the oracle prefix complexity `K^A`, including symmetry
   of information for every oracle (`KolmogorovMathlib/Oracle/PrefixComplexity/`).
+- **Entropy of non-invariant measures:** for a Borel probability measure `μ`, not assumed
+  invariant, and an oracle computing the system and the measure, the lower and upper orbit
+  complexities are at most the Brin–Katok local entropies of `μ` at every point and equal
+  them at every Martin-Löf random point, and likewise for pointwise pressure and BS dimension;
+  Billingsley-type bounds and dual principles `h(Z) = min_μ sup_{x ∈ Z} h_μ(x)` for arbitrary
+  sets; the essential bounds of the local entropies as suprema and infima over random points;
+  information rates along Bowen balls and their comparison with the Feng–Huang entropies; the
+  domination lemma and the entropy law under absolute continuity, convex combinations and
+  integral decompositions; examples on shifts
+  (`KolmogorovMathlib/PointToSet/Measure/`, blueprint `docs/entropy_noninvariant_blueprint.md`,
+  which lists the seven statements left as tracked `sorry`s).
 - **New strong-merging results:** the square-root merger of two strong sufficient
   statistics, its matching obstruction and the questions of survey Section 7.9.
 
