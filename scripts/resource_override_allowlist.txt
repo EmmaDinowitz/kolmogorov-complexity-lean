@@ -11,3 +11,11 @@
 # mentions an unfolded definition body; name the `Primcodable` instance of a
 # wide product type instead of widening `synthInstance.maxSize`; and split a
 # proof that times out into named lemmas.
+#
+# Geodesic Chapter I, `mixed_core` (the analytic core of `sectionPoint_mixed`): one
+# 640-line `ℝ≥0∞` limsup/liminf argument that exhausts the default budget at
+# `whnf` (verified 2026-11-03: without the override it times out at 200000
+# heartbeats).  Splitting it into named lemmas is the recorded follow-up of
+# the computability reorganization (REORG_LOG step 7); until then the module
+# keeps `set_option maxHeartbeats 1600000 in` on that one lemma.
+KolmogorovMathlib/PointToSet/Geodesic/UpperBound/Mixed.lean
