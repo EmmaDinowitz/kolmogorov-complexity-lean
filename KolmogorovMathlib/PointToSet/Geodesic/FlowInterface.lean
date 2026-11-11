@@ -3,8 +3,7 @@ Copyright (c) 2026 Emma Dinowitz. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
-import Mathlib.Dynamics.Flow
-import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import GeodesicInterface.FlowData
 import KolmogorovMathlib.PointToSet.Dynamics.PointwiseQuantities
 import KolmogorovMathlib.PointToSet.BSDimension.Defs
 import KolmogorovMathlib.Oracle.KraftChaitin
@@ -14,9 +13,12 @@ import KolmogorovMathlib.Oracle.Closure
 /-!
 # Flow-to-map interface (geodesic blueprint, Chapter A)
 
-The nodes `geo:flow-data`, `geo:bowen-flow-compare`, `geo:unit-potentials`,
-`geo:orbit-complexity` and `geo:bs-denominator-swap` of `geodesic_upper_bound_blueprint.md`;
-the node `geo:orbit-extension` is in `FlowInterface/OrbitExtension.lean`.
+The nodes `geo:bowen-flow-compare`, `geo:orbit-complexity` and `geo:bs-denominator-swap` of
+`geodesic_upper_bound_blueprint.md`, with the Birkhoff-average half of `geo:unit-potentials`;
+the node `geo:orbit-extension` is in `FlowInterface/OrbitExtension.lean`. The standing data
+`FlowData` of `geo:flow-data`, its time-one maps and the unit potentials themselves live in the
+Mathlib-only package `GeodesicInterface` (`GeodesicInterface/FlowData.lean`), shared with the
+geometry that instantiates them.
 
 The point-to-set library is discrete-time: Bowen balls `bowenBall T n x ε` observe the
 iterates `T^[k] x` for `k < n` and `birkhoffSum T u n x = ∑_{k<n} u (T^[k] x)`. A continuous
@@ -39,27 +41,6 @@ open scoped Topology ENNReal Computability
 
 variable {X : Type*} [MetricSpace X]
 
-/-! ### `geo:flow-data`: standing analytic data -/
-
-/-- A continuous flow on a compact metric space together with a Lipschitz constant and a
-speed bound valid for times `|s| ≤ 1`. The time-one map and its inverse are the discrete
-dynamics seen by the point-to-set library. Blueprint node `geo:flow-data`. -/
-structure FlowData (X : Type*) [MetricSpace X] [CompactSpace X] where
-  /-- The flow. -/
-  φ : Flow ℝ X
-  /-- Lipschitz constant of `φ s` for `|s| ≤ 1`. -/
-  L : ℝ
-  /-- The Lipschitz constant is at least one, so it can be used as a multiplier freely. -/
-  one_le_L : 1 ≤ L
-  /-- Uniform Lipschitz bound on unit time intervals. -/
-  lipschitz_unit : ∀ s : ℝ, |s| ≤ 1 → ∀ x y : X, dist (φ s x) (φ s y) ≤ L * dist x y
-  /-- Speed bound of the flow, used only to restore the flow coordinate. -/
-  V : ℝ
-  /-- The speed bound is nonnegative. -/
-  V_nonneg : 0 ≤ V
-  /-- Points move at most at speed `V` on unit time intervals. -/
-  speed_unit : ∀ s : ℝ, |s| ≤ 1 → ∀ y : X, dist (φ s y) y ≤ V * |s|
-
 section flowData
 
 variable [CompactSpace X]
@@ -67,58 +48,6 @@ variable [CompactSpace X]
 namespace FlowData
 
 variable (D : FlowData X)
-
-/-- The time-one map. Blueprint node `geo:flow-data`. -/
-def f : X → X := D.φ 1
-
-/-- The time-minus-one map, inverse to `f`. Blueprint node `geo:flow-data`. -/
-def finv : X → X := D.φ (-1)
-
-/-- Iterates of the time-one map are integer times of the flow.
-Blueprint node `geo:flow-data`. -/
-theorem iterate_f (n : ℕ) : D.f^[n] = D.φ (n : ℝ) := by
-  induction n with
-  | zero => simp [Flow.map_zero]
-  | succ k ih =>
-    funext x
-    rw [Function.iterate_succ_apply', ih, Nat.cast_succ, add_comm, Flow.map_add]
-    rfl
-
-/-- Iterates of the inverse time-one map are negative integer times of the flow.
-Blueprint node `geo:flow-data`. -/
-theorem iterate_finv (n : ℕ) : D.finv^[n] = D.φ (-(n : ℝ)) := by
-  induction n with
-  | zero => simp [Flow.map_zero]
-  | succ k ih =>
-    funext x
-    rw [Function.iterate_succ_apply', ih, Nat.cast_succ, neg_add, add_comm, Flow.map_add]
-    rfl
-
-/-- `f` and `finv` are mutually inverse. -/
-theorem finv_f (x : X) : D.finv (D.f x) = x := by
-  change D.φ (-1) (D.φ 1 x) = x
-  rw [← Flow.map_add, neg_add_cancel, Flow.map_zero_apply]
-
-/-- `f` and `finv` are mutually inverse. -/
-theorem f_finv (x : X) : D.f (D.finv x) = x := by
-  change D.φ 1 (D.φ (-1) x) = x
-  rw [← Flow.map_add, add_neg_cancel, Flow.map_zero_apply]
-
-/-- The time-one map is continuous. -/
-theorem continuous_f : Continuous D.f := by
-  exact D.φ.continuous_toFun 1
-
-/-- The inverse time-one map is continuous. -/
-theorem continuous_finv : Continuous D.finv := by
-  exact D.φ.continuous_toFun (-1)
-
-/-- The time-one map is Lipschitz with constant `L`. -/
-theorem dist_f_le (x y : X) : dist (D.f x) (D.f y) ≤ D.L * dist x y := by
-  exact D.lipschitz_unit 1 (by simp) x y
-
-/-- The inverse time-one map is Lipschitz with constant `L`. -/
-theorem dist_finv_le (x y : X) : dist (D.finv x) (D.finv y) ≤ D.L * dist x y := by
-  exact D.lipschitz_unit (-1) (by simp) x y
 
 /-! ### `geo:bowen-flow-compare`: discrete Bowen balls control continuous orbits -/
 
@@ -180,177 +109,12 @@ theorem mem_bowenBall_finv_of_dist_flow_lt {x y : X} {n : ℕ} {ε : ℝ}
   rw [D.iterate_finv]
   exact h (-(k : ℝ)) (neg_le_neg (by exact_mod_cast Nat.lt_succ_iff.mp hk)) (by simp)
 
-/-! ### `geo:unit-potentials`: unit-time integrated rates in bits -/
-
-/-- The forward unit-time integrated rate, in bits:
-`u⁺ x = (log 2)⁻¹ ∫₀¹ lam (φ τ x) dτ`. Blueprint node `geo:unit-potentials`. -/
-noncomputable def unitPotential (lam : X → ℝ) (x : X) : ℝ :=
-  (Real.log 2)⁻¹ * ∫ τ in (0 : ℝ)..1, lam (D.φ τ x)
-
-/-- The backward unit-time integrated rate, in bits:
-`u⁻ x = (log 2)⁻¹ ∫₀¹ lam (φ (-τ) x) dτ`. Blueprint node `geo:unit-potentials`. -/
-noncomputable def unitPotentialBackward (lam : X → ℝ) (x : X) : ℝ :=
-  (Real.log 2)⁻¹ * ∫ τ in (0 : ℝ)..1, lam (D.φ (-τ) x)
-
-/-- The continuous-time accumulated rate `S(t, x) = ∫₀ᵗ lam (φ τ x) dτ` (natural units).
-Blueprint node `geo:unit-potentials`. -/
-noncomputable def accumulatedRate (lam : X → ℝ) (t : ℝ) (x : X) : ℝ :=
-  ∫ τ in (0 : ℝ)..t, lam (D.φ τ x)
-
-/-- The backward continuous-time accumulated rate `∫₀ᵗ lam (φ (-τ) x) dτ`.
-Blueprint node `geo:unit-potentials`. -/
-noncomputable def accumulatedRateBackward (lam : X → ℝ) (t : ℝ) (x : X) : ℝ :=
-  ∫ τ in (0 : ℝ)..t, lam (D.φ (-τ) x)
+/-! ### `geo:unit-potentials` (iii): positive lower Birkhoff averages of the unit potential -/
 
 section rates
 
 variable {lam : X → ℝ} (hlam : Continuous lam) {Λ : ℝ} (hlam0 : ∀ x, 0 ≤ lam x)
   (hlamΛ : ∀ x, lam x ≤ Λ)
-
-include hlam in
-/-- The unit potential of a continuous rate is continuous.
-Blueprint node `geo:unit-potentials` (i). -/
-theorem continuous_unitPotential : Continuous (D.unitPotential lam) := by
-  refine continuous_const.mul ?_
-  exact intervalIntegral.continuous_parametric_intervalIntegral_of_continuous'
-    (f := fun x τ ↦ lam (D.φ τ x)) (hlam.comp (D.φ.continuous continuous_snd continuous_fst)) 0 1
-
-include hlam in
-/-- The unit potential of a continuous rate is uniformly continuous (compactness).
-Blueprint node `geo:unit-potentials` (i). -/
-theorem uniformContinuous_unitPotential : UniformContinuous (D.unitPotential lam) := by
-  exact CompactSpace.uniformContinuous_of_continuous (D.continuous_unitPotential hlam)
-
-include hlam in
-/-- The backward unit potential of a continuous rate is continuous.
-Blueprint node `geo:unit-potentials` (i). -/
-theorem continuous_unitPotentialBackward : Continuous (D.unitPotentialBackward lam) := by
-  refine continuous_const.mul ?_
-  exact intervalIntegral.continuous_parametric_intervalIntegral_of_continuous'
-    (f := fun x τ ↦ lam (D.φ (-τ) x))
-    (hlam.comp (D.φ.continuous continuous_snd.neg continuous_fst)) 0 1
-
-include hlam in
-/-- The backward unit potential of a continuous rate is uniformly continuous.
-Blueprint node `geo:unit-potentials` (i). -/
-theorem uniformContinuous_unitPotentialBackward :
-    UniformContinuous (D.unitPotentialBackward lam) := by
-  exact CompactSpace.uniformContinuous_of_continuous (D.continuous_unitPotentialBackward hlam)
-
-include hlam0 in
-/-- Nonnegative rates give nonnegative unit potentials. This is the nonnegativity used in
-`geo:return-adjustment`. Blueprint node `geo:unit-potentials` (i). -/
-theorem unitPotential_nonneg (x : X) : 0 ≤ D.unitPotential lam x := by
-  exact mul_nonneg (inv_nonneg.mpr (Real.log_nonneg one_le_two))
-    (intervalIntegral.integral_nonneg zero_le_one fun τ _ ↦ hlam0 _)
-
-include hlam hlamΛ in
-/-- Bounded rates give unit potentials bounded by `Λ / log 2`.
-Blueprint node `geo:unit-potentials` (i). -/
-theorem unitPotential_le (x : X) : D.unitPotential lam x ≤ Λ / Real.log 2 := by
-  unfold unitPotential
-  rw [div_eq_inv_mul]
-  refine mul_le_mul_of_nonneg_left ?_ (inv_nonneg.mpr (Real.log_nonneg one_le_two))
-  have hint : IntervalIntegrable (fun τ ↦ lam (D.φ τ x)) MeasureTheory.volume 0 1 :=
-    (hlam.comp (D.φ.continuous continuous_id continuous_const)).intervalIntegrable 0 1
-  calc ∫ τ in (0 : ℝ)..1, lam (D.φ τ x) ≤ ∫ τ in (0 : ℝ)..1, Λ :=
-        intervalIntegral.integral_mono_on zero_le_one hint intervalIntegrable_const
-          (fun τ _ ↦ hlamΛ _)
-    _ = Λ := by simp
-
-include hlam0 in
-/-- Backward nonnegativity. Blueprint node `geo:unit-potentials` (i). -/
-theorem unitPotentialBackward_nonneg (x : X) : 0 ≤ D.unitPotentialBackward lam x := by
-  exact mul_nonneg (inv_nonneg.mpr (Real.log_nonneg one_le_two))
-    (intervalIntegral.integral_nonneg zero_le_one fun τ _ ↦ hlam0 _)
-
-include hlam hlamΛ in
-/-- Backward upper bound. Blueprint node `geo:unit-potentials` (i). -/
-theorem unitPotentialBackward_le (x : X) : D.unitPotentialBackward lam x ≤ Λ / Real.log 2 := by
-  unfold unitPotentialBackward
-  rw [div_eq_inv_mul]
-  refine mul_le_mul_of_nonneg_left ?_ (inv_nonneg.mpr (Real.log_nonneg one_le_two))
-  have hint : IntervalIntegrable (fun τ ↦ lam (D.φ (-τ) x)) MeasureTheory.volume 0 1 :=
-    (hlam.comp (D.φ.continuous continuous_neg continuous_const)).intervalIntegrable 0 1
-  calc ∫ τ in (0 : ℝ)..1, lam (D.φ (-τ) x) ≤ ∫ τ in (0 : ℝ)..1, Λ :=
-        intervalIntegral.integral_mono_on zero_le_one hint intervalIntegrable_const
-          (fun τ _ ↦ hlamΛ _)
-    _ = Λ := by simp
-
-include hlam in
-/-- Birkhoff sums of the unit potential along the time-one map are the accumulated rate
-over `[0, n]`, in bits: `S_n u⁺(x) = (log 2)⁻¹ ∫₀ⁿ lam (φ τ x) dτ`.
-Blueprint node `geo:unit-potentials` (ii). -/
-theorem birkhoffSum_unitPotential (n : ℕ) (x : X) :
-    birkhoffSum D.f (D.unitPotential lam) n x =
-      (Real.log 2)⁻¹ * D.accumulatedRate lam (n : ℝ) x := by
-  have hint : ∀ a b : ℝ, IntervalIntegrable (fun τ ↦ lam (D.φ τ x)) MeasureTheory.volume a b :=
-    fun a b ↦ (hlam.comp (D.φ.continuous continuous_id continuous_const)).intervalIntegrable a b
-  induction n with
-  | zero => simp [accumulatedRate]
-  | succ k ih =>
-    rw [birkhoffSum_succ_apply, ih, D.iterate_f]
-    unfold unitPotential accumulatedRate
-    rw [← mul_add]
-    congr 1
-    have h1 : (fun τ ↦ lam (D.φ τ (D.φ (k : ℝ) x))) = fun τ ↦ lam (D.φ (τ + k) x) := by
-      funext τ; rw [Flow.map_add]
-    rw [h1, intervalIntegral.integral_comp_add_right (fun τ ↦ lam (D.φ τ x)) (k : ℝ), zero_add,
-      intervalIntegral.integral_add_adjacent_intervals (hint _ _) (hint _ _), Nat.cast_succ,
-      add_comm (1 : ℝ) (k : ℝ)]
-
-include hlam in
-/-- Backward Birkhoff sums along `finv` are the backward accumulated rate over `[0, n]`.
-Blueprint node `geo:unit-potentials` (ii). -/
-theorem birkhoffSum_unitPotentialBackward (n : ℕ) (x : X) :
-    birkhoffSum D.finv (D.unitPotentialBackward lam) n x =
-      (Real.log 2)⁻¹ * D.accumulatedRateBackward lam (n : ℝ) x := by
-  have hint : ∀ a b : ℝ,
-      IntervalIntegrable (fun τ ↦ lam (D.φ (-τ) x)) MeasureTheory.volume a b :=
-    fun a b ↦ (hlam.comp (D.φ.continuous continuous_neg continuous_const)).intervalIntegrable a b
-  induction n with
-  | zero => simp [accumulatedRateBackward]
-  | succ k ih =>
-    rw [birkhoffSum_succ_apply, ih, D.iterate_finv]
-    unfold unitPotentialBackward accumulatedRateBackward
-    rw [← mul_add]
-    congr 1
-    have h1 : (fun τ ↦ lam (D.φ (-τ) (D.φ (-(k : ℝ)) x))) = fun τ ↦ lam (D.φ (-(τ + k)) x) := by
-      funext τ; rw [← Flow.map_add, neg_add]
-    rw [h1, intervalIntegral.integral_comp_add_right (fun τ ↦ lam (D.φ (-τ) x)) (k : ℝ), zero_add,
-      intervalIntegral.integral_add_adjacent_intervals (hint _ _) (hint _ _), Nat.cast_succ,
-      add_comm (1 : ℝ) (k : ℝ)]
-
-include hlam in
-/-- Natural exponential scales of the drafts equal dyadic scales of the library:
-`exp (-(S(n,x) - ρ n)) = 2 ^ (-(S_n u⁺(x) - ρ' n))` with `ρ' = ρ / log 2`.
-Blueprint node `geo:unit-potentials`, decision D2. -/
-theorem exp_neg_accumulatedRate_eq_two_zpow (n : ℕ) (x : X) (ρ : ℝ) :
-    Real.exp (-(D.accumulatedRate lam (n : ℝ) x - ρ * (n : ℝ))) =
-      (2 : ℝ) ^ (-(birkhoffSum D.f (D.unitPotential lam) n x - (ρ / Real.log 2) * (n : ℝ))) := by
-  rw [D.birkhoffSum_unitPotential hlam, Real.rpow_def_of_pos two_pos]
-  congr 1
-  have h2 : Real.log 2 ≠ 0 := (Real.log_pos one_lt_two).ne'
-  field_simp
-
-include hlam hlam0 hlamΛ in
-/-- Continuous and integer-time accumulated rates differ by at most `Λ` on `[n, n + 1]`.
-Blueprint node `geo:unit-potentials` (iii). -/
-theorem abs_accumulatedRate_sub_le (x : X) {t : ℝ} {n : ℕ} (hn : (n : ℝ) ≤ t)
-    (ht : t ≤ (n : ℝ) + 1) :
-    |D.accumulatedRate lam t x - D.accumulatedRate lam (n : ℝ) x| ≤ Λ := by
-  have hint : ∀ a b : ℝ, IntervalIntegrable (fun τ ↦ lam (D.φ τ x)) MeasureTheory.volume a b :=
-    fun a b ↦ (hlam.comp (D.φ.continuous continuous_id continuous_const)).intervalIntegrable a b
-  have hΛ : 0 ≤ Λ := (hlam0 x).trans (hlamΛ x)
-  unfold accumulatedRate
-  rw [intervalIntegral.integral_interval_sub_left (hint _ _) (hint _ _)]
-  have hb := intervalIntegral.norm_integral_le_of_norm_le_const (a := (n : ℝ)) (b := t)
-    (f := fun τ ↦ lam (D.φ τ x)) (C := Λ) fun τ _ ↦ by
-      rw [Real.norm_eq_abs, abs_of_nonneg (hlam0 _)]; exact hlamΛ _
-  rw [Real.norm_eq_abs] at hb
-  refine hb.trans ?_
-  rw [abs_of_nonneg (by linarith)]
-  nlinarith
 
 include hlam hlam0 hlamΛ in
 /-- Positivity of the lower Birkhoff average of the unit potential is equivalent to an

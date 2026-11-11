@@ -85,7 +85,7 @@ Mathlib facts that were non-obvious to locate, for whoever continues:
 
 ---
 
-## 2. Chapter A — `Geodesic/FlowInterface.lean` (flow-to-map interface)
+## 2. Chapter A — `Geodesic/FlowInterface.lean` (flow-to-map interface; since 2026-11-11 `FlowData` and the unit potentials are in `GeodesicInterface/FlowData.lean` of the package `GeodesicInterface`)
 
 Definitions: `FlowData` (flow `φ`, unit-time Lipschitz constant `L ≥ 1`, speed bound `V`),
 `FlowData.f`, `finv`, `unitPotential`, `unitPotentialBackward`, `accumulatedRate(Backward)`,
@@ -105,7 +105,7 @@ Definitions: `FlowData` (flow `φ`, unit-time Lipschitz constant `L ≥ 1`, spee
 
 ---
 
-## 3. Chapter B — `Geodesic/GeometricData.lean` (geometric standing data) — sorry-free
+## 3. Chapter B — `Geodesic/GeometricData.lean` (geometric standing data; since 2026-11-11 `GeodesicInterface/GeometricData.lean` of the package `GeodesicInterface`) — sorry-free
 
 Definitions: `LeafKind` (`u s cu cs`), `FlowBox φ` (`U, D, a, τ, proj` with `τ_unique`),
 `GeodesicReconstructionData X extends FlowData X`, `Reg`, `plaque`, `Wloc`, `regU`, `regS`,

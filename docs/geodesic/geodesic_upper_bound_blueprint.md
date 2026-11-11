@@ -633,8 +633,8 @@ fails by design).
 
 | chapter | module | main declarations |
 |---|---|---|
-| A | `Geodesic/FlowInterface.lean` | `FlowData`, `dist_flow_lt_of_mem_bowenBall`, `unitPotential`, `birkhoffSum_unitPotential`, `centeredBSCost`, `centeredBSCost_timeLimit_le_pointwiseBSDimension`, `orbit_extension` (uses the library's `orbitComplexityNat`) |
-| B | `Geodesic/GeometricData.lean` | `LeafKind`, `FlowBox`, `GeodesicReconstructionData` (fields G1–G12), `Reg`, `plaque`, `Wloc`, `regU`, `regS`, `uPlus`, `uMinus`, `plaque_expansivity`, `exists_lps_regU`, `lamU_flow_close_of_cs_leg` |
+| A | `GeodesicInterface/FlowData.lean` (package `GeodesicInterface`, since 2026-11-11) and `Geodesic/FlowInterface.lean` | `FlowData`, `dist_flow_lt_of_mem_bowenBall`, `unitPotential`, `birkhoffSum_unitPotential`, `centeredBSCost`, `centeredBSCost_timeLimit_le_pointwiseBSDimension`, `orbit_extension` (uses the library's `orbitComplexityNat`) |
+| B | `GeodesicInterface/GeometricData.lean` (package `GeodesicInterface`, since 2026-11-11) | `LeafKind`, `FlowBox`, `GeodesicReconstructionData` (fields G1–G12), `Reg`, `plaque`, `Wloc`, `regU`, `regS`, `uPlus`, `uMinus`, `plaque_expansivity`, `exists_lps_regU`, `lamU_flow_close_of_cs_leg` |
 | C | `Geodesic/EffectiveData.lean` | `IsComputablePointIn`, `IsRepresentedFamilyIn`, `IsRepresentedOnIn`, `IsComputablyCompactIn`, `IsCeOpenFamilyIn`, `EffectiveGeodesicData` (items 1–5), `isAdmissible_f`, `orbit_approximants`, `mono`, `exists_effectiveGeodesicData` |
 | D | `Geodesic/Localization.lean` | `localization_core`, `shadowSet`, `shadowSet_subsingleton`, `localization_decoder`, `localization_decoder_proj`, `localization_decoder_backward` |
 | E | `Geodesic/BracketApprox.lean` | `scalePlus`, `scaleMinus`, `SmallPlaques`, `bracket_approx_forward/backward`, `bracket_approx`, `exists_lebesgue_innerBox`, `net_approx` |

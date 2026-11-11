@@ -3,7 +3,8 @@ Copyright (c) 2026 Emma Dinowitz. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
-import KolmogorovMathlib.PointToSet.Geodesic.GeometricData
+import GeodesicInterface.GeometricData
+import KolmogorovMathlib.PointToSet.Geodesic.FlowInterface
 
 /-!
 # Controlled returns, positive rates and stopping times (geodesic blueprint, Chapter I, part 1)

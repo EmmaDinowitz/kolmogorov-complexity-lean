@@ -152,14 +152,11 @@ import KolmogorovMathlib.PointToSet.Geodesic.BracketApprox.Geometry
 import KolmogorovMathlib.PointToSet.Geodesic.EffectiveData
 import KolmogorovMathlib.PointToSet.Geodesic.FlowInterface
 import KolmogorovMathlib.PointToSet.Geodesic.FlowInterface.OrbitExtension
-import KolmogorovMathlib.PointToSet.Geodesic.GeometricData
 import KolmogorovMathlib.PointToSet.Geodesic.Localization
 import KolmogorovMathlib.PointToSet.Geodesic.OrbitData
 import KolmogorovMathlib.PointToSet.Geodesic.OrbitToLocation
 import KolmogorovMathlib.PointToSet.Geodesic.PlaqueNeighborhoods
 import KolmogorovMathlib.PointToSet.Geodesic.SectionReconstruction
-import KolmogorovMathlib.PointToSet.Geodesic.Surface.JacobiSolutions
-import KolmogorovMathlib.PointToSet.Geodesic.Surface.Riccati
 import KolmogorovMathlib.PointToSet.Geodesic.UpperBound
 import KolmogorovMathlib.PointToSet.Geodesic.UpperBound.Mixed
 import KolmogorovMathlib.PointToSet.Geodesic.UpperBound.PrecisionChain

@@ -129,4 +129,7 @@ with the detailed overview.
 
 The Lake package is named `kolmogorov_complexity`; the Lean library targets are
 `KolmogorovMathlib` and `KolmogorovCounterexamples`. The Mathlib dependency is pinned in `lakefile.toml` and
-`lake-manifest.json` to the Lean `v4.35.0` ecosystem.
+`lake-manifest.json` to the Lean `v4.35.0` ecosystem. The branch `geodesic` also requires
+[GeodesicInterface](https://github.com/EmmaDinowitz/GeodesicInterface), the Mathlib-only package
+holding `FlowData`, `GeodesicReconstructionData` and the scalar Riccati theory that the chapter
+`KolmogorovMathlib.PointToSet.Geodesic` consumes (shared with the GeodesicSurfaces formalization).
