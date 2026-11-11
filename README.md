@@ -41,6 +41,14 @@ The development is based on Mathlib's computability infrastructure. Decompressor
   to the printed claims that fail (`Kolmogorov.PointToSet.lowerPressure_pointToSet`,
   `bsPointToSet`, `dimensionTheorem` in `KolmogorovMathlib/PointToSet/`, built on the oracle
   prefix complexity of `KolmogorovMathlib/Oracle/`).
+- **Mutual information at split precisions:** for points of presented metric spaces
+  observed at two unrelated precisions `r`, `s`, the mutual information of the two balls
+  equals that of their `K`-minimizers up to `O(log r) + O(log s)`, and satisfies symmetry of
+  information `I_{r,s}(x : y) = K_r(x) + K_s(y) - K_{r,s}(x, y) + O(log r) + O(log s)`, with
+  the tuple versions and the normalized limits along comparably divergent precisions
+  (`KolmogorovMathlib/PointToSet/SplitPrecision/`, blueprint `docs/split_precision_blueprint.md`),
+  on top of the conditional calculus of the oracle prefix complexity `K^A`, including symmetry
+  of information for every oracle (`KolmogorovMathlib/Oracle/PrefixComplexity/`).
 - **New strong-merging results:** the square-root merger of two strong sufficient
   statistics, its matching obstruction and the questions of survey Section 7.9.
 

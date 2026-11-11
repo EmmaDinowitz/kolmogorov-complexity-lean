@@ -203,6 +203,10 @@ import KolmogorovMathlib.PointToSet.Pressure.Upper.EffectiveEqSup
 import KolmogorovMathlib.PointToSet.Pressure.Upper.PointToSetPrinciple
 import KolmogorovMathlib.PointToSet.Pressure.Upper.ScaleComparison
 import KolmogorovMathlib.PointToSet.Pressure.Upper.UniformNets
+import KolmogorovMathlib.Oracle.PrefixComplexity.AsymmetricInformation
+import KolmogorovMathlib.Oracle.PrefixComplexity.SymmetryLower
+import KolmogorovMathlib.PointToSet.SplitPrecision.EuclideanTheorems
+import KolmogorovMathlib.PointToSet.SplitPrecision.Tuples
 import KolmogorovMathlib.PointToSet.SymbolicSet
 import KolmogorovMathlib.Prefix.BlockingReadMachines
 import KolmogorovMathlib.Prefix.EntropyFunctions
@@ -397,6 +401,12 @@ This module is the aggregate root: it imports the whole library.  Its parts are
   `K_stop` and the a priori stopping probability `M_stop`, and the lower bounds on the gap
   `K_stop − (−log M_stop)`, which exceeds `log m + log log log m` by any constant on
   infinitely many strings;
+* `Oracle` — oracle prefix machines, the relative prefix complexity `K^A`, relative
+  Kraft–Chaitin coding, and in `Oracle.PrefixComplexity` the conditional calculus of `K^A`
+  (two-stage machines, chain rule, symmetry of information, mutual information);
+* `PointToSet` — the point-to-set principles for pressure and dimension in dynamical systems
+  and, in `PointToSet.SplitPrecision`, mutual information of points at split precisions:
+  the comparison theorem and symmetry of information with error `O(log r) + O(log s)`;
 * `Deprecated` — the `@[deprecated] alias`es for names that have moved, generated from the
   rename tables.
 

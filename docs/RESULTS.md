@@ -531,8 +531,11 @@ KolmogorovMathlib/
 │   ├── Universal.lean                   #   Optimal oracle prefix machines: exists_optimalOraclePrefix
 │   │   └── Universal/                   #     Bounded oracle evaluator and enumeration (Enumeration), optimality construction (Optimal)
 │   ├── PrefixComplexity.lean            #   Canonical relative prefix complexity K^A
-│   │   └── PrefixComplexity/            #     Basic bounds on K^A (Basic), the oracle monotonicity threshold (MonotonicityThreshold)
-│   └── KraftChaitin.lean                #   Relative Kraft-Chaitin realization, oracle_coding_finite_mass
+│   │   └── PrefixComplexity/            #     Basic bounds on K^A (Basic), the oracle monotonicity threshold (MonotonicityThreshold),
+│   │                                    #       two-stage machines and the chain rule (TwoStage), the conditional calculus (Conditional),
+│   │                                    #       mutual information (Information), the lower direction of symmetry of information
+│   │                                    #       for every oracle (SymmetryLower), the Case-Lutz convention (AsymmetricInformation)
+│   └── KraftChaitin.lean                #   Relative Kraft-Chaitin realization, oracle_coding_finite_mass, oracle_kraftChaitin_cond
 └── PointToSet/                          # The paper's point-to-set principles
     ├── ComputableMetric.lean            #   Fixed metric presentations, admissible base oracles, static point dimensions
     │   └── ComputableMetric/            #     Presentation, StaticDimensions (exists_admissible_base), DimensionAlongScales
@@ -563,11 +566,111 @@ KolmogorovMathlib/
     ├── Geometry/                        #   Independence and infinite-entropy results
     │   ├── CoverCenters.lean, CoverCenters/       # Center policies, pressure and BS-dimension independence of cover centers
     │   └── InfiniteEntropy.lean, InfiniteEntropy/ # Finite-alphabet subsystems, the Baire shift without a Bowen root
+    ├── SplitPrecision/                  #   Mutual information at split precisions (docs/split_precision_blueprint.md)
+    │   ├── Located.lean                 #     Located families of names, transfer lemmas, products (joint versus marginal minimizers)
+    │   ├── Information.lean             #     I_{r,s} and J_{r,s}, comparison theorem, symmetry of information at split precisions
+    │   ├── Normalized.lean              #     Comparably divergent precisions, normalized limits
+    │   ├── Point.lean                   #     Precision nets, linear growth, a point as a located family
+    │   ├── Theorems.lean                #     The theorems for two points of presented spaces
+    │   ├── Tuples.lean                  #     Iterated products, the theorems for tuples of points
+    │   ├── Euclidean.lean               #     ℝⁿ with rational names and dyadic nets
+    │   └── EuclideanTheorems.lean       #     Theorems 1.8 and 4.4 for points of ℝⁿ, ℝᵗ
     ├── SymbolicSet.lean                 #   Dimensions of subsets of symbolic shifts (countable alphabet)
     └── Examples.lean, Examples/         #   The middle-thirds Cantor set: presentation, pointwise and set dimensions
 ```
 
 The blueprint with the dependency graph of all nodes is [`docs/point_to_set_blueprint.md`](point_to_set_blueprint.md).
+
+## Mutual Information at Split Precisions
+
+`KolmogorovMathlib/PointToSet/SplitPrecision/` formalizes the note *Mutual information at split
+precisions* (Emma Dinowitz, 2026; blueprint
+[`docs/split_precision_blueprint.md`](split_precision_blueprint.md)), on top of a conditional
+calculus for the oracle prefix complexity `K^A` added in `KolmogorovMathlib/Oracle/PrefixComplexity/`
+(`TwoStage.lean`, `Conditional.lean`, `Information.lean`). All theorems are in the namespace
+`Kolmogorov.PointToSet`.
+
+### What is proved
+
+* **String layer.** The two-stage oracle machine `twoStageMachine` gives, for every oracle `A`,
+  the chain rule `K(x | z) ≤ K(y | z) + K(x | y) + O(1)` (`oraclePrefixComplexityNat_triangle`),
+  the coding direction of symmetry of information `K(⟨y, x⟩) ≤ K(y) + K(x | y, K(y)) + O(1)`
+  (`oracleComplexity_pair_le_cond_context`), conditional concatenation, and recoding of
+  conditions and outputs. Mutual information is `I(u : v) = K(u) + K(v) - K(⟨u, v⟩)`
+  (`oracleMutualInfo`); the lower direction of symmetry of information
+  `K(x) + K(y | x, K(x)) ≤ K(⟨x, y⟩) + O(1)` is proved for every oracle
+  (`oracleSymmetryLower`, `SymmetryLower.lean`) from the marginal coding bound
+  `oracle_pairMarginal_coding_bound` and the context-uniform relative Kraft–Chaitin theorem
+  `oracle_kraftChaitin_cond` (added to `Oracle/KraftChaitin.lean`). Hence
+  `I(u : v) = K(v) - K(v | u, K(u)) + O(1)` and
+  `I(u : v) ≥ K(z) - K(z | u, K(u)) - K(z | v, K(v)) - O(1)` (`oracleMutualInfo_ge_common`).
+* **Located families** (`Located.lean`). `LocatedFamily A ι`: families of nonempty sets of
+  names with a budget, such that every name describes every `K`-minimizer within the budget
+  and the minimal complexity has `O(budget)` bits. The derived transfer lemmas
+  (`LocatedFamily.transfer_cond`, `transfer_context`) are the one-sided transfer lemmas of the
+  note; `LocatedFamily.prod` is the coordinatewise iteration together with the comparison of
+  joint and marginal minimizers (`complexity_pair_min_le`).
+* **The theorems** (`Information.lean`, `Normalized.lean`). For two located families with
+  budgets `b₁`, `b₂`: `splitInfo_le_minInfo` (`I ≤ J`), the comparison theorem
+  `minInfo_le_splitInfo_add` (`J ≤ I + O(b₁ r + b₂ s)`), symmetry of information at split
+  precisions `splitInfo_symmetry` (`I = K₁(r) + K₂(s) - K₁₂(r, s) + O(b₁ r + b₂ s)`),
+  `splitInfo_comm_le`, and the normalized limits along precisions whose budgets are negligible
+  against a scale (`tendsto_minInfo_sub_splitInfo_div`, `tendsto_splitInfo_sub_symmetry_div`).
+* **Points and tuples** (`Point.lean`, `Theorems.lean`, `Tuples.lean`). A point of a presented
+  space is a located family with budget `(Nat.bits r).length` once the space has precision
+  nets (`PrecisionNets`: an `A`-computable bounded candidate family containing a canonical
+  point of every ball) and the point has linear growth `K_r(x) ≤ C (r + 1)`
+  (`HasLinearGrowth`); `pointFamily`, `transfer_ballNames`. For two points: `splitMutualInfo`
+  (`I_{r,s}(x : y)`), `minimizerMutualInfo`, `jointPrecisionComplexity`, Theorem 1.8
+  (`minimizerMutualInfo_le_splitMutualInfo_add`), Theorem 4.4
+  (`splitMutualInfo_symmetry`), Corollary 4.5 (`splitMutualInfo_comm_le`), Corollaries 1.11
+  and 6.2 along log-comparably divergent precisions
+  (`tendsto_minimizerMutualInfo_sub_splitMutualInfo_div`,
+  `tendsto_splitMutualInfo_sub_symmetry_div`). Tuples of points are iterated products
+  (`LocatedFamily.pi`, `tupleFamily`), giving Theorem 4.1
+  (`tupleMinimizerMutualInfo_le_tupleSplitMutualInfo_add`) and Theorem 4.4
+  (`tupleSplitMutualInfo_symmetry`) with error `O(∑ᵢ log rᵢ + ∑ⱼ log sⱼ)`.
+* **Euclidean space** (`Euclidean.lean`, `EuclideanTheorems.lean`). `ℝⁿ = Fin n → ℝ` with the
+  sup metric and rational ideal points is a presented space with an exact computable distance
+  table (`computablePresentationIn_euclid`), precision nets given by dyadic truncation
+  (`euclidNets`) and linear growth at every point (`hasLinearGrowth_euclid`), so Theorems 1.8
+  and 4.4 hold for `x ∈ ℝⁿ`, `y ∈ ℝᵗ` and every oracle without further hypotheses
+  (`euclid_minimizerMutualInfo_le_splitMutualInfo_add`, `euclid_splitMutualInfo_symmetry`).
+
+```lean
+theorem minimizerMutualInfo_le_splitMutualInfo_add
+    (N : PrecisionNets P A) (N' : PrecisionNets Q A) (hx : HasLinearGrowth P A x)
+    (hy : HasLinearGrowth Q A y) :
+    ∃ c : ℕ, ∀ r s : ℕ,
+      minimizerMutualInfo P Q A x y r s ≤
+        splitMutualInfo P Q A x y r s + c * ((Nat.bits r).length + (Nat.bits s).length + 1)
+
+theorem splitMutualInfo_symmetry
+    (N : PrecisionNets P A) (N' : PrecisionNets Q A) (hx : HasLinearGrowth P A x)
+    (hy : HasLinearGrowth Q A y) :
+    ∃ c : ℕ, ∀ r s : ℕ,
+      splitMutualInfo P Q A x y r s ≤
+        (precisionComplexityNat P A x (dyadicRadius r) : ℤ) +
+          precisionComplexityNat Q A y (dyadicRadius s) - jointPrecisionComplexity P Q A x y r s +
+          c * ((Nat.bits r).length + (Nat.bits s).length + 1) ∧
+      (precisionComplexityNat P A x (dyadicRadius r) : ℤ) +
+          precisionComplexityNat Q A y (dyadicRadius s) - jointPrecisionComplexity P Q A x y r s ≤
+        splitMutualInfo P Q A x y r s + c * ((Nat.bits r).length + (Nat.bits s).length + 1)
+```
+
+### Corrections to the note
+
+* The note fixes the convention `I(u : v) = K(u) - K(u | v)` and transcribes Case–Lutz's
+  Corollary 4.7 as its string fact (2). Case and Lutz's convention is `I(p : q) = K(q) - K(q | p)`
+  (the second argument is described), and in that orientation Corollary 4.7 is correct
+  (`oracleMutualInfoCL_ge_common`); under the note's swapped reading, (2) is false (with `z = u`
+  and `u` the code of `K(v)` it would bound `K(K(v) | v)` by `O(log log |v|)`). The
+  formalization uses the symmetric convention, under which the inequality holds with `O(1)`
+  error and no `K(K(·))` terms, and the comparison theorem no longer needs it: the
+  symmetry-of-information identity installs the minimizer in the charged slot directly after
+  the plain transfer lemma. The conventions differ by at most `K(K(u)) + O(1)`.
+* The transfer lemmas, whose proofs the note defers, are proved from a canonical point of the
+  ball (the dyadic truncation in `ℝⁿ`) and the lower direction of symmetry of information.
 
 ## Project Layout
 
@@ -603,7 +706,8 @@ KolmogorovMathlib/
 │   └── Plain/                   # Milovanov's theorem: an optimal plain decompressor whose C-random strings do not compute the halting language in polynomial time
 ├── Oracle/                      # Oracle prefix machines, relative prefix complexity K^A, relative Kraft-Chaitin coding
 ├── PointToSet/                  # Point-to-set principles in dynamical systems: pressure, Barreira-Schmeling
-│                                #   dimension, Bowen equations, conformal dimension theorem
+│   │                            #   dimension, Bowen equations, conformal dimension theorem
+│   └── SplitPrecision/          # Mutual information of points and tuples at split precisions
 ├── Restricted/                  # Description families and restricted profiles from Section 6
 │   ├── FamilyCurve/             # Effective multiscale construction and general curve realization
 │   └── Examples/                # Cylinders, masks, and Hamming-ball families

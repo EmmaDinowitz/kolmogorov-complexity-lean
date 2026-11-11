@@ -234,6 +234,132 @@ theorem oracle_kraftChaitin_bound (A : Set ℕ) (req : ℕ → Option (BitString
   rw [← oraclePrefixComplexity_coe A x [], hlen, ← ENat.natCast_add] at hbound
   exact ENat.natCast_le_natCast.mp hbound
 
+/-! ### Context-uniform realization
+
+The allocator run on a family of request streams indexed by a context string: the decoder reads
+its context, runs the allocator of that context's stream and searches for the stage that handed
+out its program.  Every context whose stream has Kraft mass at most one is realized exactly. -/
+
+/-- The free list after any finite request prefix is relatively computable, uniformly in the
+context indexing the request stream. -/
+private lemma allocator_state_computableIn_cond {A : Set ℕ}
+    (req : BitString → ℕ → Option (BitString × ℕ))
+    (hreq : ComputableIn {charOracle A} fun q : BitString × ℕ ↦ req q.1 q.2) :
+    ComputableIn {charOracle A}
+      (fun q : BitString × ℕ ↦ KraftChaitin.allocatorState (req q.1) q.2) := by
+  have hpair : ComputableIn {charOracle A}
+      (fun p : (BitString × ℕ) × ℕ × Option (List BitString) ↦ (p.1.1, p.2.1)) :=
+    ComputableIn.pair (ComputableIn.fst.comp ComputableIn.fst)
+      (ComputableIn.fst.comp ComputableIn.snd)
+  have hreq' : ComputableIn {charOracle A}
+      (fun p : (BitString × ℕ) × ℕ × Option (List BitString) ↦ req p.1.1 p.2.1) :=
+    (hreq.comp hpair).of_eq fun _ ↦ rfl
+  have hinput : ComputableIn {charOracle A}
+      (fun p : (BitString × ℕ) × ℕ × Option (List BitString) ↦ (req p.1.1 p.2.1, p.2.2)) :=
+    ComputableIn.pair hreq' (ComputableIn.snd.comp ComputableIn.snd)
+  have hstep := (free_list_update_computable.computableIn.comp hinput).to₂
+  have hrec := ComputableIn.nat_rec ComputableIn.snd
+    (ComputableIn.const (some ([[]] : List BitString))) hstep
+  exact hrec.of_eq fun q ↦ (KraftChaitin.allocatorState_eq_rec (req q.1) q.2).symm
+
+/-- The code assigned to each stage is relatively computable, uniformly in the context. -/
+private lemma alloc_fun_computableIn_cond {A : Set ℕ}
+    (req : BitString → ℕ → Option (BitString × ℕ))
+    (hreq : ComputableIn {charOracle A} fun q : BitString × ℕ ↦ req q.1 q.2) :
+    ComputableIn {charOracle A} (fun q : BitString × ℕ ↦ KraftChaitin.allocFun (req q.1) q.2) := by
+  have hinput := (allocator_state_computableIn_cond req hreq).pair hreq
+  refine (allocated_code_computable.computableIn.comp hinput).of_eq ?_
+  intro q
+  rw [KraftChaitin.allocFun_eq_bind]
+  cases KraftChaitin.allocatorState (req q.1) q.2 with
+  | none => rfl
+  | some free => cases req q.1 q.2 <;> rfl
+
+/-- The context-uniform decoder: read the context, run the allocator of its request stream. -/
+private def allocationDecoderCond (req : BitString → ℕ → Option (BitString × ℕ)) : Map :=
+  fun pr ↦ allocationDecoder (req pr.2) pr
+
+/-- Recognizing a stage that allocated a given program is relatively computable, uniformly in
+the context. -/
+private lemma allocation_test_computableIn_cond {A : Set ℕ}
+    (req : BitString → ℕ → Option (BitString × ℕ))
+    (hreq : ComputableIn {charOracle A} fun q : BitString × ℕ ↦ req q.1 q.2) :
+    ComputableIn₂ {charOracle A} (fun p : BitString × BitString ↦ fun n : ℕ ↦
+      decide (KraftChaitin.allocFun (req p.2) n = some p.1 ∧ (req p.2 n).isSome = true)) := by
+  have heq : Computable (fun p : Option BitString × Option BitString ↦ decide (p.1 = p.2)) :=
+    (PrimrecPred.decide (PrimrecRel.comp Primrec.eq Primrec.fst Primrec.snd)).to_comp
+  have hcode : ComputableIn {charOracle A}
+      (fun p : (BitString × BitString) × ℕ ↦ some p.1.1) :=
+    (Primrec.option_some.comp (Primrec.fst.comp Primrec.fst)).computableIn
+  have hctx : ComputableIn {charOracle A}
+      (fun p : (BitString × BitString) × ℕ ↦ (p.1.2, p.2)) :=
+    ComputableIn.pair (ComputableIn.snd.comp ComputableIn.fst) ComputableIn.snd
+  have halloc : ComputableIn {charOracle A}
+      (fun p : (BitString × BitString) × ℕ ↦ KraftChaitin.allocFun (req p.1.2) p.2) :=
+    ((alloc_fun_computableIn_cond req hreq).comp hctx).of_eq fun _ ↦ rfl
+  have hmatch := heq.computableIn.comp (halloc.pair hcode)
+  have hreq' : ComputableIn {charOracle A}
+      (fun p : (BitString × BitString) × ℕ ↦ req p.1.2 p.2) :=
+    (hreq.comp hctx).of_eq fun _ ↦ rfl
+  have hpresent : ComputableIn {charOracle A}
+      (fun p : (BitString × BitString) × ℕ ↦ (req p.1.2 p.2).isSome) :=
+    Primrec.option_isSome.computableIn.comp hreq'
+  have hand : Computable (fun p : Bool × Bool ↦ p.1 && p.2) :=
+    (Computable.cond Computable.fst Computable.snd (Computable.const false)).of_eq
+      (fun p ↦ by cases p.1 <;> rfl)
+  exact (hand.computableIn.comp (hmatch.pair hpresent)).of_eq fun p ↦ by
+    simp only [Bool.decide_and, Bool.decide_eq_true]
+
+/-- The context-uniform decoder is a relative decoder. -/
+private lemma allocationDecoderCond_isDecompressorIn {A : Set ℕ}
+    (req : BitString → ℕ → Option (BitString × ℕ))
+    (hreq : ComputableIn {charOracle A} fun q : BitString × ℕ ↦ req q.1 q.2) :
+    IsDecompressorIn (charOracle A) (allocationDecoderCond req) := by
+  rw [isDecompressorIn_iff_partrecIn]
+  have hpred := (allocation_test_computableIn_cond req hreq).partrecIn₂
+  have hsearch := PartrecIn.rfind hpred
+  have houtput : Computable (fun o : Option (BitString × ℕ) ↦ o.map Prod.fst) :=
+    Computable.option_map Computable.id (Computable.fst.comp Computable.snd).to₂
+  have hdecode : PartrecIn {charOracle A} (fun o : Option BitString ↦ Part.ofOption o) :=
+    (Computable.ofOption Computable.id).partrecIn
+  have hctx : ComputableIn {charOracle A}
+      (fun p : (BitString × BitString) × ℕ ↦ (p.1.2, p.2)) :=
+    ComputableIn.pair (ComputableIn.snd.comp ComputableIn.fst) ComputableIn.snd
+  have hreq' : ComputableIn {charOracle A}
+      (fun p : (BitString × BitString) × ℕ ↦ req p.1.2 p.2) :=
+    (hreq.comp hctx).of_eq fun _ ↦ rfl
+  have hout := hdecode.comp (houtput.computableIn.comp hreq')
+  exact PartrecIn.bind hsearch hout.to₂
+
+/-- In every context the context-uniform decoder has a prefix-free domain. -/
+private lemma allocationDecoderCond_isPrefixMachine
+    (req : BitString → ℕ → Option (BitString × ℕ)) :
+    IsPrefixMachine (allocationDecoderCond req) := by
+  intro y p hp q hq hpre
+  exact allocationDecoder_isPrefixMachine (req y) y hp hq hpre
+
+/-- In a context whose stream has mass at most one, every request is realized at its length. -/
+private lemma allocationDecoderCond_produces (req : BitString → ℕ → Option (BitString × ℕ))
+    (ctx : BitString) (hmass : oracleRequestMass (req ctx) ≤ 1) :
+    ∀ j x l, req ctx j = some (x, l) →
+      ∃ p : BitString, p.length = l ∧ produces (allocationDecoderCond req) p ctx x := by
+  intro j x l hj
+  obtain ⟨p, hlen, hp⟩ := allocationDecoder_produces (req ctx) hmass j x l hj
+  exact ⟨p, hlen, hp⟩
+
+/-- **Context-uniform relative Kraft–Chaitin.** A relatively computable family of request
+streams, indexed by a context string, is realized by one relative prefix machine: in every
+context whose stream has Kraft mass at most one, each request `(x, l)` of that stream is
+produced in that context by a program of length exactly `l`. Blueprint node `oracle:kc`. -/
+theorem oracle_kraftChaitin_cond (A : Set ℕ) (req : BitString → ℕ → Option (BitString × ℕ))
+    (hreq : ComputableIn {charOracle A} fun q : BitString × ℕ ↦ req q.1 q.2) :
+    ∃ D : Map, IsDecompressorIn (charOracle A) D ∧ IsPrefixMachine D ∧
+      ∀ ctx : BitString, oracleRequestMass (req ctx) ≤ 1 →
+        ∀ j x l, req ctx j = some (x, l) →
+          ∃ p : BitString, p.length = l ∧ produces D p ctx x :=
+  ⟨allocationDecoderCond req, allocationDecoderCond_isDecompressorIn req hreq,
+    allocationDecoderCond_isPrefixMachine req, allocationDecoderCond_produces req⟩
+
 /-- Twice a finite extended nonnegative real is bounded by a natural power of two. -/
 private lemma exists_dyadic_scale (M : ℝ≥0∞) (hM : M < ⊤) :
     ∃ b : ℕ, 2 * M ≤ (2 : ℝ≥0∞) ^ b := by

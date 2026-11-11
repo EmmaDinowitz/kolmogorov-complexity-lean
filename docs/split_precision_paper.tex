@@ -1,0 +1,304 @@
+\documentclass[11pt]{amsart}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\K}{K}
+\newcommand{\pair}[2]{\langle #1,#2\rangle}
+\newcommand{\lenbits}[1]{\ell(#1)}
+\newcommand{\lean}[1]{\path{#1}}
+\newcommand{\names}{\mathcal{S}}
+\newcommand{\budget}{b}
+\DeclareMathOperator{\dist}{dist}
+
+\title[Mutual information at split precisions]{Mutual information at split precisions:\\ one-sided transfer, symmetry of information, and a Lean formalization}
+\author{Emma Dinowitz}
+\date{November 7, 2026}
+
+\begin{document}
+
+\begin{abstract}
+For points $x\in\R^n$, $y\in\R^t$ Case and Lutz define the mutual information $I_r(x:y)$ of $x$ and $y$ at a common precision $r$.  In applications to smooth dynamics the two points are observed at precisions $r,s$ tied by a conversion rate rather than equal, and we define $I_{r,s}(x:y)$ accordingly.  We prove that $I_{r,s}(x:y)$ equals the mutual information of $K$-minimizers of the two balls up to $O(\log r)+O(\log s)$, and that symmetry of information holds at split precisions,
+$I_{r,s}(x:y)=K_r(x)+K_s(y)-K_{r,s}(x,y)+O(\log r)+O(\log s)$, with an error that splits additively between the precisions and never contains a joint term.  The statements hold for tuples of points with error $\sum_i O(\log r_i)+\sum_j O(\log s_j)$, for points of any presented metric space with an effective net structure, and relative to any oracle.  The proofs isolate a single one-sided transfer principle and a small abstract interface (``located families'') under which the whole argument is pure string bookkeeping.  Along the way we observe that the Case--Lutz lower bound on mutual information through a common string is sensitive to the orientation of the asymmetric convention $K(q)-K(q\mid p)$: with the arguments swapped it fails, while under the symmetric convention it holds with constant error and no $K(K(\cdot))$ terms; and we give a direct proof of the Levin--G\'acs direction of symmetry of information for prefix complexity relative to an arbitrary oracle.  Every result is formalized in Lean~4 in the author's Kolmogorov-complexity library; the formal statements are indicated throughout.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+Case and Lutz \cite{CaseLutz} introduced the mutual information $I_r(x:y)$ of two Euclidean points at a precision $r$ and showed that $I_r(x:y)=K_r(x)+K_r(y)-K_r(x,y)+O(\log r)$, where $K_r(x)$ is the least prefix complexity of a rational point within $2^{-r}$ of $x$.  Lutz and Stull \cite{LutzStull} introduced a two-precision conditional complexity $K_{r,s}(x\mid y)$, but only as a stepping stone: they show that raising $s$ to $r$ costs $O(\log r)$ and then work at a single precision.  In both settings the two scales never carry independent meaning.
+
+The present note is motivated by anisotropic expansion in smooth dynamics, where forward and backward orbit data determine a point at precisions related by Lyapunov potentials rather than equal.  We therefore keep the precisions $r$ and $s$ of $x$ and $y$ independent throughout, and ask what survives.  The answer is: everything, with an error $O(\log r)+O(\log s)$ in which the two scales never interact.  The structural reason is that every transfer step one needs is \emph{one-sided}: it constrains only the object in the conditioning slot of a conditional complexity, while the object being described ranges freely over all strings.  Because no statement ever mentions two precisions at once, no joint error term can arise.
+
+Two further points emerged while formalizing the argument, and we record them because they change the way the results should be stated.
+
+\begin{enumerate}[label=(\alph*)]
+\item The inequality
+\begin{equation}\label{eq:caselutz}
+I(u:v)\;\ge\;K(z)-K(z\mid u,K(u))-K(z\mid v,K(v))-K(K(u))-K(K(z))-O(1),
+\end{equation}
+which one uses to pass from a rational chosen to minimize mutual information to a $K$-minimizer, is Corollary~4.7 of \cite{CaseLutz} and is correct in their convention $I(p:q)=K(q)-K(q\mid p)$, in which the \emph{second} argument is described (Proposition~\ref{prop:cl}).  It is \emph{false} if the convention is read as $I(u:v)=K(u)-K(u\mid v)$ with the variables of \eqref{eq:caselutz} kept in place (Remark~\ref{rem:convention}), a slip that is easy to make and that the author made in an earlier draft.  Under the symmetric convention $I(u:v)=K(u)+K(v)-K(\pair uv)$ it holds with constant error and without the $K(K(\cdot))$ terms (Proposition~\ref{prop:mi}(iii)), and in fact the proof of the comparison theorem does not need it at all: symmetry of information installs the minimizer in the charged slot directly.
+\item Since the intended application is relative to an oracle $A$, the string-level facts are needed for the prefix complexity $K^A$ of an optimal $A$-prefix machine.  The coding direction of symmetry of information relativizes verbatim, but the Levin--G\'acs direction does not follow from its unrelativized form.  We give a self-contained proof for arbitrary $A$ (Theorem~\ref{thm:soi}).
+\end{enumerate}
+
+All results below are formalized in Lean~4 \cite{Lean} on top of Mathlib, in the author's library of algorithmic information theory, in the modules \lean{Oracle/PrefixComplexity/} and \lean{PointToSet/SplitPrecision/} (Section~\ref{sec:formal}).  Formal names are given in brackets after each statement.  Every formal theorem depends only on the axioms \lean{propext}, \lean{Classical.choice} and \lean{Quot.sound}.
+
+\section{Preliminaries}\label{sec:prelim}
+
+\subsection{Oracle prefix complexity}
+Strings are finite binary words.  Fix an oracle $A\subseteq\N$ and an optimal prefix machine $U=U^A$ relative to $A$: a partial function $U(p,y)$ on pairs of strings, computable with oracle $A$, whose halting set in every context $y$ is prefix-free, and which is optimal among all such machines up to an additive constant.  Such machines exist, and the resulting \emph{conditional prefix complexity}
+\[K(x\mid y)=K^A(x\mid y)=\min\{|p|: U(p,y)=x\},\qquad K(x)=K(x\mid\varepsilon),\]
+is finite for all $x,y$ and well defined up to $O(1)$ \cite[Ch.~4]{SUV}.  Throughout, $O(1)$ denotes a constant depending only on $A$ (and on the finitely many computable maps mentioned in a statement); $O(\log r)$ denotes $c\,(\lenbits r+1)$ for such a constant $c$, where $\lenbits r$ is the number of binary digits of $r$.  We write $\pair xy$ for the self-delimiting pair code of $x$ and $y$, and $(x,K(x))$ for the context $\pair{x}{\overline{K(x)}}$ in which $K(x)$ is encoded in unary; we use the same conventions for natural numbers through their binary codes.
+
+\begin{proposition}[conditional calculus]\label{prop:calc}
+For all strings $x,y,z$ and every $A$-computable total or partial map $f$:
+\begin{enumerate}[label=(\roman*)]
+\item (chain rule) $K(x\mid z)\le K(y\mid z)+K(x\mid y)+O(1)$ and $K(x\mid z)\le K(y\mid z)+K(x\mid \pair yz)+O(1)$ \ [\lean{oraclePrefixComplexityNat_triangle}, \lean{_triangle_pair}];
+\item (coding direction of symmetry) $K(\pair yx\mid z)\le K(y\mid z)+K(x\mid y,K(y\mid z))+O(1)$ \ [\lean{oraclePrefixComplexityNat_pair_le_cond_context}];
+\item (concatenation) $K(\pair yx\mid z)\le K(y\mid z)+K(x\mid z)+O(1)$ \ [\lean{oraclePrefixComplexityNat_pair_le_add}];
+\item (recoding) $K(x\mid y)\le K(x\mid f(y))+O(1)$ and $K(f(x)\mid y)\le K(x\mid y)+O(1)$ \ [\lean{_cond_le_of_partrecIn}, \lean{_map_le_of_partrecIn}];
+\item $K(x\mid y)\le K(x\mid y,k)+K(\overline k)+O(1)$ for every $k\in\N$, and $K(\overline k)\le 3\lenbits k+O(1)$ \ [\lean{_le_context_add}, \lean{oracleComplexity_natCode_le}].
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i)--(iii) are instances of one machine.  Given $A$-computable maps $g$ and $h$, let $D(p_1p_2,z)=h(z,y,x)$ where $U(p_1,z)=y$ and $U(p_2,g(z,y,|p_1|))=x$.  Prefix-freeness of the domain of $U$ in each context makes the parse $p_1p_2$ unique, so $D$ is again a prefix machine, and it is $A$-computable by dovetailing over the enumerable set of halting pairs $(p_1,p_2)$.  Optimality of $U$ gives $K(h(z,y,x)\mid z)\le K(y\mid z)+K(x\mid g(z,y,K(y\mid z)))+O(1)$ [\lean{oraclePrefixComplexityNat_twoStage_le}]; take $g=y$, $g=\pair yz$, $g=(y,|p_1|)$ and $g=z$ respectively.  (iv) composes $U$ with $f$ on the context or the output.  (v) follows from (iv) and (iii) applied to $\overline k$, and from the binary code of $k$ having $\lenbits k$ bits.
+\end{proof}
+
+\subsection{Symmetry of information relative to an oracle}
+
+\begin{theorem}[symmetry of information for $K^A$]\label{thm:soi}
+For every oracle $A$ and all strings $x,y$,
+\[K(\pair xy)=K(x)+K(y\mid x,K(x))+O(1).\]
+\textup{[\lean{oracleComplexity_pair_le_cond_context}, \lean{oracleSymmetryLower}]}
+\end{theorem}
+
+The inequality $\le$ is Proposition~\ref{prop:calc}(ii) with $z=\varepsilon$.  For $\ge$ we cannot invoke the unrelativized theorem, whose proof is about computable machines; for oracles with computable characteristic function the transport is immediate [\lean{OracleSymmetryLower.of_partrec}], but in general a direct argument is needed.
+
+\begin{proof}[Proof of $\ge$]
+For a string $x$ let $\mu(x)$ be the total weight $\sum 2^{-|p|}$ of the programs $p$ with $U(p,\varepsilon)=\pair x{y}$ for some $y$.  Since the domain of $U$ is prefix-free, $\sum_x\mu(x)\le 1$, and since distinct outputs come from distinct programs, $\sum_y 2^{-K(\pair xy)}\le\mu(x)$.
+
+\emph{Marginal coding bound} [\lean{oracle_pairMarginal_coding_bound}]: $\mu(x)\le 2^{c}\,2^{-K(x)}$ for a constant $c$.  The set $R=\{(x,n):2^{-n}<\mu(x)\}$ is $A$-enumerable, because $\mu(x)$ is the supremum of the rational partial sums over the enumerable halting triples $(p,x,y)$.  Enumerate $R$ without repetition and issue, for the pair $(x,n)$, a Kraft--Chaitin request for $x$ of length $n+1$.  The total mass is at most $\sum_x\sum_{n:2^{-n}<\mu(x)}2^{-(n+1)}\le\sum_x\mu(x)\le 1$, so by the relative Kraft--Chaitin theorem $K(x)\le n+1+O(1)$ whenever $2^{-n}<\mu(x)$; taking $n$ least gives $\mu(x)\le 2^{-n+1}\le 2^{c}2^{-K(x)}$.
+
+\emph{Conditional requests} [\lean{oracle_kraftChaitin_cond}]: the Kraft--Chaitin construction is uniform in a context string, so an $A$-computable family of request streams indexed by contexts is realized by a single $A$-prefix machine, exactly at the requested lengths, in every context whose stream has mass at most one.  Given the context $(x,k)$, enumerate the halting triples $(p,x,y)$ and request $y$ with length $|p|-k+c+c_2$, where $c_2$ is the constant of $K(x)\le K(\pair xy)+c_2$ (so no truncation occurs when $k=K(x)$).  At $k=K(x)$ the mass is $2^{k-c-c_2}\mu(x)\le 2^{-c_2}\le 1$, hence $K(y\mid x,K(x))\le K(\pair xy)-K(x)+O(1)$.
+\end{proof}
+
+\subsection{Mutual information of strings}
+
+\begin{definition}
+The \emph{mutual information} of two strings is $I(u:v)=K(u)+K(v)-K(\pair uv)\in\Z$ \ [\lean{oracleMutualInfo}].
+\end{definition}
+
+\begin{proposition}\label{prop:mi}
+For all strings $u,v,z$:
+\begin{enumerate}[label=(\roman*)]
+\item $I(u:v)\ge -O(1)$ and $I(u:v)=I(v:u)+O(1)$;
+\item $I(u:v)=K(v)-K(v\mid u,K(u))+O(1)$ \ [\lean{oracleMutualInfo_ge_cond}, \lean{oracleMutualInfo_le_cond}];
+\item \label{it:common} $I(u:v)\ge K(z)-K(z\mid u,K(u))-K(z\mid v,K(v))-O(1)$ \ [\lean{oracleMutualInfo_ge_common}].
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i) is Proposition~\ref{prop:calc}(iii),(iv); (ii) is Theorem~\ref{thm:soi}.  For (iii), $K(\pair uv)\le K(z)+K(\pair uv\mid z,K(z))+O(1)\le K(z)+K(u\mid z,K(z))+K(v\mid z,K(z))+O(1)$ by Proposition~\ref{prop:calc}(ii),(iii), while $K(u)\ge K(z)+K(u\mid z,K(z))-K(z\mid u,K(u))-O(1)$ and likewise for $v$ by both directions of Theorem~\ref{thm:soi}; add.
+\end{proof}
+
+\begin{proposition}[the Case--Lutz convention]\label{prop:cl}
+Let $I_{\mathrm{CL}}(u:v)=K(v)-K(v\mid u)$.  Then $I_{\mathrm{CL}}(u:v)\le I(u:v)+O(1)$, $I(u:v)\le I_{\mathrm{CL}}(u:v)+K(\overline{K(u)})+O(1)$, and for all $x,y,z$
+\[I_{\mathrm{CL}}(x:y)\;\ge\;K(z)-K(z\mid x,K(x))-K(z\mid y,K(y))-K(\overline{K(x)})-K(\overline{K(z)})-O(1),\]
+which is Corollary~4.7 of \cite{CaseLutz}. \ \textup{[\lean{oracleMutualInfoCL_le}, \lean{oracleMutualInfo_le_CL_add}, \lean{oracleMutualInfoCL_ge_common}]}
+\end{proposition}
+
+\begin{proof}
+The comparisons are Proposition~\ref{prop:mi}(ii) with Proposition~\ref{prop:calc}(iv),(v).  For the inequality, both directions of Theorem~\ref{thm:soi} give $K(y)\ge K(z)+K(y\mid z,K(z))-K(z\mid y,K(y))-O(1)$, and the chain rule with Proposition~\ref{prop:calc}(v) gives $K(y\mid x)\le K(z\mid x,K(x))+K(\overline{K(x)})+K(y\mid z,K(z))+K(\overline{K(z)})+O(1)$; subtract.  The two $K(K(\cdot))$ terms are exactly the cost of supplying the complexity values of $x$ and $z$ to the chain through $z$.
+\end{proof}
+
+\begin{remark}[the orientation matters]\label{rem:convention}
+With the arguments swapped, $I'(u:v)=K(u)-K(u\mid v)$, the same inequality \eqref{eq:caselutz} is false.  Take $z=u$ and $u=\overline{K(v)}$.  Then $K(z\mid u,K(u))=O(1)$, $K(z\mid v,K(v))=O(1)$, and $K(K(u))$, $K(K(z))$ are $O(\log\log|v|)$, so \eqref{eq:caselutz} would give $K(K(v)\mid v)=K(u\mid v)+O(1)\le O(\log\log |v|)$ for all $v$, contradicting G\'acs' theorem that $K(K(v)\mid v)$ exceeds $\log|v|-O(\log\log|v|)$ infinitely often \cite{Gacs}.  Since $I'(u:v)-I(u:v)=K(u\mid v,K(v))-K(u\mid v)+O(1)\in[-K(K(v)\mid v)-O(1),\,O(1)]$ and $I_{\mathrm{CL}}$ differs from $I$ by at most $K(\overline{K(u)})+O(1)$, all three conventions differ by $O(\log r)$ at $K$-minimizers of balls of radius $2^{-r}$ (Proposition~\ref{prop:calc}(v) with $K(\cdot)=O(r)$), so all statements about points below hold in each of them; but only the symmetric one makes the string facts exact and orientation-free.
+\end{remark}
+
+\section{Located families and one-sided transfer}\label{sec:located}
+
+The objects of interest, points and tuples of points, are known only through \emph{names}: strings ranging over a set determined by the object and a precision.  We abstract exactly what the argument uses.
+
+\begin{definition}\label{def:located}
+Let $\iota$ be a set of \emph{precisions}.  A \emph{located family} $L=(\names,\budget)$ over $\iota$ consists of nonempty sets of strings $\names_r$ and budgets $\budget_r\in\N$, $r\in\iota$, such that for a constant $c$ and all $r$:
+\begin{enumerate}[label=(L\arabic*)]
+\item\label{L1} (transfer) $K(p\mid q)\le c\,(\budget_r+1)$ for every $q\in\names_r$ and every $K$-minimizer $p$ of $\names_r$;
+\item\label{L2} (growth) $\lenbits{K(p)}\le c\,(\budget_r+1)$ for every $K$-minimizer $p$ of $\names_r$.
+\end{enumerate}
+Here a $K$-minimizer of $\names_r$ is an element of least complexity; one exists since complexities are natural numbers.  We write $K_L(r)$ for that least complexity.  \textup{[\lean{LocatedFamily}, \lean{IsMinName}, \lean{LocatedFamily.complexity}]}
+\end{definition}
+
+\begin{lemma}[transfer lemmas]\label{lem:transfer}
+Let $L$ be located over $\iota$.  For all $r\in\iota$, $q\in\names_r$, $K$-minimizers $p$ of $\names_r$ and all strings $z,w$:
+\begin{enumerate}[label=(\roman*)]
+\item $K(z\mid \pair qw)\le K(z\mid\pair pw)+O(\budget_r)$ \ [\lean{LocatedFamily.transfer_cond}];
+\item $K(z\mid q,K(q))\le K(z\mid p,K(p))+O(\budget_r)$ \ [\lean{LocatedFamily.transfer_context}];
+\item $K(\overline{K(p)})\le O(\budget_r)$ \ [\lean{LocatedFamily.natCode_complexity_le}].
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(iii) is \ref{L2} and Proposition~\ref{prop:calc}(v).  For (i), $K(z\mid\pair qw)\le K(\pair pw\mid\pair qw)+K(z\mid\pair pw)+O(1)$ and $K(\pair pw\mid \pair qw)\le K(p\mid q)+K(w\mid\pair qw)+O(1)\le O(\budget_r)$ by \ref{L1}.  For (ii), the same chain with $K((p,K(p))\mid (q,K(q)))\le K(p\mid q)+K(\overline{K(p)})+O(1)\le O(\budget_r)$.
+\end{proof}
+
+Each lemma constrains only the string in the conditioning slot; $z$ and $w$ are arbitrary.  This is what allows two located families with unrelated precisions to be treated one at a time.
+
+\begin{proposition}[products]\label{prop:prod}
+Let $L_1$, $L_2$ be located over $\iota_1$, $\iota_2$.  Then $L_1\times L_2$, with names $\{\pair{q_1}{q_2}: q_i\in\names^{(i)}_{r_i}\}$ and budgets $\budget^{(1)}_{r_1}+\budget^{(2)}_{r_2}$, is located over $\iota_1\times\iota_2$.  Moreover, if $p_1,p_2$ are $K$-minimizers of $\names^{(1)}_{r_1}$, $\names^{(2)}_{r_2}$, then
+\[K_{L_1\times L_2}(r_1,r_2)\le K(\pair{p_1}{p_2})\le K_{L_1\times L_2}(r_1,r_2)+O(\budget^{(1)}_{r_1}+\budget^{(2)}_{r_2}).\]
+\textup{[\lean{LocatedFamily.prod}, \lean{LocatedFamily.complexity_pair_min_le}]}
+\end{proposition}
+
+\begin{proof}
+A joint minimizer $p=\pair{u_1}{u_2}$ of the product is in general not a pair of marginal minimizers, nor conversely, so both notions are kept.  Let $p^*=\pair{p_1}{p_2}$.  By \ref{L1} for the factors and concatenation, $K(p^*\mid\pair{q_1}{q_2})$ and $K(p^*\mid p)$ are $O(\budget^{(1)}+\budget^{(2)})$.  By Theorem~\ref{thm:soi}, $K(p\mid p^*,K(p^*))\le K(\pair{p^*}{p})-K(p^*)+O(1)\le K(p)+K(p^*\mid p)-K(p^*)+O(1)\le K(p^*\mid p)+O(1)$, using $K(p)\le K(p^*)$.  Then $K(p\mid\pair{q_1}{q_2})\le K(p\mid p^*)+K(p^*\mid\pair{q_1}{q_2})+O(1)$ and $K(p\mid p^*)\le K(p\mid p^*,K(p^*))+K(\overline{K(p^*)})+O(1)$, which is \ref{L1}; \ref{L2} follows from $K(p)\le K(p^*)\le K(p_1)+K(p_2)+O(1)$.  The displayed inequality is $K(p^*)\le K(p)+K(p^*\mid p)+O(1)$.
+\end{proof}
+
+Iterating, a tuple $(L_1,\dots,L_k)$ of located families is located over $\prod\iota_i$, with names the list codes of tuples of names and budget $\sum_i\budget^{(i)}_{r_i}$ [\lean{LocatedFamily.pi}, \lean{mem_pi_names}, \lean{pi_budget}].  This is the coordinatewise iteration of the transfer lemmas, and the proposition is the comparison of joint and marginal minimizers.
+
+\section{Mutual information at split precisions}\label{sec:split}
+
+\begin{definition}
+For located families $L_1,L_2$ over $\iota_1,\iota_2$ and $(r,s)\in\iota_1\times\iota_2$ put
+\[I_{r,s}(L_1:L_2)=\min\{I(q_1:q_2): q_i\in\names^{(i)}\},\qquad J_{r,s}(L_1:L_2)=\min\{I(p_1:p_2): p_i\text{ a $K$-minimizer of }\names^{(i)}\},\]
+the minima over $\names^{(1)}_r\times\names^{(2)}_s$ being attained since $I\ge -O(1)$. \textup{[\lean{LocatedFamily.splitInfo}, \lean{LocatedFamily.minInfo}]}
+\end{definition}
+
+Minimizers are names, so $I_{r,s}\le J_{r,s}$.  The two precisions do not interact in the definitions, and the following theorems show that they do not interact in the errors either.
+
+\begin{theorem}[comparison]\label{thm:comparison}
+$J_{r,s}(L_1:L_2)\le I_{r,s}(L_1:L_2)+O(\budget^{(1)}_r+\budget^{(2)}_s)$. \ \textup{[\lean{LocatedFamily.minInfo_le_splitInfo_add}]}
+\end{theorem}
+
+\begin{proof}
+Let $q_1,q_2$ attain $I_{r,s}$ and let $p_1,p_2$ be arbitrary minimizers.  Every step below is charged to one precision.
+
+\emph{Step 1 (charged to $r$).}  By Proposition~\ref{prop:mi}(ii), $I(q_1:q_2)\ge K(q_2)-K(q_2\mid q_1,K(q_1))-O(1)$.  By the chain rule and Lemma~\ref{lem:transfer}, $K(q_2\mid q_1,K(q_1))\le K(p_1\mid q_1)+K(q_2\mid p_1)+O(1)\le K(q_2\mid p_1,K(p_1))+O(\budget^{(1)}_r)$, using Lemma~\ref{lem:transfer}(iii) to add $K(p_1)$ to the context.  Hence $I(q_1:q_2)\ge K(q_2)-K(q_2\mid p_1,K(p_1))-O(\budget^{(1)}_r)\ge I(p_1:q_2)-O(\budget^{(1)}_r)$, again by Proposition~\ref{prop:mi}(ii).  The $y$-side is unconstrained, so $s$ does not enter.
+
+\emph{Step 2 (charged to $s$).}  Symmetrically, $I(p_1:q_2)=I(q_2:p_1)+O(1)\ge K(p_1)-K(p_1\mid q_2,K(q_2))-O(1)\ge K(p_1)-K(p_1\mid p_2,K(p_2))-O(\budget^{(2)}_s)$ by the decorated transfer lemma~\ref{lem:transfer}(ii), and the last expression is $I(p_2:p_1)+O(1)=I(p_1:p_2)+O(1)$.
+
+Since $p_1,p_2$ were arbitrary, $J_{r,s}\le I(p_1:p_2)\le I_{r,s}+O(\budget^{(1)}_r+\budget^{(2)}_s)$.
+\end{proof}
+
+The proof is the four-step argument of the original appendix with its Step~2 removed: there the minimizer was installed in the charged slot of \eqref{eq:caselutz}, which is exactly where the orientation of Remark~\ref{rem:convention} bites.  Under the symmetric convention Proposition~\ref{prop:mi}(ii) does the installation.
+
+\begin{theorem}[symmetry of information at split precisions]\label{thm:symmetry}
+\[I_{r,s}(L_1:L_2)=K_{L_1}(r)+K_{L_2}(s)-K_{L_1\times L_2}(r,s)+O(\budget^{(1)}_r+\budget^{(2)}_s).\]
+\textup{[\lean{LocatedFamily.splitInfo_symmetry}]}
+\end{theorem}
+
+\begin{proof}
+Let $p_1,p_2$ attain $J_{r,s}$.  Then $J_{r,s}=K(p_1)+K(p_2)-K(\pair{p_1}{p_2})=K_{L_1}(r)+K_{L_2}(s)-K(\pair{p_1}{p_2})$ and $K(\pair{p_1}{p_2})=K_{L_1\times L_2}(r,s)+O(\budget^{(1)}+\budget^{(2)})$ by Proposition~\ref{prop:prod}; conclude with Theorem~\ref{thm:comparison}.
+\end{proof}
+
+\begin{corollary}\label{cor:sym}
+$I_{r,s}(L_1:L_2)=I_{s,r}(L_2:L_1)+O(1)$. \ \textup{[\lean{LocatedFamily.splitInfo_comm_le}]}
+\end{corollary}
+
+\begin{corollary}[normalized forms]\label{cor:normalized}
+Let $(r_k,s_k)$ be precisions and $N_k\to\infty$ a scale with $\budget^{(1)}_{r_k}/N_k\to0$ and $\budget^{(2)}_{s_k}/N_k\to0$.  Then
+\[\frac{J_{r_k,s_k}-I_{r_k,s_k}}{N_k}\to0\qquad\text{and}\qquad\frac{I_{r_k,s_k}-\bigl(K_{L_1}(r_k)+K_{L_2}(s_k)-K_{L_1\times L_2}(r_k,s_k)\bigr)}{N_k}\to0.\]
+\textup{[\lean{tendsto_minInfo_sub_splitInfo_div}, \lean{tendsto_splitInfo_sub_symmetry_div}]}
+\end{corollary}
+
+Consequently the lower and upper limits of the normalized mutual information agree with those of the normalized symmetry expression.  Some such condition is close to necessary: if $s$ is held fixed while $r\to\infty$, Theorem~\ref{thm:comparison} still holds but both sides are bounded by $O(s)$, so the normalized statement carries no information.
+
+\section{Points, tuples and Euclidean space}\label{sec:points}
+
+\subsection{Presented spaces}
+A \emph{presented} metric space is a complete metric space $X$ with a fixed dense sequence $(\xi_i)_{i\in\N}$ of \emph{ideal points} \cite{DinowitzPTS}.  The complexity of a point at precision $r$ is
+\[K_r(x)=\min\{K(\bar i): \dist(\xi_i,x)<2^{-r}\},\]
+where $\bar i$ is the binary code of $i$; its minimizers are the $K$-minimizers of the ball.  For $X=\R^n$ with the sup metric and $(\xi_i)$ an enumeration of $\Q^n$ this is the usual $K_r(x)$ of \cite{CaseLutz,LutzStull}.  The names of $x$ at precision $r$ are the codes of the ideal points of $B(x,2^{-r})$ [\lean{ballNames}], and the least complexity of a name is $K_r(x)$ [\lean{minComplexity_ballNames}].
+
+\begin{definition}\label{def:nets}
+A presented space has \emph{precision nets} relative to $A$ if there are an $A$-computable function $(r,i,j)\mapsto\mathrm{cand}(r,i,j)\in\N$ and a bound $D$ such that every ball $B(x,2^{-r})$ contains a \emph{canonical} ideal point $\xi_d$ with $d=\mathrm{cand}(r,i,j)$ for some $j<D$, for every ideal point $\xi_i$ of the ball.  A point $x$ has \emph{linear growth} if $K_r(x)\le C(r+1)$ for some $C$. \textup{[\lean{PrecisionNets}, \lean{HasLinearGrowth}]}
+\end{definition}
+
+Linear growth is the only place the ambient geometry enters the estimates (and it enters only through the number of bits of $K_r(x)$); any bound $K_r(x)\le Cr+O(\log r)$ would do.
+
+\begin{theorem}[geometric transfer]\label{thm:geomtransfer}
+Let $X$ have precision nets relative to $A$ and let $x$ have linear growth.  Then $x$ is a located family over $\N$ with names the codes of the ideal points of $B(x,2^{-r})$ and budget $\lenbits r$: for every ideal point $\xi_i$ of $B(x,2^{-r})$ and every $K$-minimizer $\xi_p$ of the ball, $K(\bar p\mid\bar i)\le O(\log r)$.
+\textup{[\lean{transfer_ballNames}, \lean{pointFamily}]}
+\end{theorem}
+
+\begin{proof}
+Let $\xi_d$ be the canonical point of $B(x,2^{-r})$.  From any ideal point $\xi_i$ of the ball, $d$ is recovered from $r$ and an index $j<D$, so $K(\bar d\mid\bar i)\le K(\bar r)+K(\bar j)+O(1)=O(\log r)$ [\lean{PrecisionNets.canonical_cond_le}]; in particular $K(\bar d)\le K(\bar p)+O(\log r)\le C'(r+1)$, so $K(\overline{K(\bar d)})=O(\log r)$.  Since $\xi_d$ lies in the ball, $K(\bar p)\le K(\bar d)$, and Theorem~\ref{thm:soi} gives $K(\bar p\mid \bar d,K(\bar d))\le K(\pair{\bar d}{\bar p})-K(\bar d)+O(1)\le K(\bar p)+K(\bar d\mid\bar p)-K(\bar d)+O(1)\le O(\log r)$.  Hence $K(\bar p\mid\bar i)\le K(\bar d\mid\bar i)+K(\bar p\mid\bar d)+O(1)\le O(\log r)+K(\bar p\mid\bar d,K(\bar d))+K(\overline{K(\bar d)})+O(1)=O(\log r)$.  The growth condition \ref{L2} is linear growth.
+\end{proof}
+
+This is the content of the transfer lemmas whose proofs were deferred in the original appendix: the canonical point replaces the ``pivot through the dyadic truncation'', and symmetry of information replaces the count of almost-realizers.  No counting of rationals of bounded complexity is needed.
+
+\subsection{The theorems for points}
+Let $X,Y$ be presented spaces with precision nets relative to $A$, and let $x\in X$, $y\in Y$ have linear growth.  Define
+\[I_{r,s}(x:y)=\min\{I(\bar i:\bar j):\dist(\xi_i,x)<2^{-r},\ \dist(\eta_j,y)<2^{-s}\},\]
+$J_{r,s}(x:y)$ the same minimum over $K$-minimizers of the two balls, and $K_{r,s}(x,y)=\min K(\pair{\bar i}{\bar j})$ over the same pairs.  These definitions involve no hypotheses [\lean{splitMutualInfo}, \lean{minimizerMutualInfo}, \lean{jointPrecisionComplexity}]; for $r=s$ they are the quantities of \cite{CaseLutz}.
+
+\begin{theorem}\label{thm:points}
+For all $r,s\in\N$:
+\begin{enumerate}[label=(\roman*)]
+\item $I_{r,s}(x:y)\le J_{r,s}(x:y)\le I_{r,s}(x:y)+O(\log r)+O(\log s)$ \ [\lean{minimizerMutualInfo_le_splitMutualInfo_add}];
+\item $I_{r,s}(x:y)=K_r(x)+K_s(y)-K_{r,s}(x,y)+O(\log r)+O(\log s)$ \ [\lean{splitMutualInfo_symmetry}];
+\item $I_{r,s}(x:y)=I_{s,r}(y:x)+O(1)$ \ [\lean{splitMutualInfo_comm_le}].
+\end{enumerate}
+If $(r_k,s_k)$ is log-comparably divergent, i.e.\ $r_k,s_k\to\infty$, $\log s_k/r_k\to0$ and $\log r_k/s_k\to0$ --- in particular if it is comparably divergent, $0<\liminf r_k/s_k\le\limsup r_k/s_k<\infty$ --- then $(J_{r_k,s_k}-I_{r_k,s_k})/r_k\to0$ and the normalized mutual information and symmetry expression have the same limiting behaviour; the same holds with $s_k$ in the denominator.
+\textup{[\lean{tendsto_minimizerMutualInfo_sub_splitMutualInfo_div}, \lean{tendsto_splitMutualInfo_sub_symmetry_div}]}
+\end{theorem}
+
+\begin{proof}
+Theorems~\ref{thm:comparison}, \ref{thm:symmetry}, Corollaries~\ref{cor:sym}, \ref{cor:normalized} applied to the located families of Theorem~\ref{thm:geomtransfer}, whose product has least complexity $K_{r,s}(x,y)$ and budget $\lenbits r+\lenbits s$; and $\lenbits{s_k}/r_k\to0$ because $\lenbits s\le\log_2 s+1$.
+\end{proof}
+
+\subsection{Tuples}
+For $k$ points $x_i\in X_i$ at precisions $\bar r=(r_1,\dots,r_k)$ and $m$ points $y_j\in Y_j$ at $\bar s$, the names of $\bar x$ at $\bar r$ are the list codes of tuples of ideal points of the balls $B(x_i,2^{-r_i})$, $K_{\bar r}(\bar x)$ is the least complexity of such a name, and $I_{\bar r,\bar s}(\bar x:\bar y)$, $J_{\bar r,\bar s}$, $K_{\bar r,\bar s}(\bar x,\bar y)$ are defined as before [\lean{tupleNames}, \lean{tuplePrecisionComplexity}, \lean{tupleSplitMutualInfo}, \lean{tupleJointComplexity}].  Each $x_i$ is located with budget $\lenbits{r_i}$, so by the product construction $\bar x$ is located with budget $\sum_i\lenbits{r_i}$, and Section~\ref{sec:split} applies verbatim.
+
+\begin{theorem}\label{thm:tuples}
+$J_{\bar r,\bar s}(\bar x:\bar y)\le I_{\bar r,\bar s}(\bar x:\bar y)+\sum_iO(\log r_i)+\sum_jO(\log s_j)$, and
+\[I_{\bar r,\bar s}(\bar x:\bar y)=K_{\bar r}(\bar x)+K_{\bar s}(\bar y)-K_{\bar r,\bar s}(\bar x,\bar y)+\sum_iO(\log r_i)+\sum_jO(\log s_j).\]
+\textup{[\lean{tupleMinimizerMutualInfo_le_tupleSplitMutualInfo_add}, \lean{tupleSplitMutualInfo_symmetry}]}
+\end{theorem}
+
+No step of any proof holds an $r_i$-constrained and an $s_j$-constrained object in constrained position simultaneously, nor two $r_i$-constrained objects; this is why the error is a sum over all $k+m$ precisions and never a joint term.
+
+\subsection{Euclidean space}
+\begin{proposition}\label{prop:euclid}
+$\R^n$ with the sup metric and the rational points as ideal points is a presented space with an exact computable distance table, with precision nets relative to every oracle, and every point has linear growth.  Consequently Theorems~\ref{thm:points} and \ref{thm:tuples} hold for $x\in\R^n$, $y\in\R^t$ and every oracle $A$ without further hypotheses.
+\textup{[\lean{euclidPresentation}, \lean{euclidNets}, \lean{hasLinearGrowth_euclid}, \lean{euclid_minimizerMutualInfo_le_splitMutualInfo_add}, \lean{euclid_splitMutualInfo_symmetry}]}
+\end{proposition}
+
+\begin{proof}
+The canonical point of $B(x,2^{-r})$ is the dyadic truncation $d=(\lfloor 2^{r+2}x_i\rfloor/2^{r+2})_i$, within $2^{-r-2}$ of $x$.  If $q$ is a rational point of the ball then $|\lfloor2^{r+2}x_i\rfloor-\lfloor2^{r+2}q_i\rfloor|\le4$ for each $i$, so $d$ is one of the $9^n$ points $\bigl((\lfloor2^{r+2}q_i\rfloor+e_i-4)/2^{r+2}\bigr)_i$, $e\in\{0,\dots,8\}^n$, which are computable from $(r,q,e)$.  For linear growth, the code of $d$ is computable from the list $(r,\lfloor2^{r+2}x_1\rfloor,\dots,\lfloor2^{r+2}x_n\rfloor)$, whose entries have $O(r+\log(|x_i|+1))$ bits, so $K_r(x)\le K(\bar d)\le n r+O_x(\log r)\le C_x(r+1)$.  The Euclidean metric would do equally well; the sup metric is used because the distance between rational points is then rational.
+\end{proof}
+
+Any doubling metric space with an $A$-computable family of finite nets also has precision nets, so the results hold there directly; the pull-back along an Assouad embedding is not needed.
+
+\section{The formalization}\label{sec:formal}
+
+The development lives in the author's Lean~4 library of algorithmic information theory (Mathlib \lean{v4.35.0}).  The string layer is in \lean{KolmogorovMathlib/Oracle/PrefixComplexity/}: \lean{TwoStage.lean} (the two-stage machine and Proposition~\ref{prop:calc}), \lean{Conditional.lean} (the conditional calculus), \lean{Information.lean} (mutual information, Proposition~\ref{prop:mi}), \lean{AsymmetricInformation.lean} (Proposition~\ref{prop:cl}) and \lean{SymmetryLower.lean} (Theorem~\ref{thm:soi}), with the context-uniform Kraft--Chaitin theorem \lean{oracle_kraftChaitin_cond} in \lean{Oracle/KraftChaitin.lean}.  The split-precision theory is in \lean{KolmogorovMathlib/PointToSet/SplitPrecision/}: \lean{Located.lean} (Section~\ref{sec:located}), \lean{Information.lean} and \lean{Normalized.lean} (Section~\ref{sec:split}), \lean{Point.lean}, \lean{Theorems.lean}, \lean{Tuples.lean}, \lean{Euclidean.lean} and \lean{EuclideanTheorems.lean} (Section~\ref{sec:points}); about 4\,400 lines in all.  Every statement is relative to an arbitrary oracle $A\subseteq\N$, error terms are explicit existential constants multiplying $\lenbits r+\lenbits s+1$ (or the sum over coordinates), complexities are natural numbers and mutual informations integers, and the normalized statements are limits of real sequences.  All declarations depend only on the axioms \lean{propext}, \lean{Classical.choice} and \lean{Quot.sound}, and the library's audit (no \lean{sorry}, complete documentation, no resource overrides) passes on the new modules.  The blueprint \lean{docs/split_precision_blueprint.md} maps the statements above to the Lean declarations.
+
+Not formalized: a conditional form $K_{\bar r,\bar s}(\bar x\mid\bar y)$ in the style of \cite{LutzStull}, whose convention (maximum or minimum over the $y$-names) is left open here.
+
+\begin{thebibliography}{9}
+\bibitem{CaseLutz} A.~Case and J.~H.~Lutz, \emph{Mutual dimension}, ACM Trans.\ Comput.\ Theory \textbf{7} (2015), no.~3, Art.~12.
+\bibitem{LutzStull} N.~Lutz and D.~M.~Stull, \emph{Bounding the dimension of points on a line}, Inform.\ and Comput.\ \textbf{275} (2020); \emph{Projection theorems using effective dimension}, MFCS 2018.
+\bibitem{SUV} A.~Shen, V.~A.~Uspensky and N.~Vereshchagin, \emph{Kolmogorov complexity and algorithmic randomness}, Math.\ Surveys Monogr.\ 220, Amer.\ Math.\ Soc., 2017.
+\bibitem{Gacs} P.~G\'acs, \emph{On the symmetry of algorithmic information}, Soviet Math.\ Dokl.\ \textbf{15} (1974), 1477--1480.
+\bibitem{DinowitzPTS} E.~Dinowitz, \emph{Point-to-set principles in dynamical systems}, preprint, arXiv:2607.21976.
+\bibitem{Lean} L.~de~Moura and S.~Ullrich, \emph{The Lean 4 theorem prover and programming language}, CADE 28 (2021); The Mathlib Community, \emph{The Lean mathematical library}, CPP 2020.
+\end{thebibliography}
+
+\end{document}
