@@ -3,7 +3,7 @@ Copyright (c) 2026 Emma Dinowitz. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
-import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Defs
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Auxiliary.Defs
 
 /-!
 # The two halves of an interleaved sequence
@@ -17,18 +17,18 @@ of a set described through the halves: for a family of sets `T z` indexed by seq
 
 ## Conventions
 
-`cantorEvens w k = w (2k)` and `cantorOdds w k = w (2k+1)`, matching `cantorJoin`, which puts its
-first argument on the even positions. For a string `ρ` of length `ℓ`, `evenBits ρ` has length
-`⌈ℓ/2⌉` and `oddBits ρ` has length `⌊ℓ/2⌋`. Measures are in `ℝ≥0∞`; the Fubini formula needs only
+The definitions `cantorEvens`, `cantorOdds`, `evenBits`, `oddBits` and `jointSet` are in
+`VanLambalgen/Auxiliary/Defs.lean`. Measures are in `ℝ≥0∞`; the Fubini formula needs only
 s-finiteness of the second factor, as Mathlib's `Measure.prod_apply`.
 
 ## Main declarations
 
-* `cantorEvens`, `cantorOdds`, `evenBits`, `oddBits` (blueprint node `vl:halves`): the two halves
-  of a sequence and of a string.
+* `cantorEvens_cantorJoin`, `cantorOdds_cantorJoin`, `primrec_evenBits`, `primrec_oddBits`
+  (blueprint node `vl:halves`): the halves of an interleaving, and computability of the halves of
+  a string.
 * `mem_cantorCylinder_iff_halves` (blueprint node `vl:halves`): `w ∈ [ρ]` iff the halves of `w`
   lie in the cylinders of the halves of `ρ`.
-* `jointSet` (blueprint node `vl:joint-set`): the set `{z ⊕ y | y ∈ T z}` of a family `T`.
+* `cantorJoin_mem_jointSet` (blueprint node `vl:joint-set`): `z ⊕ y ∈ jointSet T ↔ y ∈ T z`.
 * `joinMeasure_jointSet` (blueprint node `vl:joint-fubini`): its joined product measure is
   `∫⁻ z, ν (T z) ∂μ`.
 
@@ -42,12 +42,6 @@ namespace Kolmogorov
 open MeasureTheory
 
 /-! ### Halves of sequences -/
-
-/-- The even half of a sequence: `cantorEvens w k = w (2k)`. Blueprint node `vl:halves`. -/
-def cantorEvens (w : CantorSeq) : CantorSeq := fun k => w (2 * k)
-
-/-- The odd half of a sequence: `cantorOdds w k = w (2k+1)`. Blueprint node `vl:halves`. -/
-def cantorOdds (w : CantorSeq) : CantorSeq := fun k => w (2 * k + 1)
 
 /-- The even half of an interleaving is its first component. Blueprint node `vl:halves`. -/
 @[simp] theorem cantorEvens_cantorJoin (x y : CantorSeq) : cantorEvens (cantorJoin x y) = x := by
@@ -75,16 +69,6 @@ private theorem cantorJoin_cantorEvens_cantorOdds (w : CantorSeq) :
     omega
 
 /-! ### Halves of strings -/
-
-/-- The even half of a string: its entries at the positions `0, 2, 4, …`, a string of length
-`⌈|ρ|/2⌉`. Blueprint node `vl:halves`. -/
-def evenBits (ρ : BitString) : BitString :=
-  (List.range ((ρ.length + 1) / 2)).map fun k => ρ.getD (2 * k) false
-
-/-- The odd half of a string: its entries at the positions `1, 3, 5, …`, a string of length
-`⌊|ρ|/2⌋`. Blueprint node `vl:halves`. -/
-def oddBits (ρ : BitString) : BitString :=
-  (List.range (ρ.length / 2)).map fun k => ρ.getD (2 * k + 1) false
 
 /-- Taking the even half of a string is primitive recursive. Blueprint node `vl:halves`. -/
 theorem primrec_evenBits : Primrec evenBits :=
@@ -160,12 +144,6 @@ theorem oddBits_cantorPrefix (w : CantorSeq) (L : ℕ) :
     rfl
 
 /-! ### Sets of pairs and their joined product measure -/
-
-/-- The set of interleavings `z ⊕ y` with `y ∈ T z`, written through the halves: a sequence `w`
-belongs to it when `cantorOdds w ∈ T (cantorEvens w)`. For `T` constantly empty it is empty.
-Blueprint node `vl:joint-set`. -/
-def jointSet (T : CantorSeq → Set CantorSeq) : Set CantorSeq :=
-  {w | cantorOdds w ∈ T (cantorEvens w)}
 
 /-- An interleaving `z ⊕ y` lies in `jointSet T` exactly when `y ∈ T z`.
 Blueprint node `vl:joint-set`. -/

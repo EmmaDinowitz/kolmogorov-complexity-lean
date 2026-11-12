@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Defs
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Auxiliary.Defs
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Join
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Halves
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.OracleUniform
@@ -19,6 +20,8 @@ first coordinate is random and its second is random relative to the first (bluep
 `docs/BLUEPRINT.md`, nodes `vl:*`).
 
 * `Defs` — the interleaving `cantorJoin` and the joined product measure `joinMeasure`.
+* `Auxiliary/Defs` — the definitions the proofs use (halves, joint sets, oracle-uniform
+  families, uniform trimming, discard sets); none appears in a main statement.
 * `Join` — the oracle and the total mass of an interleaving, the uniform case, the swap.
 * `Halves` — the even and odd halves of sequences and strings, joint sets `{z ⊕ y | y ∈ T z}`
   and their joined product measure (Fubini).

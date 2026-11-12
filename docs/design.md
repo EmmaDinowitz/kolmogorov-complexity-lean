@@ -87,10 +87,7 @@ cost time, numerical checks, abandoned approaches. Read at the start of every se
   definitions with a classical `if k ∈ A` must be `noncomputable`.
 * **Mechanical-cut gate.** Two private helpers in `OracleUniform/Trim.lean` whose index-bound
   hypotheses were discharged by `omega` at their single call site were inlined into their callers.
-* **Open layout question.** The infrastructure definitions (`IsOracleUniformIn`, `uniformEnum`,
-  `uniformFamily`, `jointSet`, `cantorEvens`, `cantorOdds`, `evenBits`, `oddBits`, `sectionEnum`,
-  `trimUniform`, `discardSet`) live next to their lemmas, not in a protected `Defs.lean`;
-  pending the author's decision.
+* **Layout of the proof definitions** (resolved later the same day, see below).
 
 ## 2026-11-12 — phase 2: countable products
 
@@ -116,3 +113,17 @@ cost time, numerical checks, abandoned approaches. Read at the start of every se
   `Join.lean`, `Directions/Left.lean` and `Countable/Split.lean`.
 * **Possible later cleanup.** The swap of `Join.lean` is an instance of `vl:permute` (an
   involution); its proof could be shortened by moving `vl:permute` to `Relative/Pullback.lean`.
+
+## 2026-11-12 — layout cleanup
+
+* **Proof definitions in a protected file.** At the author's request the definitions the proofs
+  use (`cantorEvens`, `cantorOdds`, `evenBits`, `oddBits`, `jointSet`, `IsOracleUniformIn`,
+  `uniformEnum`, `uniformFamily`, `sectionEnum`, `trimUniform`, `discardSet`) moved to
+  `VanLambalgen/Auxiliary/Defs.lean`. The finite-list helpers of `trimUniform` were private in
+  `OracleUniform/Trim.lean`; a definition in another file cannot use private names, so they are
+  public, in the namespace `Kolmogorov.TrimUniform` to keep generic names (`listEnum`,
+  `localDisj`, …) out of the main namespace. Purely proof-local encodings (stage decoders,
+  index maps such as `swapIndex`, `splitIndex`) stay private next to their lemmas.
+* **`vl:permute` moved to `Relative/Pullback.lean`**, next to `preimage_precomp`, and the swap
+  `vl:swap` is now its instance with the self-inverse `swapIndex` (the hand-written pullback of
+  tests in `Join.lean` is gone).

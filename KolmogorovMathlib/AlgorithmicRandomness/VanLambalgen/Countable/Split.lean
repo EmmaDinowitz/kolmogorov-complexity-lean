@@ -24,7 +24,8 @@ coordinates, reindexed (`cantorPiJoinSkip`), is Turing equivalent to the infinit
 The measures `μ i` are probability measures, so that `Measure.infinitePi μ` is their product.
 Randomness is `IsMartinLofRandomIn`, relative to an arbitrary oracle `A`. A permutation of
 positions acts on sequences by precomposition, `w ↦ w ∘ π`, and on measures by `Measure.map` of
-that map.
+that map; its invariance (`isMartinLofRandomIn_map_precomp_iff`, blueprint node `vl:permute`) is
+in `Relative/Pullback.lean`.
 
 The permutation splitting off the `i`-th coordinate sends the even position `2m` to the position
 `pair (skipIndex i a) b` of the infinite join, where `(a, b) = unpair m`, and the odd position
@@ -36,9 +37,6 @@ The permutation splitting off the `i`-th coordinate sends the even position `2m`
 * `exists_cantorPiJoin_eq` (blueprint node `vl:pi-join`): every sequence is an infinite join.
 * `isProbabilityMeasure_piJoinMeasure` (blueprint node `vl:pi-join-measure`): the countable product
   of probability measures is a probability measure.
-* `isMartinLofRandomIn_map_precomp_iff` (blueprint node `vl:permute`): randomness is invariant
-  under precomposition with a primitive recursive map of positions that has a primitive recursive
-  right inverse, the measure being carried along.
 * `isMartinLofRandomIn_cantorPiJoin_iff_split` (blueprint node `vl:pi-split`): `⊕ⱼ xⱼ` is random for
   `piJoinMeasure μ` exactly when `(⊕_{j ≠ i} xⱼ) ⊕ xᵢ` is random for the joined product.
 * `isMartinLofRandomIn_oracleJoin_cantorPiJoinSkip_iff`,
@@ -72,39 +70,6 @@ measure. Blueprint node `vl:pi-join-measure`. -/
 instance isProbabilityMeasure_piJoinMeasure [∀ i, IsProbabilityMeasure (μ i)] :
     IsProbabilityMeasure (piJoinMeasure μ) :=
   inferInstanceAs (IsProbabilityMeasure ((Measure.infinitePi μ).map cantorPiJoin))
-
-/-! ### Invariance of randomness under a computable permutation of positions -/
-
-/-- Randomness is invariant under a computable permutation of positions: if `π` is primitive
-recursive and has a primitive recursive right inverse `σ`, then `z` is random for `ν` relative to
-`A` exactly when `z ∘ π` is random relative to `A` for the image of `ν` under `w ↦ w ∘ π`.
-Blueprint node `vl:permute`. -/
-theorem isMartinLofRandomIn_map_precomp_iff {π σ : ℕ → ℕ} (hπ : Primrec π) (hσ : Primrec σ)
-    (hπσ : Function.LeftInverse π σ) {ν : Measure CantorSeq} {z : CantorSeq} :
-    IsMartinLofRandomIn A ν z ↔ IsMartinLofRandomIn A (ν.map fun w => w ∘ π) (z ∘ π) := by
-  have hm : ∀ ρ : ℕ → ℕ, Measurable fun w : CantorSeq => w ∘ ρ :=
-    fun _ => Measurable.of_eval fun _ => measurable_pi_apply _
-  have hid : ((fun w : CantorSeq => w ∘ σ) ∘ fun w => w ∘ π) = id :=
-    funext fun w => by
-      simp only [Function.comp_apply, Function.comp_assoc, hπσ.comp_eq_id, Function.comp_id,
-        id_eq]
-  constructor
-  · intro h U hU hz
-    refine h (fun n => (fun w : CantorSeq => w ∘ π) ⁻¹' U n)
-      ⟨hU.1.preimage_precomp hπ, fun n => ?_⟩ ?_
-    · rw [← Measure.map_apply (hm π) (hU.1.measurableSet n)]
-      exact hU.2 n
-    · simpa only [Set.mem_iInter, Set.mem_preimage] using hz
-  · intro h U hU hz
-    refine h (fun n => (fun w : CantorSeq => w ∘ σ) ⁻¹' U n)
-      ⟨hU.1.preimage_precomp hσ, fun n => ?_⟩ ?_
-    · rw [Measure.map_apply (hm π) (hm σ (hU.1.measurableSet n)), ← Set.preimage_comp, hid,
-        Set.preimage_id]
-      exact hU.2 n
-    · simp only [Set.mem_iInter, Set.mem_preimage] at hz ⊢
-      intro n
-      rw [Function.comp_assoc, hπσ.comp_eq_id, Function.comp_id]
-      exact hz n
 
 /-! ### Index maps -/
 

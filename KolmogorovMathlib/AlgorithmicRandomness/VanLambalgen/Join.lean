@@ -144,40 +144,31 @@ private lemma cantorJoin_comp_swapIndex (x y : CantorSeq) :
     have h2 : (n - 1) / 2 = n / 2 := by omega
     simp only [h, h1, h2, ↓reduceIte]
 
-/-- Pulling back along the exchange of even and odd positions turns `joinMeasure ν μ` into
-`joinMeasure μ ν`. -/
-private lemma joinMeasure_preimage_swap [SFinite μ] [SFinite ν] {S : Set CantorSeq}
-    (hS : MeasurableSet S) :
-    joinMeasure μ ν ((fun z : CantorSeq => z ∘ swapIndex) ⁻¹' S) = joinMeasure ν μ S := by
+private lemma swapIndex_swapIndex : Function.LeftInverse swapIndex swapIndex := fun n => by
+  unfold swapIndex
+  split_ifs <;> omega
+
+/-- The exchange of even and odd positions carries `joinMeasure μ ν` to `joinMeasure ν μ`. -/
+private lemma map_joinMeasure_swap [SFinite μ] [SFinite ν] :
+    (joinMeasure μ ν).map (fun z : CantorSeq => z ∘ swapIndex) = joinMeasure ν μ := by
   have hs : Measurable fun z : CantorSeq => z ∘ swapIndex :=
     Measurable.of_eval fun _ => measurable_pi_apply _
-  rw [joinMeasure, joinMeasure, Measure.map_apply measurable_cantorJoin (hs hS),
-    Measure.map_apply measurable_cantorJoin hS, ← Measure.prod_swap (μ := μ) (ν := ν),
+  ext S hS
+  rw [Measure.map_apply hs hS, joinMeasure, joinMeasure,
+    Measure.map_apply measurable_cantorJoin (hs hS), Measure.map_apply measurable_cantorJoin hS,
+    ← Measure.prod_swap (μ := μ) (ν := ν),
     Measure.map_apply measurable_swap (measurable_cantorJoin hS)]
   congr 1
   ext ⟨x, y⟩
-  simp only [Set.mem_preimage, Prod.swap_prod_mk,
-    cantorJoin_comp_swapIndex]
-
-/-- One direction of `isMartinLofRandomIn_joinMeasure_swap`: a test for `joinMeasure ν μ` pulls
-back along the exchange of even and odd positions to a test for `joinMeasure μ ν`. -/
-private lemma IsMartinLofRandomIn.joinMeasure_swap [SFinite μ] [SFinite ν] {x y : CantorSeq}
-    (h : IsMartinLofRandomIn A (joinMeasure μ ν) (cantorJoin x y)) :
-    IsMartinLofRandomIn A (joinMeasure ν μ) (cantorJoin y x) := by
-  intro U hU hmem
-  refine h (fun n => (fun z : CantorSeq => z ∘ swapIndex) ⁻¹' U n)
-    ⟨hU.1.preimage_precomp primrec_swapIndex, fun n => ?_⟩ ?_
-  · rw [joinMeasure_preimage_swap (hU.1.measurableSet n)]
-    exact hU.2 n
-  · simp only [Set.mem_iInter, Set.mem_preimage, cantorJoin_comp_swapIndex] at hmem ⊢
-    exact hmem
+  simp only [Set.mem_preimage, Prod.swap_prod_mk, cantorJoin_comp_swapIndex]
 
 /-- Exchanging the two factors preserves randomness: `x ⊕ y` is random for `joinMeasure μ ν`
 relative to `A` exactly when `y ⊕ x` is random for `joinMeasure ν μ` relative to `A`.
 Blueprint node `vl:swap`. -/
 theorem isMartinLofRandomIn_joinMeasure_swap [SFinite μ] [SFinite ν] {x y : CantorSeq} :
     IsMartinLofRandomIn A (joinMeasure μ ν) (cantorJoin x y) ↔
-      IsMartinLofRandomIn A (joinMeasure ν μ) (cantorJoin y x) :=
-  ⟨IsMartinLofRandomIn.joinMeasure_swap, IsMartinLofRandomIn.joinMeasure_swap⟩
+      IsMartinLofRandomIn A (joinMeasure ν μ) (cantorJoin y x) := by
+  rw [isMartinLofRandomIn_map_precomp_iff primrec_swapIndex primrec_swapIndex swapIndex_swapIndex,
+    map_joinMeasure_swap, cantorJoin_comp_swapIndex]
 
 end Kolmogorov

@@ -31,15 +31,16 @@ extending `σ`.
 ## Conventions
 
 The trimmed family is listed by `trimUniform a g` at the level `Nat.pair n L`: `n` is the level
-of the original family and `L` the trimming level. Measures are in `ℝ≥0∞`, the bound `2^{-L}` is
-`dyadicValue 1 L`, and `2^{-(L+2)}` is written `(2 : ℝ≥0∞)⁻¹ ^ (L + 2)`, as in `Trim.lean`.
+of the original family and `L` the trimming level. `trimUniform`, its finite-list helpers
+(namespace `TrimUniform`) and `discardSet` are defined in `VanLambalgen/Auxiliary/Defs.lean`.
+Measures are in `ℝ≥0∞`, the bound `2^{-L}` is `dyadicValue 1 L`, and `2^{-(L+2)}` is written
+`(2 : ℝ≥0∞)⁻¹ ^ (L + 2)`, as in `Trim.lean`.
 
 ## Main declarations
 
-* `trimUniform` (blueprint node `vl:uniform-trim`): the trimmed oracle-uniform listing.
 * `isOracleUniformIn_trimUniform`, `measure_uniformFamily_trimUniform_le`,
   `uniformFamily_trimUniform_of_not_mem` (blueprint node `vl:uniform-trim`).
-* `discardSet`, `isUniformlyEffectiveOpenIn_discardSet`, `lt_measure_of_mem_discardSet`
+* `isUniformlyEffectiveOpenIn_discardSet`, `lt_measure_of_mem_discardSet`
   (blueprint node `vl:discard`): the oracles at which trimming discards something.
 
 Used by the directions `vl:snd` and `vl:converse` in
@@ -48,7 +49,7 @@ Used by the directions `vl:snd` and `vl:converse` in
 
 namespace Kolmogorov
 
-open MeasureTheory ENNReal
+open MeasureTheory ENNReal TrimUniform
 
 variable {A : Set ℕ} {ν : Measure CantorSeq} {a : BitString → ℕ → ℕ}
   {g : BitString → ℕ → ℕ → Option BitString}
@@ -105,34 +106,6 @@ private theorem trimAccept_congr {w w' : ℕ → ℕ} {k : ℕ} (h : ∀ j ≤ k
   rw [trimPartial_congr (k := k) fun j hj => h j hj.le, h k le_rfl]
 
 /-! ### The trimmed listing at a finite oracle prefix -/
-
-/-- A finite list of optional strings read as an enumeration, empty beyond its length. -/
-private def listEnum (l : List (Option BitString)) (i : ℕ) : Option BitString := l.getD i none
-
-/-- The first `N` entries of the enumeration of level `n` at the oracle prefix `σ`. -/
-private def prefixEnumList (g : BitString → ℕ → ℕ → Option BitString) (σ : BitString)
-    (n N : ℕ) : List (Option BitString) :=
-  (List.range N).map fun j => g (σ.take (Nat.unpair j).1) n (Nat.unpair j).2
-
-/-- The first `N` entries of the disjointification of `prefixEnumList`. -/
-private def disjList (g : BitString → ℕ → ℕ → Option BitString) (σ : BitString) (n N : ℕ) :
-    List (Option BitString) :=
-  (List.range N).map (disjEnum (listEnum (prefixEnumList g σ n N)))
-
-/-- The first `N` trimming weights of `disjList`, at the trimming level `L`. -/
-private def weightList (a : BitString → ℕ → ℕ) (g : BitString → ℕ → ℕ → Option BitString)
-    (σ : BitString) (n L N : ℕ) : List ℕ :=
-  (List.range N).map (trimWeight a (listEnum (disjList g σ n N)) L)
-
-/-- The disjointified entry at index `j`, computed at the oracle prefix `σ`. -/
-private def localDisj (g : BitString → ℕ → ℕ → Option BitString) (σ : BitString) (n j : ℕ) :
-    Option BitString :=
-  listEnum (disjList g σ n (j + 1)) j
-
-/-- The trimming decision at index `j`, computed at the oracle prefix `σ`. -/
-private def localAccept (a : BitString → ℕ → ℕ) (g : BitString → ℕ → ℕ → Option BitString)
-    (σ : BitString) (n L j : ℕ) : Bool :=
-  trimAccept (fun k => (weightList a g σ n L (j + 1)).getD k 0) j
 
 /-- Below the length of the oracle prefix, `disjList` lists the disjointified enumeration at the
 oracle. -/
@@ -250,17 +223,6 @@ private theorem computableIn_localData (ha : ComputableIn₂ {charOracle A} a)
 
 /-! ### The trimmed family -/
 
-/-- The trimmed oracle-uniform listing at the level `Nat.pair n L`: at the oracle prefix `σ` and
-index `j ≤ |σ|` it lists the `j`-th disjointified entry of level `n` if the trimming at level `L`
-accepts it, and nothing otherwise; at indices `j > |σ|` it lists nothing.
-Blueprint node `vl:uniform-trim`. -/
-def trimUniform (a : BitString → ℕ → ℕ) (g : BitString → ℕ → ℕ → Option BitString) :
-    BitString → ℕ → ℕ → Option BitString :=
-  fun σ m j =>
-    bif decide (j ≤ σ.length) && localAccept a g σ (Nat.unpair m).1 (Nat.unpair m).2 j then
-      localDisj g σ (Nat.unpair m).1 j
-    else none
-
 /-- The trimmed listing is oracle-uniform relative to `A`.
 Blueprint node `vl:uniform-trim`. -/
 theorem isOracleUniformIn_trimUniform (ha : ComputableIn₂ {charOracle A} a)
@@ -326,13 +288,6 @@ theorem measure_uniformFamily_trimUniform_le
   exact measure_iUnion_trimEnum_le ha _ L
 
 /-! ### The discard set -/
-
-/-- The oracles at which the trimming of level `n` at the trimming level `L` rejects some nonempty
-entry of the disjointified enumeration. Blueprint node `vl:discard`. -/
-def discardSet (a : BitString → ℕ → ℕ) (g : BitString → ℕ → ℕ → Option BitString)
-    (n L : ℕ) : Set CantorSeq :=
-  {z | ∃ j, disjEnum (uniformEnum g z n) j ≠ none ∧
-    trimAccept (trimWeight a (disjEnum (uniformEnum g z n)) L) j = false}
 
 /-- At an oracle outside the discard set, the
 trimmed family is the original family. Blueprint node `vl:uniform-trim`. -/

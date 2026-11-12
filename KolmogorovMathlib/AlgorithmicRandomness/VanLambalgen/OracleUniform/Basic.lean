@@ -30,21 +30,22 @@ oracle-uniform family (`isOracleUniformIn_sectionEnum`, `uniformFamily_sectionEn
 
 Oracles are sets of natural numbers queried through `charOracle`; `A ⊕ x` is
 `PointToSet.oracleJoin A (seqOracle x)`. In `uniformEnum g z n j` the index `j` codes the pair
-`(k, i)` by `Nat.pair`: the string `g (cantorPrefix z k) n i` is enumerated. No monotonicity of
-`g` in its string argument is required. The general list lemma `computableIn_list_range_map`
+`(k, i)` by `Nat.pair`: the string `g (cantorPrefix z k) n i` is enumerated. The definitions
+`IsOracleUniformIn`, `uniformEnum`, `uniformFamily` and `sectionEnum` are in
+`VanLambalgen/Auxiliary/Defs.lean`. The general list lemma `computableIn_list_range_map`
 (mapping a relatively computable function over `List.range N`) is proved here because the
 relative computability API of `AlgorithmicRandomness/OracleComputability.lean` has no list
 operations.
 
 ## Main declarations
 
-* `IsOracleUniformIn`, `uniformEnum`, `uniformFamily` (blueprint node `vl:oracle-uniform`): the
-  computability condition, the enumeration at an oracle, and the family.
+* `IsOracleUniformIn.reindex` (blueprint node `vl:oracle-uniform`): a computable change of levels
+  preserves oracle-uniformity.
 * `IsOracleUniformIn.isUniformlyEffectiveOpenIn_jointSet` (blueprint node `vl:oracle-uniform`):
   joint sets of an oracle-uniform family are uniformly effectively open relative to `A`.
 * `IsOracleUniformIn.isUniformlyEffectiveOpenIn_uniformFamily` (blueprint node
   `vl:oracle-uniform`): the family at `x` is uniformly effectively open relative to `A ⊕ x`.
-* `sectionEnum`, `uniformFamily_sectionEnum`, `isOracleUniformIn_sectionEnum` (blueprint node
+* `uniformFamily_sectionEnum`, `isOracleUniformIn_sectionEnum` (blueprint node
   `vl:sections`): sections of an effectively open set form an oracle-uniform family.
 * `computableIn_list_range_map` (blueprint node `vl:oracle-uniform`): relative computability of
   `fun a N => (List.range N).map (f a)`.
@@ -85,25 +86,6 @@ theorem computableIn_list_range_map {O : Set (ℕ →. ℕ)} {α β : Type*} [Pr
       congrArg (fun l : List β => l ++ [f a N]) ih
 
 /-! ### Oracle-uniform families -/
-
-/-- A function listing strings for every finite oracle prefix `σ`, level `n` and stage `i` is
-oracle-uniform relative to `A` when it is computable relative to `A` as a function of the triple.
-Blueprint node `vl:oracle-uniform`. -/
-def IsOracleUniformIn (A : Set ℕ) (g : BitString → ℕ → ℕ → Option BitString) : Prop :=
-  ComputableIn {charOracle A} fun p : BitString × ℕ × ℕ => g p.1 p.2.1 p.2.2
-
-/-- The enumeration of the member of level `n` at the oracle sequence `z`: at the index coding
-`(k, i)` it lists `g (cantorPrefix z k) n i`. Blueprint node `vl:oracle-uniform`. -/
-def uniformEnum (g : BitString → ℕ → ℕ → Option BitString) (z : CantorSeq) (n : ℕ) :
-    ℕ → Option BitString :=
-  fun j => g (cantorPrefix z (Nat.unpair j).1) n (Nat.unpair j).2
-
-/-- The member of level `n` at the oracle sequence `z` of the family listed by `g`: the union of
-the cylinders `g σ n i` over the prefixes `σ` of `z`. It is empty when `g` lists nothing.
-Blueprint node `vl:oracle-uniform`. -/
-def uniformFamily (g : BitString → ℕ → ℕ → Option BitString) (z : CantorSeq) (n : ℕ) :
-    Set CantorSeq :=
-  ⋃ j, coverSet (uniformEnum g z n) j
 
 /-- An oracle-uniform function stays oracle-uniform after a computable change of levels.
 Blueprint node `vl:oracle-uniform`. -/
@@ -278,12 +260,6 @@ theorem IsOracleUniformIn.isUniformlyEffectiveOpenIn_uniformFamily
         (ComputableIn.fst.pair (ComputableIn.snd.comp hu.computableIn)))).of_eq fun _ => rfl
 
 /-! ### Sections of an effectively open set -/
-
-/-- The oracle-uniform listing of the sections `{y | z ⊕ y ∈ W m}` of a set `W` listed by `f`:
-for the oracle prefix `σ`, level `m` and stage `i` it lists `oddBits ρ` when `f m i = some ρ`
-and `evenBits ρ = σ`, and nothing otherwise. Blueprint node `vl:sections`. -/
-def sectionEnum (f : ℕ → ℕ → Option BitString) : BitString → ℕ → ℕ → Option BitString :=
-  fun σ m i => (f m i).bind fun ρ => bif decide (evenBits ρ = σ) then some (oddBits ρ) else none
 
 /-- The family listed by `sectionEnum f` at the oracle `z` is the family of sections at `z` of the
 open sets listed by `f`. Blueprint node `vl:sections`. -/

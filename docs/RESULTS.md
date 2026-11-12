@@ -813,9 +813,10 @@ KolmogorovMathlib/AlgorithmicRandomness/
 ├── Relative.lean, Relative/          # Martin-Löf randomness relative to an oracle
 │   ├── Defs.lean                     #   seqOracle, relative effective openness, computable measures, tests, randomness
 │   ├── Basic.lean                    #   oracle monotonicity, the empty oracle, almost every sequence is random
-│   └── Pullback.lean                 #   pullback of relatively effectively open families
+│   └── Pullback.lean                 #   pullback of relatively effectively open families, permutation invariance
 └── VanLambalgen.lean, VanLambalgen/  # van Lambalgen's theorem
     ├── Defs.lean                     #   cantorJoin, joinMeasure
+    ├── Auxiliary/Defs.lean           #   definitions used only in the proofs (halves, oracle-uniform families, trimming)
     ├── Join.lean                     #   oracle and mass of an interleaving, the uniform case, the swap
     ├── Halves.lean                   #   even and odd halves, joint sets, Fubini for joint sets
     ├── OracleUniform.lean, OracleUniform/
@@ -824,7 +825,7 @@ KolmogorovMathlib/AlgorithmicRandomness/
     │   └── Trim.lean                 #     trimming uniformly in the oracle, discard sets
     ├── Countable.lean, Countable/
     │   ├── Defs.lean                 #     cantorPiJoin, piJoinMeasure, the oracles of other and earlier coordinates
-    │   └── Split.lean                #     permutation invariance, splitting one coordinate off, oracle reductions
+    │   └── Split.lean                #     splitting one coordinate off, oracle reductions
     ├── Directions.lean, Directions/
     │   ├── Left.lean                 #     random pair ⇒ random first coordinate
     │   ├── Right.lean                #     random pair ⇒ second coordinate random relative to the first

@@ -15,7 +15,9 @@ This is the relativized form of `isUniformlyEffectiveOpen_pullback`
 (`AlgorithmicRandomness/RandomnessConservation.lean`), with the single cylinder there replaced by a
 computably enumerated union. The main instance is precomposition `z ↦ z ∘ π` with a primitive
 recursive `π : ℕ → ℕ`, which covers the coordinate maps of the van Lambalgen theorem (the even
-part of a sequence, the exchange of even and odd positions).
+part of a sequence, the exchange of even and odd positions). When `π` has a primitive recursive
+right inverse, precomposition preserves randomness in both directions, the measure being carried
+along.
 
 ## Conventions
 
@@ -33,6 +35,9 @@ original family uses `A`.
   computably enumerated unions of cylinders preserves uniform effective openness relative to `A`.
 * `IsUniformlyEffectiveOpenIn.preimage_precomp`: the same for precomposition `z ↦ z ∘ π` with a
   primitive recursive `π`.
+* `isMartinLofRandomIn_map_precomp_iff` (blueprint node `vl:permute`): randomness is invariant
+  under precomposition with a primitive recursive map of positions that has a primitive recursive
+  right inverse, the measure being carried along.
 
 Used by `AlgorithmicRandomness/VanLambalgen/Join.lean`,
 `AlgorithmicRandomness/VanLambalgen/Directions/` and
@@ -163,5 +168,38 @@ theorem IsUniformlyEffectiveOpenIn.preimage_precomp (hU : IsUniformlyEffectiveOp
     {π : ℕ → ℕ} (hπ : Primrec π) :
     IsUniformlyEffectiveOpenIn A fun n => (fun z : CantorSeq => z ∘ π) ⁻¹' U n :=
   hU.preimage (primrec_precompCover hπ).to_comp (preimage_precomp_cantorCylinder π)
+
+/-! ### Invariance of randomness under a computable permutation of positions -/
+
+/-- Randomness is invariant under a computable permutation of positions: if `π` is primitive
+recursive and has a primitive recursive right inverse `σ`, then `z` is random for `ν` relative to
+`A` exactly when `z ∘ π` is random relative to `A` for the image of `ν` under `w ↦ w ∘ π`.
+Blueprint node `vl:permute`. -/
+theorem isMartinLofRandomIn_map_precomp_iff {π σ : ℕ → ℕ} (hπ : Primrec π) (hσ : Primrec σ)
+    (hπσ : Function.LeftInverse π σ) {ν : Measure CantorSeq} {z : CantorSeq} :
+    IsMartinLofRandomIn A ν z ↔ IsMartinLofRandomIn A (ν.map fun w => w ∘ π) (z ∘ π) := by
+  have hm : ∀ ρ : ℕ → ℕ, Measurable fun w : CantorSeq => w ∘ ρ :=
+    fun _ => Measurable.of_eval fun _ => measurable_pi_apply _
+  have hid : ((fun w : CantorSeq => w ∘ σ) ∘ fun w => w ∘ π) = id :=
+    funext fun w => by
+      simp only [Function.comp_apply, Function.comp_assoc, hπσ.comp_eq_id, Function.comp_id,
+        id_eq]
+  constructor
+  · intro h U hU hz
+    refine h (fun n => (fun w : CantorSeq => w ∘ π) ⁻¹' U n)
+      ⟨hU.1.preimage_precomp hπ, fun n => ?_⟩ ?_
+    · rw [← Measure.map_apply (hm π) (hU.1.measurableSet n)]
+      exact hU.2 n
+    · simpa only [Set.mem_iInter, Set.mem_preimage] using hz
+  · intro h U hU hz
+    refine h (fun n => (fun w : CantorSeq => w ∘ σ) ⁻¹' U n)
+      ⟨hU.1.preimage_precomp hσ, fun n => ?_⟩ ?_
+    · rw [Measure.map_apply (hm π) (hm σ (hU.1.measurableSet n)), ← Set.preimage_comp, hid,
+        Set.preimage_id]
+      exact hU.2 n
+    · simp only [Set.mem_iInter, Set.mem_preimage] at hz ⊢
+      intro n
+      rw [Function.comp_assoc, hπσ.comp_eq_id, Function.comp_id]
+      exact hz n
 
 end Kolmogorov
