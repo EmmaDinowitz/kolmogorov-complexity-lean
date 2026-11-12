@@ -3,8 +3,9 @@ Copyright (c) 2026 Emma Dinowitz. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
-import KolmogorovMathlib.AlgorithmicRandomness.Relative.Basic
-import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Defs
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Directions.Left
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Directions.Right
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Directions.Converse
 
 /-!
 # The three directions of the van Lambalgen theorem
@@ -36,37 +37,6 @@ only. Accordingly `vl:fst` assumes `ν` finite, `vl:converse` assumes `ν` compu
 (which makes it finite), and `vl:snd` assumes in addition `μ` finite. No direction assumes `μ`
 computable.
 
-Used by `AlgorithmicRandomness/VanLambalgen/MainResults.lean`.
+The proofs are in `Directions/Left.lean`, `Directions/Right.lean` and
+`Directions/Converse.lean`. Used by `AlgorithmicRandomness/VanLambalgen/MainResults.lean`.
 -/
-
-namespace Kolmogorov
-
-open MeasureTheory ENNReal
-open PointToSet (oracleJoin)
-
-variable {A : Set ℕ} {μ ν : Measure CantorSeq} {x y : CantorSeq}
-
-/-- If the interleaving `x ⊕ y` is random for `joinMeasure μ ν` relative to `A`, then `x` is
-random for `μ` relative to `A`. Blueprint node `vl:fst`. -/
-theorem IsMartinLofRandomIn.left_of_cantorJoin [IsFiniteMeasure ν]
-    (h : IsMartinLofRandomIn A (joinMeasure μ ν) (cantorJoin x y)) :
-    IsMartinLofRandomIn A μ x := by
-  sorry -- blueprint node `vl:fst`
-
-/-- If the interleaving `x ⊕ y` is random for `joinMeasure μ ν` relative to `A`, then `y` is
-random for `ν` relative to `A ⊕ x`. Blueprint node `vl:snd`. -/
-theorem IsMartinLofRandomIn.right_of_cantorJoin [IsFiniteMeasure μ]
-    (hν : IsComputableCantorMeasureIn A ν)
-    (h : IsMartinLofRandomIn A (joinMeasure μ ν) (cantorJoin x y)) :
-    IsMartinLofRandomIn (oracleJoin A (seqOracle x)) ν y := by
-  sorry -- blueprint node `vl:snd`
-
-/-- If `x` is random for `μ` relative to `A` and `y` is random for `ν` relative to `A ⊕ x`, then
-the interleaving `x ⊕ y` is random for `joinMeasure μ ν` relative to `A`.
-Blueprint node `vl:converse`. -/
-theorem IsMartinLofRandomIn.cantorJoin (hν : IsComputableCantorMeasureIn A ν)
-    (hx : IsMartinLofRandomIn A μ x) (hy : IsMartinLofRandomIn (oracleJoin A (seqOracle x)) ν y) :
-    IsMartinLofRandomIn A (joinMeasure μ ν) (cantorJoin x y) := by
-  sorry -- blueprint node `vl:converse`
-
-end Kolmogorov

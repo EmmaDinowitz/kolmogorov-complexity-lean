@@ -63,7 +63,7 @@ computable relative to the oracle `A`.
 
 | Node | Claim | Declaration | Mark | Reviewed |
 |---|---|---|---|---|
-| `vl:fst` | `x ⊕ y` random ⇒ `x` random (`ν` finite). | `IsMartinLofRandomIn.left_of_cantorJoin` | | |
+| `vl:fst` | `x ⊕ y` random ⇒ `x` random (`ν` finite). `Directions/Left.lean`. | `IsMartinLofRandomIn.left_of_cantorJoin` | | |
 | `vl:snd` | `x ⊕ y` random ⇒ `y` random relative to `A ⊕ x` (`μ` finite, `ν` `A`-computable). | `IsMartinLofRandomIn.right_of_cantorJoin` | | |
 | `vl:converse` | `x` random and `y` random relative to `A ⊕ x` ⇒ `x ⊕ y` random (`ν` `A`-computable). | `IsMartinLofRandomIn.cantorJoin` | | |
 
