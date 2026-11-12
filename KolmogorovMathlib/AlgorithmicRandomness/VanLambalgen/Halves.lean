@@ -32,8 +32,9 @@ s-finiteness of the second factor, as Mathlib's `Measure.prod_apply`.
 * `joinMeasure_jointSet` (blueprint node `vl:joint-fubini`): its joined product measure is
   `∫⁻ z, ν (T z) ∂μ`.
 
-Used by `AlgorithmicRandomness/VanLambalgen/OracleUniform/` and by the directions
-`vl:snd` and `vl:converse` in `AlgorithmicRandomness/VanLambalgen/Directions/`.
+Used by `AlgorithmicRandomness/VanLambalgen/OracleUniform/`, by the directions in
+`AlgorithmicRandomness/VanLambalgen/Directions/`, and by `VanLambalgen/Join.lean` and
+`VanLambalgen/Countable/Split.lean` (measurability of the interleaving).
 -/
 
 namespace Kolmogorov

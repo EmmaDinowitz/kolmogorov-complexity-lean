@@ -34,8 +34,9 @@ original family uses `A`.
 * `IsUniformlyEffectiveOpenIn.preimage_precomp`: the same for precomposition `z ↦ z ∘ π` with a
   primitive recursive `π`.
 
-Used by `AlgorithmicRandomness/VanLambalgen/Join.lean` and
-`AlgorithmicRandomness/VanLambalgen/Directions/Left.lean`.
+Used by `AlgorithmicRandomness/VanLambalgen/Join.lean`,
+`AlgorithmicRandomness/VanLambalgen/Directions/` and
+`AlgorithmicRandomness/VanLambalgen/Countable/Split.lean`.
 -/
 
 namespace Kolmogorov

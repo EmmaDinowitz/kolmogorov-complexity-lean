@@ -6,6 +6,7 @@ Authors: Emma Dinowitz
 import KolmogorovMathlib.AlgorithmicRandomness.Relative.Basic
 import KolmogorovMathlib.AlgorithmicRandomness.Relative.Pullback
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Defs
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Halves
 
 /-!
 # van Lambalgen: a random pair has a random first coordinate
@@ -40,13 +41,6 @@ theorem IsMartinLofRandomIn.left_of_cantorJoin [IsFiniteMeasure ν]
       hf.comp (Primrec.nat_add.comp Primrec.fst (Primrec.const c)).to_comp.computableIn
         ComputableIn.snd,
       fun n => hfU (n + c)⟩
-  have hjoin : Measurable fun p : CantorSeq × CantorSeq => cantorJoin p.1 p.2 := by
-    refine Measurable.of_eval fun n => ?_
-    by_cases h : n % 2 = 0
-    · simp only [cantorJoin, h, ↓reduceIte]
-      exact (measurable_pi_apply _).comp measurable_fst
-    · simp only [cantorJoin, h, ↓reduceIte]
-      exact (measurable_pi_apply _).comp measurable_snd
   have heven : Measurable fun z : CantorSeq => z ∘ (2 * ·) :=
     Measurable.of_eval fun _ => measurable_pi_apply _
   have hleft : ∀ x' y' : CantorSeq, cantorJoin x' y' ∘ (2 * ·) = x' := fun x' y' =>
@@ -57,7 +51,7 @@ theorem IsMartinLofRandomIn.left_of_cantorJoin [IsFiniteMeasure ν]
         ((fun z : CantorSeq => z ∘ (2 * ·)) ⁻¹' U (n + c)) = U (n + c) ×ˢ Set.univ := by
       ext ⟨x', y'⟩
       simp [hleft]
-    rw [joinMeasure, Measure.map_apply hjoin (heven (hUc.measurableSet n)), hpre,
+    rw [joinMeasure, Measure.map_apply measurable_cantorJoin (heven (hUc.measurableSet n)), hpre,
       Measure.prod_prod]
     calc μ (U (n + c)) * ν Set.univ ≤ dyadicValue 1 (n + c) * ((2 ^ c : ℕ) : ℝ≥0∞) :=
           mul_le_mul' (hU.2 (n + c)) hc

@@ -91,3 +91,28 @@ cost time, numerical checks, abandoned approaches. Read at the start of every se
   `uniformFamily`, `jointSet`, `cantorEvens`, `cantorOdds`, `evenBits`, `oddBits`, `sectionEnum`,
   `trimUniform`, `discardSet`) live next to their lemmas, not in a protected `Defs.lean`;
   pending the author's decision.
+
+## 2026-11-12 — phase 2: countable products
+
+* **Only the direction from the join to its coordinates.** The countable converse is false
+  (columns `xⱼ = 0ʲ zⱼ` of a random sequence: each coordinate random relative to the earlier ones,
+  the join in a computable null set), so it is recorded as not formalized, not stated.
+* **Reduction to the binary theorem.** Splitting coordinate `i` off is precomposition with the
+  primitive recursive position map `splitIndex i` (inverse `mergeIndex i`), proved
+  randomness-preserving once in general (`isMartinLofRandomIn_map_precomp_iff`, `vl:permute`).
+  The binary `vl:snd` then gives randomness relative to the reindexed other coordinates, and
+  `vl:pi-oracles` converts to the blanked form. Only `μ i` needs to be computable relative to `A`.
+* **Splitting the product measure.** Mathlib has no `infinitePi` over a sum or `Option` index type.
+  `infinitePi μ` is shown to be the image of `(infinitePi (μ ∘ skipIndex i)).prod (μ i)` under the
+  coordinate-insertion map by `Measure.eq_infinitePi` on boxes, with the box preimage written over
+  `(s.erase i).image unskip` (avoids injectivity side terms), then `Finset.prod_image`,
+  `Finset.prod_erase_mul`. `Measure.eq_infinitePi μ` and `Measure.infinitePi_pi _` take `μ`
+  explicitly; `Measurable.prodMap` is the current name; there is no `isProbabilityMeasure_map`
+  lemma (use `inferInstanceAs`).
+* **Oracle reductions with constant answers.** Queries answered by `false` use
+  `PartrecIn.cond_some` with `ComputableIn.const 0`, then `PartrecIn.of_eq`, combined with
+  `oracle_joins_least` / `oracle_joins`.
+* **Dedup.** `measurable_cantorJoin` (public, `Halves.lean`) replaces three private copies in
+  `Join.lean`, `Directions/Left.lean` and `Countable/Split.lean`.
+* **Possible later cleanup.** The swap of `Join.lean` is an instance of `vl:permute` (an
+  involution); its proof could be shortened by moving `vl:permute` to `Relative/Pullback.lean`.

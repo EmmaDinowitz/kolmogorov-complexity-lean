@@ -6,6 +6,7 @@ Authors: Emma Dinowitz
 import KolmogorovMathlib.AlgorithmicRandomness.Relative.Basic
 import KolmogorovMathlib.AlgorithmicRandomness.Relative.Pullback
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Defs
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Halves
 
 /-!
 # Interleaving: oracles, the uniform measure and the swap
@@ -65,15 +66,6 @@ theorem exists_cantorJoin_eq (z : CantorSeq) : ∃ x y, cantorJoin x y = z := by
     omega
 
 /-! ### The joined product measure -/
-
-private lemma measurable_cantorJoin :
-    Measurable fun p : CantorSeq × CantorSeq => cantorJoin p.1 p.2 := by
-  refine Measurable.of_eval fun n => ?_
-  by_cases h : n % 2 = 0
-  · simp only [cantorJoin, h, ↓reduceIte]
-    exact (measurable_pi_apply _).comp measurable_fst
-  · simp only [cantorJoin, h, ↓reduceIte]
-    exact (measurable_pi_apply _).comp measurable_snd
 
 /-- The total mass of the joined product is the product of the total masses.
 Blueprint node `vl:join-measure`. -/

@@ -761,6 +761,12 @@ theorems are in the namespace `Kolmogorov`.
   to `x`.
 * **Non-vacuousness** `exists_isMartinLofRandomIn_cantorJoin`: for nonzero measures both sides hold
   for some pair.
+* **Countable products** `IsMartinLofRandomIn.coordinate_of_cantorPiJoin`,
+  `IsMartinLofRandomIn.coordinate_of_cantorPiJoin_below`: for probability measures `μ j`, if the
+  infinite join `⊕ⱼ xⱼ` (`cantorPiJoin`) is random for the product (`piJoinMeasure μ`) relative to
+  `A` and `μ i` is computable relative to `A`, then `xᵢ` is random for `μ i` relative to `A` joined
+  with all other coordinates, hence with the earlier ones; `exists_isMartinLofRandomIn_cantorPiJoin`
+  shows random joins exist. The converse fails for infinitely many coordinates and is not stated.
 * **Tools** used on the way: randomness relative to an oracle and its basic facts
   (`IsMartinLofRandomIn.mono_oracle`, `isMartinLofRandomIn_empty_iff`,
   `measure_setOf_not_isMartinLofRandomIn`), pullback of relatively effectively open families
@@ -792,7 +798,10 @@ computable relative to the oracle); the textbook statement is the corollary abov
 
 `isMartinLofRandomIn_cantorJoin_iff`, `isMartinLofRandomIn_cantorJoin_iff_swap`,
 `isMartinLofRandomIn_cantorJoin_iff_mutual`, `isMartinLofRandom_cantorJoin_uniformMeasure_iff`,
-`exists_isMartinLofRandomIn_cantorJoin`, and the three directions
+`exists_isMartinLofRandomIn_cantorJoin`, the countable forms
+`IsMartinLofRandomIn.coordinate_of_cantorPiJoin`,
+`IsMartinLofRandomIn.coordinate_of_cantorPiJoin_below`, `exists_isMartinLofRandomIn_cantorPiJoin`,
+and the three directions
 `IsMartinLofRandomIn.left_of_cantorJoin`, `IsMartinLofRandomIn.right_of_cantorJoin`,
 `IsMartinLofRandomIn.cantorJoin`. Each depends only on the axioms `propext`, `Classical.choice`
 and `Quot.sound`.
@@ -813,11 +822,14 @@ KolmogorovMathlib/AlgorithmicRandomness/
     │   ├── Basic.lean                #     oracle-uniform families, sections
     │   ├── UsePrinciple.lean         #     a family relative to A ⊕ x is the member at x of a uniform one
     │   └── Trim.lean                 #     trimming uniformly in the oracle, discard sets
+    ├── Countable.lean, Countable/
+    │   ├── Defs.lean                 #     cantorPiJoin, piJoinMeasure, the oracles of other and earlier coordinates
+    │   └── Split.lean                #     permutation invariance, splitting one coordinate off, oracle reductions
     ├── Directions.lean, Directions/
     │   ├── Left.lean                 #     random pair ⇒ random first coordinate
     │   ├── Right.lean                #     random pair ⇒ second coordinate random relative to the first
     │   └── Converse.lean             #     relatively random coordinates ⇒ random pair
-    └── MainResults.lean              #   the theorem, exchanged and mutual forms, textbook form, non-vacuousness
+    └── MainResults.lean              #   the theorem, exchanged, mutual and countable forms, textbook form, non-vacuousness
 ```
 
 ## Project Layout
