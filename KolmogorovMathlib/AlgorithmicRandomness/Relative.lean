@@ -5,6 +5,7 @@ Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.AlgorithmicRandomness.Relative.Defs
 import KolmogorovMathlib.AlgorithmicRandomness.Relative.Basic
+import KolmogorovMathlib.AlgorithmicRandomness.Relative.Pullback
 
 /-!
 # Martin-Löf randomness on Cantor space relative to an oracle
@@ -17,4 +18,5 @@ Martin-Löf randomness, relativized to an oracle `A : Set ℕ` (blueprint
   `IsMartinLofTestIn`, `IsMartinLofRandomIn`.
 * `Basic` — monotonicity in the oracle, the bridge to unrelativized randomness at the empty
   oracle, almost every sequence is random, finiteness of relatively computable measures.
+* `Pullback` — preimages of relatively effective open families under cylinder maps.
 -/

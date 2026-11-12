@@ -1,1 +1,2 @@
 kind	declaration_or_file	rule	reason
+public-single-file	Kolmogorov.IsUniformlyEffectiveOpenIn.preimage	CLAUDE.md 2: a lemma used only in its own file is private	General pullback of relatively effectively open families along maps with computably enumerated cylinder preimages; kept public as library API for the countable product (phase 2) and the itinerary transfer (phase 3), which pull tests back along other maps.

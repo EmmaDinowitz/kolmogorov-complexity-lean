@@ -58,6 +58,7 @@ computable relative to the oracle `A`.
 | `vl:join-oracle` | `seqOracle (x ⊕ y) = oracleJoin (seqOracle x) (seqOracle y)`. | `seqOracle_cantorJoin` | | |
 | `vl:join-uniform` | `joinMeasure uniformMeasure uniformMeasure = uniformMeasure`. | `joinMeasure_uniformMeasure` | | |
 | `vl:swap` | `x ⊕ y` random for `joinMeasure μ ν` iff `y ⊕ x` random for `joinMeasure ν μ` (s-finite factors). | `isMartinLofRandomIn_joinMeasure_swap` | | |
+| `vl:pullback` | Pulling a family that is uniformly effectively open relative to `A` back along a map whose cylinder preimages are computably enumerated unions of cylinders (in particular precomposition with a primitive recursive index map) keeps it effectively open relative to `A`; its members are measurable. `Relative/Pullback.lean`. | `IsUniformlyEffectiveOpenIn.preimage`; `IsUniformlyEffectiveOpenIn.preimage_precomp`, `IsUniformlyEffectiveOpenIn.measurableSet` | | |
 
 ### The three directions (`AlgorithmicRandomness/VanLambalgen/Directions.lean`)
 
