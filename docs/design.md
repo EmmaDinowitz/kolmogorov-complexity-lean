@@ -127,3 +127,26 @@ cost time, numerical checks, abandoned approaches. Read at the start of every se
 * **`vl:permute` moved to `Relative/Pullback.lean`**, next to `preimage_precomp`, and the swap
   `vl:swap` is now its instance with the self-inverse `swapIndex` (the hand-written pullback of
   tests in `Join.lean` is gone).
+
+## 2026-11-12 — phase 3: presented metric spaces (definitions and statements)
+
+* **Route: transfer along itineraries, not a direct reproof.** Trimming tests on a metric space
+  needs measures of finite unions of basic sets from both sides; open balls give only lower
+  bounds. Hoyrup–Rojas almost decidable balls give two-sided bounds, and once they exist the
+  itinerary map moves the whole Cantor-space theorem across unchanged.
+* **Almost decidable bases as an abstract property** (`IsAlmostDecidableBasisIn`) rather than a
+  specific family of balls: c.e. open members, c.e. open exteriors, an effective null cover of the
+  boundary sets, and generation of the basic balls. Products of bases are bases (interleaved, to
+  match `cantorJoin`), which a "balls only" definition would not give in the sup metric without
+  extra work. The exterior is a separate c.e. open set because the complement of the closure of
+  a ball need not be c.e. open in a general metric space.
+* **Total itinerary.** `itinerary B x k = decide (x ∈ B k)` is defined everywhere (classically);
+  the boundary sets matter only in the proofs, where random points avoid them.
+* **"Relative to x" through names.** The main statement quantifies over *some* Cauchy name, via its
+  graph oracle (`nameOracle`). Every name computes the itinerary at a random point and the
+  itinerary computes a name, so this is the least degree of a name; "every name" is false.
+* **Both measures computable.** The itinerary of the first factor needs `μ`-null boundaries found
+  effectively, so the blind version of `vl:main` does not transfer by this route; recorded as not
+  formalized.
+* **Second countability** of a presented space (`Presentation.secondCountableTopology`) makes the
+  product σ-algebra on `X × Y` Borel, so `randomPoints` of `μ.prod ν` sees open sets measurably.

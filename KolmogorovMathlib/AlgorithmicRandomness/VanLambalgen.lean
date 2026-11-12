@@ -11,6 +11,7 @@ import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.OracleUniform
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Directions
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Countable
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.MainResults
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric
 
 /-!
 # The van Lambalgen theorem
@@ -31,4 +32,5 @@ first coordinate is random and its second is random relative to the first (bluep
 * `Countable` — infinite joins, countable product measures, and splitting one coordinate off.
 * `MainResults` — the theorem, its symmetric and mutual forms, the countable form, the textbook
   uniform case and non-vacuousness.
+* `Metric` — the theorem on presented metric spaces, through almost decidable bases (Hoyrup–Rojas).
 -/
