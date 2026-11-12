@@ -48,6 +48,8 @@ import KolmogorovMathlib.AlgorithmicRandomness.UniversalStages
 import KolmogorovMathlib.AlgorithmicRandomness.RandomnessConservation
 import KolmogorovMathlib.AlgorithmicRandomness.EulerComputable
 import KolmogorovMathlib.AlgorithmicRandomness.PiComputable
+import KolmogorovMathlib.AlgorithmicRandomness.Relative
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen
 
 /-!
 # Martin-Löf randomness
@@ -65,7 +67,9 @@ group covers:
 * randomness deficiency and the two kinds of randomness test — `Deficiencies`,
   `DeficiencyCore`, `DeficiencyComparison`, `ProbabilityBounded`, `ExpectationBounded`,
   `ExpectationMixture`, `LowerSemicomputableFun`, `LSCCharacterizations`;
-* relativised randomness — `OracleComputability`, `OracleSemidecision`, `JumpRandom`;
+* relativised randomness — `OracleComputability`, `OracleSemidecision`, `JumpRandom`,
+  `Relative` (Martin-Löf randomness relative to an oracle) and `VanLambalgen` (van Lambalgen's
+  theorem);
 * the computability toolbox these use — `RatComputable`, `NatLogPrimrec`, `StageComputable`,
   `StageIntegral`, `LevelStrings`, `LSCAux`, `LSCConstruction`, `EulerComputable`,
   `PiComputable`.
