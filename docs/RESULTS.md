@@ -736,6 +736,90 @@ theorem splitMutualInfo_symmetry
 * The transfer lemmas, whose proofs the note defers, are proved from a canonical point of the
   ball (the dyadic truncation in `ℝⁿ`) and the lower direction of symmetry of information.
 
+## van Lambalgen's Theorem
+
+`KolmogorovMathlib/AlgorithmicRandomness/Relative/` relativizes Martin-Löf randomness on Cantor
+space to an oracle `A : Set ℕ`, and `KolmogorovMathlib/AlgorithmicRandomness/VanLambalgen/` proves
+van Lambalgen's theorem ([vanLambalgen1987]; [Nies2009, §3.4]) in that setting (blueprint
+[`docs/BLUEPRINT.md`](BLUEPRINT.md), nodes `vl:*`). A pair of sequences is encoded by
+interleaving, `x ⊕ y = cantorJoin x y`, the product measure by `joinMeasure μ ν`, and a sequence
+is used as an oracle through `seqOracle x`. The measure `ν` is computable relative to `A`; the
+measure `μ` is only finite, so for non-computable `μ` the theorem is about blind randomness. All
+theorems are in the namespace `Kolmogorov`.
+
+### What is proved
+
+* **van Lambalgen's theorem** `isMartinLofRandomIn_cantorJoin_iff`: `x ⊕ y` is random for
+  `joinMeasure μ ν` relative to `A` if and only if `x` is random for `μ` relative to `A` and `y` is
+  random for `ν` relative to `A ⊕ x`.
+* **Exchanged and mutual forms** `isMartinLofRandomIn_cantorJoin_iff_swap`,
+  `isMartinLofRandomIn_cantorJoin_iff_mutual`: with `μ` computable relative to `A`, the roles of the
+  coordinates can be exchanged, and the pair is random exactly when each coordinate is random
+  relative to `A` joined with the other.
+* **The textbook form** `isMartinLofRandom_cantorJoin_uniformMeasure_iff`: for the uniform measure
+  and no oracle, `x ⊕ y` is Martin-Löf random if and only if `x` is and `y` is random relative
+  to `x`.
+* **Non-vacuousness** `exists_isMartinLofRandomIn_cantorJoin`: for nonzero measures both sides hold
+  for some pair.
+* **Tools** used on the way: randomness relative to an oracle and its basic facts
+  (`IsMartinLofRandomIn.mono_oracle`, `isMartinLofRandomIn_empty_iff`,
+  `measure_setOf_not_isMartinLofRandomIn`), pullback of relatively effectively open families
+  (`IsUniformlyEffectiveOpenIn.preimage`), oracle-uniform families with the use principle
+  (`exists_isOracleUniformIn_uniformFamily_eq`), trimming uniformly in the oracle
+  (`trimUniform`, `measure_uniformFamily_trimUniform_le`) and Fubini for joint sets
+  (`joinMeasure_jointSet`).
+
+The Lean statements of the theorem and its textbook form, as in the code:
+
+```lean
+theorem isMartinLofRandomIn_cantorJoin_iff [IsFiniteMeasure μ]
+    (hν : IsComputableCantorMeasureIn A ν) :
+    IsMartinLofRandomIn A (joinMeasure μ ν) (cantorJoin x y) ↔
+      IsMartinLofRandomIn A μ x ∧ IsMartinLofRandomIn (oracleJoin A (seqOracle x)) ν y
+
+theorem isMartinLofRandom_cantorJoin_uniformMeasure_iff :
+    IsMartinLofRandom uniformMeasure (cantorJoin x y) ↔
+      IsMartinLofRandom uniformMeasure x ∧
+        IsMartinLofRandomIn (seqOracle x) uniformMeasure y
+```
+
+### Corrections
+
+None. The main statement is broader than the textbook one (any oracle, any finite `μ`, `ν`
+computable relative to the oracle); the textbook statement is the corollary above.
+
+### Main theorems
+
+`isMartinLofRandomIn_cantorJoin_iff`, `isMartinLofRandomIn_cantorJoin_iff_swap`,
+`isMartinLofRandomIn_cantorJoin_iff_mutual`, `isMartinLofRandom_cantorJoin_uniformMeasure_iff`,
+`exists_isMartinLofRandomIn_cantorJoin`, and the three directions
+`IsMartinLofRandomIn.left_of_cantorJoin`, `IsMartinLofRandomIn.right_of_cantorJoin`,
+`IsMartinLofRandomIn.cantorJoin`. Each depends only on the axioms `propext`, `Classical.choice`
+and `Quot.sound`.
+
+### Map of the files
+
+```text
+KolmogorovMathlib/AlgorithmicRandomness/
+├── Relative.lean, Relative/          # Martin-Löf randomness relative to an oracle
+│   ├── Defs.lean                     #   seqOracle, relative effective openness, computable measures, tests, randomness
+│   ├── Basic.lean                    #   oracle monotonicity, the empty oracle, almost every sequence is random
+│   └── Pullback.lean                 #   pullback of relatively effectively open families
+└── VanLambalgen.lean, VanLambalgen/  # van Lambalgen's theorem
+    ├── Defs.lean                     #   cantorJoin, joinMeasure
+    ├── Join.lean                     #   oracle and mass of an interleaving, the uniform case, the swap
+    ├── Halves.lean                   #   even and odd halves, joint sets, Fubini for joint sets
+    ├── OracleUniform.lean, OracleUniform/
+    │   ├── Basic.lean                #     oracle-uniform families, sections
+    │   ├── UsePrinciple.lean         #     a family relative to A ⊕ x is the member at x of a uniform one
+    │   └── Trim.lean                 #     trimming uniformly in the oracle, discard sets
+    ├── Directions.lean, Directions/
+    │   ├── Left.lean                 #     random pair ⇒ random first coordinate
+    │   ├── Right.lean                #     random pair ⇒ second coordinate random relative to the first
+    │   └── Converse.lean             #     relatively random coordinates ⇒ random pair
+    └── MainResults.lean              #   the theorem, exchanged and mutual forms, textbook form, non-vacuousness
+```
+
 ## Project Layout
 
 ```text

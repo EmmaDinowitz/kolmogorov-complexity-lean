@@ -60,13 +60,26 @@ computable relative to the oracle `A`.
 | `vl:swap` | `x ⊕ y` random for `joinMeasure μ ν` iff `y ⊕ x` random for `joinMeasure ν μ` (s-finite factors). | `isMartinLofRandomIn_joinMeasure_swap` | | |
 | `vl:pullback` | Pulling a family that is uniformly effectively open relative to `A` back along a map whose cylinder preimages are computably enumerated unions of cylinders (in particular precomposition with a primitive recursive index map) keeps it effectively open relative to `A`; its members are measurable. `Relative/Pullback.lean`. | `IsUniformlyEffectiveOpenIn.preimage`; `IsUniformlyEffectiveOpenIn.preimage_precomp`, `IsUniformlyEffectiveOpenIn.measurableSet` | | |
 
+### Machinery for the hard directions (`VanLambalgen/Halves.lean`, `VanLambalgen/OracleUniform/`)
+
+| Node | Claim | Declaration | Mark | Reviewed |
+|---|---|---|---|---|
+| `vl:halves` | The even and odd halves of sequences and strings; the halves of `x ⊕ y` are `x` and `y`; a cylinder is the product of the cylinders of its halves. `Halves.lean`. | `cantorEvens`, `cantorOdds`, `evenBits`, `oddBits`; `cantorEvens_cantorJoin`, `cantorOdds_cantorJoin`, `mem_cantorCylinder_iff_halves`, `evenBits_cantorPrefix`, `oddBits_cantorPrefix`, `primrec_evenBits`, `primrec_oddBits` | | |
+| `vl:joint-set` | `jointSet T = {z ⊕ y \| y ∈ T z}`; every set is the joint set of its sections; interleaving is measurable. `Halves.lean`. | `jointSet`; `cantorJoin_mem_jointSet`, `jointSet_sections`, `measurable_cantorJoin` | | |
+| `vl:joint-fubini` | `joinMeasure μ ν (jointSet T) = ∫⁻ z, ν (T z) ∂μ` for a measurable joint set (`ν` s-finite). `Halves.lean`. | `joinMeasure_jointSet` | | |
+| `vl:oracle-uniform` | Oracle-uniform families: listings `g σ n i` over oracle prefixes `σ`, computable in `A`; their joint sets are effectively open relative to `A`, their member at `x` is effectively open relative to `A ⊕ x`. `OracleUniform/Basic.lean`. | `IsOracleUniformIn`, `uniformEnum`, `uniformFamily`; `IsOracleUniformIn.isUniformlyEffectiveOpenIn_jointSet`, `IsOracleUniformIn.isUniformlyEffectiveOpenIn_uniformFamily`, `IsOracleUniformIn.reindex`, `computableIn_list_range_map` | | |
+| `vl:sections` | The sections of an effectively open set relative to `A` form an oracle-uniform family relative to `A`. `OracleUniform/Basic.lean`. | `sectionEnum`; `uniformFamily_sectionEnum`, `isOracleUniformIn_sectionEnum` | | |
+| `vl:use-principle` | Every family effectively open relative to `A ⊕ x` is the member at `x` of an oracle-uniform family relative to `A`. `OracleUniform/UsePrinciple.lean`. | `exists_isOracleUniformIn_uniformFamily_eq` | | |
+| `vl:uniform-trim` | For `ν` computable relative to `A`, trimming an oracle-uniform family gives an oracle-uniform family whose level-`L` member has `ν`-measure at most `2^{-L}` at every oracle, and equals the original outside the discard set. `OracleUniform/Trim.lean`. | `trimUniform`; `isOracleUniformIn_trimUniform`, `measure_uniformFamily_trimUniform_le`, `uniformFamily_trimUniform_of_not_mem` | | |
+| `vl:discard` | The oracles at which trimming discards something form a family effectively open relative to `A`, and each of them has `ν(T z n) > 2^{-(L+2)}`. `OracleUniform/Trim.lean`. | `discardSet`; `isUniformlyEffectiveOpenIn_discardSet`, `lt_measure_of_mem_discardSet` | | |
+
 ### The three directions (`AlgorithmicRandomness/VanLambalgen/Directions.lean`)
 
 | Node | Claim | Declaration | Mark | Reviewed |
 |---|---|---|---|---|
 | `vl:fst` | `x ⊕ y` random ⇒ `x` random (`ν` finite). `Directions/Left.lean`. | `IsMartinLofRandomIn.left_of_cantorJoin` | | |
-| `vl:snd` | `x ⊕ y` random ⇒ `y` random relative to `A ⊕ x` (`μ` finite, `ν` `A`-computable). | `IsMartinLofRandomIn.right_of_cantorJoin` | | |
-| `vl:converse` | `x` random and `y` random relative to `A ⊕ x` ⇒ `x ⊕ y` random (`ν` `A`-computable). | `IsMartinLofRandomIn.cantorJoin` | | |
+| `vl:snd` | `x ⊕ y` random ⇒ `y` random relative to `A ⊕ x` (`μ` finite, `ν` `A`-computable). Use principle, uniform trimming, Fubini. `Directions/Right.lean`. | `IsMartinLofRandomIn.right_of_cantorJoin` | | |
+| `vl:converse` | `x` random and `y` random relative to `A ⊕ x` ⇒ `x ⊕ y` random (`ν` `A`-computable). The discard sets of the trimmed sections are the Markov sets. `Directions/Converse.lean`. | `IsMartinLofRandomIn.cantorJoin` | | |
 
 ### Main results (`AlgorithmicRandomness/VanLambalgen/MainResults.lean`; protected)
 

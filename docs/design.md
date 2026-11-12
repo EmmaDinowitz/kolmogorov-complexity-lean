@@ -62,3 +62,32 @@ cost time, numerical checks, abandoned approaches. Read at the start of every se
   is a beta-redex, so `dsimp only` before rewriting.
 * Small duplication: the measurability of the join map is proved privately in `Join.lean` and
   inline in `Directions/Left.lean`, which does not import `Join.lean`.
+
+## 2026-11-12 — proofs of `vl:snd` and `vl:converse`
+
+* **Oracle-uniform families** (`OracleUniform/Basic.lean`) are listings `g σ n i` over finite
+  prefixes `σ` of the oracle sequence, computable in `A`; `g` need not be monotone in `σ`. The
+  member at `z` lists `g (z↾k) n i` at index `⟨k, i⟩`. Rejected: a monotone c.e. relation on
+  triples `(σ, n, τ)`, which needs a separate monotonization step.
+* **Use principle** via `PointToSet.oracleStage_universal`: stage `t` of the universal oracle
+  machine reads only queries below `t` (`Nat.unpair_left_le`), so it can be re-run on the prefix
+  of `A ⊕ σ`; a private plain-computable copy of the stage function (`stageOnPrefix`) does this.
+  `Oracle/FinitePrefix.lean`'s `exists_exact_string_operator` was not needed.
+* **Uniform trimming** reuses `disjEnum` (`Disjointify.lean`) and `trimEnum` (`Trim.lean`)
+  unchanged, so their measure lemmas apply. Both are local (entry `j` depends only on entries
+  `≤ j`, hence on `z↾j`). Disjointifying first makes the sum of the masses equal the measure of
+  the union, so measures of finite unions never need to be approximated.
+* **The discard set does double duty.** In `vl:snd` it shows nothing is trimmed at `x`; in
+  `vl:converse` it is the Markov set: `μ(D_L) ≤ 2^{-(L+1)}` at section level `2L + 3`, and
+  `V_k = ⋃_L D_{L+k+1}` is the test that `x` avoids.
+* **Pitfall: `whnf` timeouts.** `have h : ComputableIn O (fun x ↦ someDef …) := ComputableIn.comp
+  h1 h2` makes the unifier unfold `someDef` and time out. Compose without an expected type and
+  close with `.of_eq fun _ ↦ rfl`. Also: `cond_true` is deprecated (`Bool.cond_true`); `List`'s
+  `==` is not the instance `Primrec.beq` expects (use `decide (a = b)` with `Primrec.eq.decide`);
+  definitions with a classical `if k ∈ A` must be `noncomputable`.
+* **Mechanical-cut gate.** Two private helpers in `OracleUniform/Trim.lean` whose index-bound
+  hypotheses were discharged by `omega` at their single call site were inlined into their callers.
+* **Open layout question.** The infrastructure definitions (`IsOracleUniformIn`, `uniformEnum`,
+  `uniformFamily`, `jointSet`, `cantorEvens`, `cantorOdds`, `evenBits`, `oddBits`, `sectionEnum`,
+  `trimUniform`, `discardSet`) live next to their lemmas, not in a protected `Defs.lean`;
+  pending the author's decision.
