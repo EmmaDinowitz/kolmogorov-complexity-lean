@@ -29,6 +29,9 @@ merged here during the planned reorganization.
 | mutual relative randomness | `vl:mutual` | `isMartinLofRandomIn_cantorJoin_iff_mutual` | same |
 | uniform measure, no oracle | `vl:uniform` | `isMartinLofRandom_cantorJoin_uniformMeasure_iff` | same |
 | non-vacuousness | `vl:nonvacuous` | `exists_isMartinLofRandomIn_cantorJoin` | same |
+| countable products | `vl:countable` | `IsMartinLofRandomIn.coordinate_of_cantorPiJoin` | same |
+| countable, earlier coordinates | `vl:countable-below` | `IsMartinLofRandomIn.coordinate_of_cantorPiJoin_below` | same |
+| countable, non-vacuousness | `vl:countable-nonvacuous` | `exists_isMartinLofRandomIn_cantorPiJoin` | same |
 
 ## 3. van Lambalgen's theorem (`vl:*`)
 
@@ -96,10 +99,29 @@ stated for an arbitrary oracle, an arbitrary finite measure `μ` (blind randomne
 `A`-computable `ν`, rather than for two computable probability measures. The textbook statement is
 `vl:uniform`.
 
+### Countable products (`VanLambalgen/Countable/`; headline results in `MainResults.lean`)
+
+Phase 2. For probability measures `μ j` (so that `Measure.infinitePi μ` is their product), only the
+direction from the infinite join to its coordinates holds; the countable converse is false (see
+below) and is not formalized.
+
+| Node | Claim | Declaration | Mark | Reviewed |
+|---|---|---|---|---|
+| `vl:pi-join` | The infinite join `⊕ⱼ xⱼ` (Cantor pairing), the joins of all coordinates but one and of the coordinates below an index; every sequence is an infinite join. `Countable/Defs.lean` (protected), `Countable/Split.lean`. | `cantorPiJoin`, `cantorPiJoinExcept`, `cantorPiJoinBelow`; `exists_cantorPiJoin_eq` | | |
+| `vl:pi-join-measure` | `piJoinMeasure μ`: `Measure.infinitePi μ` carried by the infinite join; a probability measure for probability `μ j`. | `piJoinMeasure`; `isProbabilityMeasure_piJoinMeasure` | | |
+| `vl:pi-split` | `⊕ⱼ xⱼ` is random for `piJoinMeasure μ` iff `(⊕_{j ≠ i} xⱼ) ⊕ xᵢ` is random for the joined product of the other measures' product with `μ i`. | `skipIndex`, `cantorPiJoinSkip`; `isMartinLofRandomIn_cantorPiJoin_iff_split` | | |
+| `vl:pi-oracles` | The reindexed and the blanked oracles of the other coordinates give the same relative randomness; the earlier coordinates reduce to the other coordinates. | `isMartinLofRandomIn_oracleJoin_cantorPiJoinSkip_iff`, `charOracle_oracleJoin_cantorPiJoinBelow_le` | | |
+| `vl:countable` | `⊕ⱼ xⱼ` random for `piJoinMeasure μ` relative to `A` and `μ i` computable relative to `A` ⇒ `xᵢ` random for `μ i` relative to `A ⊕ (⊕_{j ≠ i} xⱼ)`. `MainResults.lean`. | `IsMartinLofRandomIn.coordinate_of_cantorPiJoin` | | |
+| `vl:countable-below` | The same relative to `A ⊕ (⊕_{j < i} xⱼ)`. | `IsMartinLofRandomIn.coordinate_of_cantorPiJoin_below` | | |
+| `vl:countable-nonvacuous` | For probability `μ j` some infinite join is random relative to `A`. | `exists_isMartinLofRandomIn_cantorPiJoin` | | |
+
+Not formalized: the countable converse ("each `xᵢ` random relative to the earlier coordinates ⇒
+`⊕ⱼ xⱼ` random"). It is false: with `(zⱼ)` the columns of a random sequence and `xⱼ = 0ʲ zⱼ`, each
+`xⱼ` is random relative to the earlier coordinates, but `⊕ⱼ xⱼ` has forced zeros on the
+computable set of positions `pair j k`, `k < j`, a Martin-Löf null set for the product.
+
 ### Planned (not yet stated)
 
-* `vl:countable` (phase 2): for uniformly `A`-computable measures `μ_i` and `x` random for their
-  product, each `x_i` is random relative to `A` joined with all `x_j`, `j ≠ i`.
 * Phase 3: transfer to presented metric spaces through almost-decidable balls (Hoyrup–Rojas),
   for finite measures with `A`-computable total mass.
 
