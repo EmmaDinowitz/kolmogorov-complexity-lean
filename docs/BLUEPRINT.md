@@ -138,16 +138,23 @@ namespace `PointToSet`. Status: definitions and statements; proofs are `sorry` e
 | Node | Claim | Declaration | Mark | Reviewed |
 |---|---|---|---|---|
 | `vlm:name-oracle` | The graph `{⟨p, a p⟩}` of a name, as an oracle. `Metric/Defs.lean` (protected). | `nameOracle` | | |
-| `vlm:prod-presentation` | The product presentation of `X × Y` (pairs of ideal points, sup metric); a presented space is second countable. | `Presentation.prod`; `Presentation.secondCountableTopology` (proved) | | |
+| `vlm:prod-presentation` | The product presentation of `X × Y` (pairs of ideal points, sup metric); a presented space is second countable; computable metric tables give a computable product table. | `Presentation.prod`; `Presentation.secondCountableTopology`, `Presentation.computablePresentationIn_prod` | | |
 | `vlm:ad-basis` | Almost decidable basis relative to `A` for `μ`: uniformly c.e. open members, c.e. open exteriors disjoint from them, boundary sets `(B k ∪ D k)ᶜ` covered by uniformly c.e. open sets of measure `≤ 2^{-n}`, and every basic ball an `A`-c.e. union of finite intersections of members. | `IsAlmostDecidableBasisIn` | ◇ | |
 | `vlm:itinerary` | The itinerary `k ↦ [x ∈ B k]`; measurable for an almost decidable basis. | `itinerary`; `IsAlmostDecidableBasisIn.measurable_itinerary` | | |
 | `vlm:ad-basis-exists` | Hoyrup–Rojas: an `A`-computable finite measure with `A`-computable mass on a presentation with `A`-computable metric table has an almost decidable basis relative to `A` (balls with `A`-computable radii and null spheres, by a nested-interval search over annuli). `Metric/Basis.lean`. | `exists_isAlmostDecidableBasisIn` | | |
-| `vlm:transfer` | For every `A' ≥_T A`: `x` is `μ`-random relative to `A'` iff its itinerary is random relative to `A'` for the image measure. No computability of `μ` used. `Metric/Transfer.lean`. | `IsAlmostDecidableBasisIn.mem_randomPoints_iff` | | |
+| `vlm:transfer` | For every `A' ≥_T A`, on a presentation with metric table computable relative to `A`: `x` is `μ`-random relative to `A'` iff its itinerary is random relative to `A'` for the image measure. No computability of `μ` used. `Metric/Transfer.lean`. | `IsAlmostDecidableBasisIn.mem_randomPoints_iff` | ✎ | |
 | `vlm:itinerary-measure` | The image of `μ` under the itinerary map is computable relative to `A` on Cantor space. `Metric/Transfer.lean`. | `IsAlmostDecidableBasisIn.isComputableCantorMeasureIn_map` | | |
 | `vlm:oracle` | The itinerary computes a name relative to `A` (every point); every name computes the itinerary relative to `A` at a random point. `Metric/Oracle.lean`. | `IsAlmostDecidableBasisIn.exists_isCauchyName_le_itinerary`, `IsAlmostDecidableBasisIn.itinerary_le_of_mem_randomPoints` | | |
 | `vlm:prod-basis` | Interleaved product basis `B k × Y`, `X × C k`: an almost decidable basis of `μ.prod ν`; its itinerary is `cantorJoin` of the itineraries (proved), and it carries `μ.prod ν` to `joinMeasure`. `Metric/Product.lean`. | `prodBasis`; `IsAlmostDecidableBasisIn.prod`, `itinerary_prodBasis`, `map_prod_itinerary_prodBasis` | | |
 | `vlm:transfer-main` | Some family `B` makes randomness relative to every `A' ≥_T A` equal to randomness of the itinerary, for an `A`-computable image measure. `Metric/MainResults.lean` (protected; proved from the nodes above). | `mem_randomPoints_iff_itinerary` | | |
 | `vlm:main` | van Lambalgen on presented spaces: `(x, y)` is `μ ⊗ ν`-random relative to `A` iff `x` is `μ`-random relative to `A` and `y` is `ν`-random relative to `A ⊕ a` for some Cauchy name `a` of `x`. `Metric/MainResults.lean` (protected; proved from the nodes above and `vl:main`). | `mem_randomPoints_prod_iff` | ✎ | |
+
+The mark ✎ on `vlm:transfer`: the metric-table hypothesis was added on 2026-11-13 with the author's
+approval, after a counterexample to the direction "random point ⇒ random itinerary" without it:
+`X = ℝ` with ideal points `q` and `Ω + q` (`q` rational), Lebesgue measure on `[0, 1]`, the basic
+balls as basis; `Ω / 2` is random but its itinerary lies in the test of the cylinders where a
+rational ball and an `Ω`-ball with nearby centres both contain the point. The main statements
+already assumed the hypothesis.
 
 The mark ◇ on `vlm:ad-basis`: Hoyrup and Rojas speak of a basis of almost decidable balls; the
 definition abstracts the properties the proofs use, so that products of bases are bases again.
@@ -162,6 +169,23 @@ should agree with "some name" through the itinerary (every uniform test at `x` i
 `A ⊕ a` for every name `a`, and a test relative to `A ⊕ itinerary` is uniform in `x` off the
 boundary sets). It would need a new definition and its own comparison lemma; recorded as a possible
 later addition, not formalized.
+
+#### Countable products on a presented space (`Metric/Countable/`)
+
+One presented space `X` for all coordinates; `ℕ → X` with Mathlib's `PiCountable.metricSpace`
+(a local instance; its topology is the product topology). Probability measures `μ i`, computable
+relative to `A` uniformly in `i`. Statements await the author's review; node lemmas are `sorry`.
+
+| Node | Claim | Declaration | Mark | Reviewed |
+|---|---|---|---|---|
+| `vlm:pi-presentation` | Presentation of `ℕ → X` by finitely prescribed ideal sequences (rest `ι 0`); dense (proved); metric table computable when `P`'s is. `Countable/Defs.lean` (protected), `Countable/Product.lean`. | `Presentation.pi`, `Presentation.denseRange_piIdeal`; `Presentation.computablePresentationIn_pi` | | |
+| `vlm:measure-family` | Uniform computability of a sequence of measures; members are computable; a probability measure has computable mass. | `IsComputableMeasureFamilyIn`; `IsComputableMeasureFamilyIn.isComputableMeasureIn`, `isComputableRealFamilyIn_measure_univ` | | |
+| `vlm:mix` | The mixture `∑ᵢ 2^{-(i+1)} μ i` is a computable probability measure; an almost decidable basis of it is one of every `μ i`. | `mixMeasure`; `isProbabilityMeasure_mixMeasure`, `IsComputableMeasureFamilyIn.isComputableMeasureIn_mix`, `IsAlmostDecidableBasisIn.of_mixMeasure` | | |
+| `vlm:pi-basis` | The product basis `x j ∈ B k` at `⟨j, k⟩`: an almost decidable basis of `Measure.infinitePi μ`; itinerary = `cantorPiJoin` of the coordinates' itineraries (proved); carries the product measure to `piJoinMeasure`. | `piBasis`; `IsAlmostDecidableBasisIn.pi`, `itinerary_piBasis`, `map_infinitePi_itinerary_piBasis` | | |
+| `vlm:pi-below` | A name of a sequence computes a name of its truncation to the first `i` coordinates. | `exists_isCauchyName_pi_below` | | |
+| `vlm:countable` | `x` random for `∏ μ i` relative to `A` ⇒ `x i` is `μ i`-random relative to `A ⊕ a` for some name `a` of the other coordinates `j ↦ x (skipIndex i j)`. `Countable/MainResults.lean` (protected; proved from the nodes above). | `mem_randomPoints_coordinate_of_pi` | | |
+| `vlm:countable-below` | The same for some name of the earlier coordinates `j ↦ if j < i then x j else ι 0`. | `mem_randomPoints_coordinate_of_pi_below` | | |
+| `vlm:countable-nonvacuous` | Some sequence is random for `∏ μ i` relative to `A`. | `exists_mem_randomPoints_pi` | | |
 
 Not formalized (phase 3): the blind version (`μ` arbitrary finite, as in `vl:main`), which the
 itinerary route cannot give because the boundaries of the first factor's basis must be found

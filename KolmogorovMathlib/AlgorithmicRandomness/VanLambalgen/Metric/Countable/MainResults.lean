@@ -61,8 +61,8 @@ theorem mem_randomPoints_coordinate_of_pi (hP : ComputablePresentationIn P A)
   have hBi := hB.of_mixMeasure i
   have hφ := hB.measurable_itinerary
   have hBpi := hB.pi hP
-  rw [hBpi.mem_randomPoints_iff (TuringReducible.refl _), map_infinitePi_itinerary_piBasis hφ,
-    itinerary_piBasis] at hx
+  rw [hBpi.mem_randomPoints_iff (P.computablePresentationIn_pi hP) (TuringReducible.refl _),
+    map_infinitePi_itinerary_piBasis hφ, itinerary_piBasis] at hx
   have hci := hBi.isComputableCantorMeasureIn_map (hμ.isComputableMeasureIn i)
     (isComputableRealFamilyIn_measure_univ _)
   have h1 : IsMartinLofRandomIn
@@ -74,7 +74,7 @@ theorem mem_randomPoints_coordinate_of_pi (hP : ComputablePresentationIn P A)
       cantorPiJoinSkip (fun j => itinerary B (x j)) i := by
     rw [itinerary_piBasis]
     rfl
-  rw [← hy, ← hBi.mem_randomPoints_iff (oracle_joins A _)] at h1
+  rw [← hy, ← hBi.mem_randomPoints_iff hP (oracle_joins A _)] at h1
   obtain ⟨a, ha, hle⟩ := hBpi.exists_isCauchyName_le_itinerary fun j => x (skipIndex i j)
   exact ⟨a, ha, randomPoints_anti_oracle P (μ i) hle h1⟩
 

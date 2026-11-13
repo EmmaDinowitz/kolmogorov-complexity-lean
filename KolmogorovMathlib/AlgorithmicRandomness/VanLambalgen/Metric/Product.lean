@@ -6,6 +6,7 @@ Authors: Emma Dinowitz
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Halves
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Defs
 import KolmogorovMathlib.PointToSet.ComputableMetric.Represented
+import KolmogorovMathlib.Interface.ComputableReals.Part01
 
 /-!
 # Products of presented spaces and of almost decidable bases
@@ -45,6 +46,34 @@ theorem Presentation.secondCountableTopology (P : Presentation X) :
     SecondCountableTopology X := by
   have := P.dense.separableSpace'
   exact UniformSpace.secondCountable_of_separable X
+
+/-- The product presentation has a metric table computable relative to `A` when both factors have:
+the sup distance is the maximum of the two coordinate distances, and the maximum of two
+approximations within `2^{-p}` is within `2^{-p}`. Blueprint node `vlm:prod-presentation`. -/
+theorem Presentation.computablePresentationIn_prod {A : Set ℕ} {P : Presentation X}
+    {Q : Presentation Y} (hP : ComputablePresentationIn P A) (hQ : ComputablePresentationIn Q A) :
+    ComputablePresentationIn (P.prod Q) A := by
+  obtain ⟨qP, hqP, hP'⟩ := hP
+  obtain ⟨qQ, hqQ, hQ'⟩ := hQ
+  have hu1 : Computable fun w : (ℕ × ℕ) × ℕ =>
+      (((Nat.unpair w.1.1).1, (Nat.unpair w.1.2).1), w.2) :=
+    (((Primrec.fst.comp (Primrec.unpair.comp (Primrec.fst.comp Primrec.fst))).pair
+      (Primrec.fst.comp (Primrec.unpair.comp (Primrec.snd.comp Primrec.fst)))).pair
+        Primrec.snd).to_comp
+  have hu2 : Computable fun w : (ℕ × ℕ) × ℕ =>
+      (((Nat.unpair w.1.1).2, (Nat.unpair w.1.2).2), w.2) :=
+    (((Primrec.snd.comp (Primrec.unpair.comp (Primrec.fst.comp Primrec.fst))).pair
+      (Primrec.snd.comp (Primrec.unpair.comp (Primrec.snd.comp Primrec.fst)))).pair
+        Primrec.snd).to_comp
+  refine ⟨fun w => max (qP (((Nat.unpair w.1.1).1, (Nat.unpair w.1.2).1), w.2))
+    (qQ (((Nat.unpair w.1.1).2, (Nat.unpair w.1.2).2), w.2)), ?_, fun ij p => ?_⟩
+  · exact (ComputableIn₂.comp ComputableReals.primrec_ratMax.to_comp.computableIn₂
+      (hqP.comp hu1.computableIn) (hqQ.comp hu2.computableIn)).of_eq fun _ => rfl
+  · have h1 := hP' ((Nat.unpair ij.1).1, (Nat.unpair ij.2).1) p
+    have h2 := hQ' ((Nat.unpair ij.1).2, (Nat.unpair ij.2).2) p
+    change |((max _ _ : ℚ) : ℝ) - max _ _| < _
+    push_cast
+    exact (abs_max_sub_max_le_max _ _ _ _).trans_lt (max_lt h1 h2)
 
 omit [MetricSpace X] [MetricSpace Y] in
 /-- The itinerary of a pair in the interleaved product family is the interleaving of the

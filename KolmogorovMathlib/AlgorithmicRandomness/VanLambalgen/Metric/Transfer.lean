@@ -24,7 +24,9 @@ Cantor space relative to `A` when `μ` is
 Randomness on the presented space is `randomPoints P A μ`; on Cantor space it is
 `IsMartinLofRandomIn A`. Measures are in `ℝ≥0∞`. A test on Cantor space pulls back along `φ` to a
 union of finite intersections of the members `B k` and the exteriors `D k`, which differs from the
-exact preimage by the boundary sets `(B k ∪ D k)ᶜ`; a random point avoids these.
+exact preimage by the boundary sets `(B k ∪ D k)ᶜ`; a random point avoids these. Those finite
+intersections are c.e. open only when `A` computes the metric table
+(`ComputablePresentationIn P A`), which the transfer therefore assumes.
 
 ## Main declarations
 
@@ -358,18 +360,17 @@ private lemma isMartinLofRandomIn_of_mem_randomPoints [OpensMeasurableSpace X]
 
 /-- **Transfer of randomness.** For an almost decidable basis `B` relative to `A` for `μ` and every
 oracle `A'` above `A`, a point is `μ`-random relative to `A'` exactly when its itinerary is random
-relative to `A'` for the image of `μ` under the itinerary map. No computability of `μ` is used.
+relative to `A'` for the image of `μ` under the itinerary map, provided the presentation has a
+metric table computable relative to `A`. No computability of `μ` is used. The metric table is
+needed only for "random point ⇒ random itinerary": without it the direction fails (ideal points
+`q` and `Ω + q` of `ℝ`; the itinerary of `Ω / 2` is caught by a test while `Ω / 2` is random).
 Blueprint node `vlm:transfer`. -/
 theorem IsAlmostDecidableBasisIn.mem_randomPoints_iff [OpensMeasurableSpace X]
-    (hB : IsAlmostDecidableBasisIn P A μ B) {A' : Set ℕ} (hAA' : charOracle A ≤ᵀ charOracle A')
-    {x : X} :
-    x ∈ randomPoints P A' μ ↔ IsMartinLofRandomIn A' (μ.map (itinerary B)) (itinerary B x) := by
-  refine ⟨fun hx ↦ ?_, mem_randomPoints_of_isMartinLofRandomIn hB hAA'⟩
-  -- This direction is false as stated: the cylinder pullbacks are finite intersections of the
-  -- `B k` and `D k`, which are c.e. open only when `A` computes the metric table of `P`
-  -- (`IsCeOpenFamilyIn.inter`). With `hP : ComputablePresentationIn P A` added to the statement,
-  -- it is `isMartinLofRandomIn_of_mem_randomPoints hB hP hAA' hx`.
-  sorry -- blueprint node vlm:transfer
+    (hB : IsAlmostDecidableBasisIn P A μ B) (hP : ComputablePresentationIn P A) {A' : Set ℕ}
+    (hAA' : charOracle A ≤ᵀ charOracle A') {x : X} :
+    x ∈ randomPoints P A' μ ↔ IsMartinLofRandomIn A' (μ.map (itinerary B)) (itinerary B x) :=
+  ⟨isMartinLofRandomIn_of_mem_randomPoints hB hP hAA',
+    mem_randomPoints_of_isMartinLofRandomIn hB hAA'⟩
 
 /-! ### The image measure -/
 

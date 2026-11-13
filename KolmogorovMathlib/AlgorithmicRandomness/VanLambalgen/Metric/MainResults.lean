@@ -62,7 +62,7 @@ theorem mem_randomPoints_iff_itinerary [IsFiniteMeasure μ] (hP : ComputablePres
           IsMartinLofRandomIn A' (μ.map (itinerary B)) (itinerary B x)) := by
   obtain ⟨B, hB⟩ := exists_isAlmostDecidableBasisIn hP hμ hmass
   exact ⟨B, hB.isComputableCantorMeasureIn_map hμ hmass,
-    fun _ hAA' _ => hB.mem_randomPoints_iff hAA'⟩
+    fun _ hAA' _ => hB.mem_randomPoints_iff hP hAA'⟩
 
 /-- **van Lambalgen's theorem on presented metric spaces.** For presentations with metric tables
 computable relative to `A` and finite Borel measures `μ`, `ν` computable relative to `A` with total
@@ -83,11 +83,12 @@ theorem mem_randomPoints_prod_iff [IsFiniteMeasure μ] [IsFiniteMeasure ν]
   obtain ⟨C, hC⟩ := exists_isAlmostDecidableBasisIn hQ hν hνm
   have hBC := hB.prod hP hQ hC
   have hνC := hC.isComputableCantorMeasureIn_map hν hνm
-  rw [hBC.mem_randomPoints_iff (TuringReducible.refl _),
+  rw [hBC.mem_randomPoints_iff (Presentation.computablePresentationIn_prod hP hQ)
+      (TuringReducible.refl _),
     map_prod_itinerary_prodBasis μ ν hB.measurable_itinerary hC.measurable_itinerary,
     itinerary_prodBasis, isMartinLofRandomIn_cantorJoin_iff hνC,
-    ← hB.mem_randomPoints_iff (TuringReducible.refl _),
-    ← hC.mem_randomPoints_iff (oracle_joins A (seqOracle (itinerary B x)))]
+    ← hB.mem_randomPoints_iff hP (TuringReducible.refl _),
+    ← hC.mem_randomPoints_iff hQ (oracle_joins A (seqOracle (itinerary B x)))]
   refine and_congr_right fun hx => ⟨fun hy => ?_, fun ⟨a, ha, hy⟩ => ?_⟩
   · obtain ⟨a, ha, hle⟩ := hB.exists_isCauchyName_le_itinerary x
     exact ⟨a, ha, randomPoints_anti_oracle Q ν hle hy⟩
