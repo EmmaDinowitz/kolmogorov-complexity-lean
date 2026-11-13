@@ -150,3 +150,7 @@ cost time, numerical checks, abandoned approaches. Read at the start of every se
   formalized.
 * **Second countability** of a presented space (`Presentation.secondCountableTopology`) makes the
   product σ-algebra on `X × Y` Borel, so `randomPoints` of `μ.prod ν` sees open sets measurably.
+* **Author's decisions (2026-11-13).** "Some name" (with a blueprint note on uniform tests as the
+  alternative); both measures `A`-computable; statements `vlm:main`, `vlm:transfer-main`,
+  `vlm:ad-basis` approved; the countable form joins phase 3, with a presentation of `ℕ → X`
+  (Mathlib's `PiCountable.metricSpace`), which the library did not have.

@@ -155,9 +155,17 @@ The mark ✎ on `vlm:main`: "relative to `x`" is not defined for a point of a me
 statement uses *some* Cauchy name. "Every name" would make the theorem false (a point has names
 of arbitrarily high degree, and a name can encode `y`). Both measures are `A`-computable here.
 
+Alternative not taken (author's decision, 2026-11-13): relativize to a point by *uniform tests*
+(Gács; Hoyrup–Rojas), i.e. tests `U_n(x)` enumerated from the basic balls containing `x`, uniformly
+in `x`, with no names involved. That notion is canonical and name-free, and for random `x` it
+should agree with "some name" through the itinerary (every uniform test at `x` is c.e. relative to
+`A ⊕ a` for every name `a`, and a test relative to `A ⊕ itinerary` is uniform in `x` off the
+boundary sets). It would need a new definition and its own comparison lemma; recorded as a possible
+later addition, not formalized.
+
 Not formalized (phase 3): the blind version (`μ` arbitrary finite, as in `vl:main`), which the
 itinerary route cannot give because the boundaries of the first factor's basis must be found
-effectively; and the countable form, which needs a presentation of `ℕ → X`.
+effectively.
 
 ## 4. Corrections
 
