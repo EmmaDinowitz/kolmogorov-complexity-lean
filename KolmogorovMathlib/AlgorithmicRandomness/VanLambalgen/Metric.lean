@@ -9,6 +9,9 @@ import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Oracle
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Basis
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Product
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.MainResults
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Countable.Defs
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Countable.Product
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Countable.MainResults
 
 /-!
 # The van Lambalgen theorem on presented metric spaces
@@ -22,4 +25,6 @@ bases and itineraries (Hoyrup–Rojas); blueprint `docs/BLUEPRINT.md`, nodes `vl
 * `Basis` — existence of almost decidable bases.
 * `Product` — products of presentations and of bases.
 * `MainResults` — van Lambalgen's theorem on presented spaces.
+* `Countable/` — the presentation of `ℕ → X`, products of bases over the coordinates, and the
+  countable theorem.
 -/
