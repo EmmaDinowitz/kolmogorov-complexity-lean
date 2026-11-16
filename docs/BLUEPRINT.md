@@ -174,13 +174,13 @@ later addition, not formalized.
 
 One presented space `X` for all coordinates; `ℕ → X` with Mathlib's `PiCountable.metricSpace`
 (a local instance; its topology is the product topology). Probability measures `μ i`, computable
-relative to `A` uniformly in `i`. Statements await the author's review; node lemmas are `sorry`.
+relative to `A` uniformly in `i`. Statements approved by the author on 2026-11-16 (the "Reviewed" column is the author's). Node files: `Countable/Presentation.lean`, `Countable/Mixture.lean`, `Countable/Basis.lean`, sharing `Countable/Basic.lean`.
 
 | Node | Claim | Declaration | Mark | Reviewed |
 |---|---|---|---|---|
-| `vlm:pi-presentation` | Presentation of `ℕ → X` by finitely prescribed ideal sequences (rest `ι 0`); dense (proved); metric table computable when `P`'s is. `Countable/Defs.lean` (protected), `Countable/Product.lean`. | `Presentation.pi`, `Presentation.denseRange_piIdeal`; `Presentation.computablePresentationIn_pi` | | |
+| `vlm:pi-presentation` | Presentation of `ℕ → X` by finitely prescribed ideal sequences (rest `ι 0`); dense (proved); metric table computable when `P`'s is. `Countable/Defs.lean` (protected), `Countable/Presentation.lean`. | `Presentation.pi`; `Presentation.computablePresentationIn_pi` | | |
 | `vlm:measure-family` | Uniform computability of a sequence of measures; members are computable; a probability measure has computable mass. | `IsComputableMeasureFamilyIn`; `IsComputableMeasureFamilyIn.isComputableMeasureIn`, `isComputableRealFamilyIn_measure_univ` | | |
-| `vlm:mix` | The mixture `∑ᵢ 2^{-(i+1)} μ i` is a computable probability measure; an almost decidable basis of it is one of every `μ i`. | `mixMeasure`; `isProbabilityMeasure_mixMeasure`, `IsComputableMeasureFamilyIn.isComputableMeasureIn_mix`, `IsAlmostDecidableBasisIn.of_mixMeasure` | | |
+| `vlm:mix` | The mixture `∑ᵢ 2^{-(i+1)} μ i` dominates each `μ i` up to `2^{i+1}` (proved); it is a computable probability measure; an almost decidable basis of it is one of every `μ i`. | `mixMeasure`; `le_two_pow_smul_mixMeasure`, `isProbabilityMeasure_mixMeasure`, `IsComputableMeasureFamilyIn.isComputableMeasureIn_mix`, `IsAlmostDecidableBasisIn.of_mixMeasure` | | |
 | `vlm:pi-basis` | The product basis `x j ∈ B k` at `⟨j, k⟩`: an almost decidable basis of `Measure.infinitePi μ`; itinerary = `cantorPiJoin` of the coordinates' itineraries (proved); carries the product measure to `piJoinMeasure`. | `piBasis`; `IsAlmostDecidableBasisIn.pi`, `itinerary_piBasis`, `map_infinitePi_itinerary_piBasis` | | |
 | `vlm:pi-below` | A name of a sequence computes a name of its truncation to the first `i` coordinates. | `exists_isCauchyName_pi_below` | | |
 | `vlm:countable` | `x` random for `∏ μ i` relative to `A` ⇒ `x i` is `μ i`-random relative to `A ⊕ a` for some name `a` of the other coordinates `j ↦ x (skipIndex i j)`. `Countable/MainResults.lean` (protected; proved from the nodes above). | `mem_randomPoints_coordinate_of_pi` | | |

@@ -52,8 +52,8 @@ variable {X : Type*} [MetricSpace X]
 
 /-- The sequences listed by finite lists of ideal indices are dense in `ℕ → X` (product topology):
 a basic open set constrains finitely many coordinates, each to an open set containing an ideal
-point. Blueprint node `vlm:pi-presentation`. -/
-theorem Presentation.denseRange_piIdeal (P : Presentation X) :
+point. -/
+private theorem Presentation.denseRange_piIdeal (P : Presentation X) :
     DenseRange fun n : ℕ => fun j : ℕ =>
       P.ι (((Encodable.decode (α := List ℕ) n).getD []).getD j 0) := by
   refine dense_iff_inter_open.2 fun U hU ⟨y, hy⟩ => ?_

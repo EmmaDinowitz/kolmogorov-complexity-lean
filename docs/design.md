@@ -154,3 +154,27 @@ cost time, numerical checks, abandoned approaches. Read at the start of every se
   alternative); both measures `A`-computable; statements `vlm:main`, `vlm:transfer-main`,
   `vlm:ad-basis` approved; the countable form joins phase 3, with a presentation of `ℕ → X`
   (Mathlib's `PiCountable.metricSpace`), which the library did not have.
+
+## 2026-11-16 — phase 3: countable form approved; proof-file layout
+
+* **Author's decisions (2026-11-16).** The countable statements `vlm:countable`,
+  `vlm:countable-below`, `vlm:countable-nonvacuous` are approved as stated (one space `X` for all
+  coordinates, uniform computability, "some name"); the computable metric table is added to
+  `vlm:transfer` (counterexample in `BLUEPRINT.md`); the node lemmas go to parallel agents.
+* **One file per agent.** The countable node lemmas are split into `Countable/Presentation.lean`,
+  `Countable/Mixture.lean` and `Countable/Basis.lean`, so that parallel provers never edit the
+  same file. The one fact two of them share, `μ i ≤ 2^{i+1} • mixMeasure μ`, is proved first in
+  `Countable/Basic.lean`.
+* **`measurable_cantorPiJoin` is public** (in `Countable/Split.lean`), so the product-basis proof
+  reuses it instead of re-proving it.
+* **`Presentation.denseRange_piIdeal` is private** in the protected `Countable/Defs.lean`: it only
+  discharges the `dense` field of `Presentation.pi`.
+* **Pitfalls from the first proof round.** Dot notation on predicates that unfold to `∃`
+  (`IsCeOpenFamilyIn`, `IsUniformlyEffectiveOpenIn`, `ComputablePresentationIn`) resolves to
+  `Exists.*`: use full names (`IsCeOpenFamilyIn.inter P A hP hU hV`). `omit … in` goes before the
+  docstring. `Set.mem_setOf_eq`, `if_pos`/`if_neg`, `if_true`/`if_false` are deprecated here:
+  use `Set.mem_ofPred_eq` and `↓reduceIte`. `decide_not` takes its proposition implicitly. A
+  presentation's metric-table computability gives no real arithmetic: express a computable real's
+  ball as a union over its rational approximations instead. Lake waits for the machine-wide lock
+  can exceed 30 minutes; run builds in the background with a log file.
+

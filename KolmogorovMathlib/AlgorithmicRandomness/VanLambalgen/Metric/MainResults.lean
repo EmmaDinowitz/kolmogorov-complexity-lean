@@ -28,8 +28,8 @@ The proof transfers the Cantor-space theorem (`isMartinLofRandomIn_cantorJoin_if
 "Some name" cannot be strengthened to "every name": a point has names of arbitrarily high degree,
 and a name can encode `y` itself. Both measures must be computable relative to `A` here, while the
 Cantor-space theorem lets the first be arbitrary finite: the itinerary of the first factor needs
-`μ`-null boundaries found effectively. The blind version on presented spaces and the countable
-form are not formalized (see `docs/BLUEPRINT.md`).
+`μ`-null boundaries found effectively. The blind version on presented spaces is not formalized
+(see `docs/BLUEPRINT.md`); the countable form is in `Metric/Countable/MainResults.lean`.
 
 ## Main statements
 

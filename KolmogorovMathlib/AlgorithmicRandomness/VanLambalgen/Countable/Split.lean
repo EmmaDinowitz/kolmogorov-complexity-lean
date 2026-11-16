@@ -34,7 +34,8 @@ The permutation splitting off the `i`-th coordinate sends the even position `2m`
 
 ## Main declarations
 
-* `exists_cantorPiJoin_eq` (blueprint node `vl:pi-join`): every sequence is an infinite join.
+* `exists_cantorPiJoin_eq`, `measurable_cantorPiJoin` (blueprint node `vl:pi-join`): every sequence
+  is an infinite join, and the infinite join is measurable.
 * `isProbabilityMeasure_piJoinMeasure` (blueprint node `vl:pi-join-measure`): the countable product
   of probability measures is a probability measure.
 * `isMartinLofRandomIn_cantorPiJoin_iff_split` (blueprint node `vl:pi-split`): `⊕ⱼ xⱼ` is random for
@@ -62,7 +63,8 @@ Blueprint node `vl:pi-join`. -/
 theorem exists_cantorPiJoin_eq (z : CantorSeq) : ∃ x, cantorPiJoin x = z :=
   ⟨fun j k => z (Nat.pair j k), funext fun n => by simp only [cantorPiJoin, Nat.pair_unpair]⟩
 
-private lemma measurable_cantorPiJoin : Measurable cantorPiJoin :=
+/-- The infinite join is measurable. Blueprint node `vl:pi-join`. -/
+theorem measurable_cantorPiJoin : Measurable cantorPiJoin :=
   Measurable.of_eval fun _ => (measurable_pi_apply _).comp (measurable_pi_apply _)
 
 /-- The countable product of probability measures, carried by the infinite join, is a probability

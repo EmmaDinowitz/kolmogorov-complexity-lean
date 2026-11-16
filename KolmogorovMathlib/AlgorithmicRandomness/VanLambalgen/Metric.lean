@@ -10,7 +10,10 @@ import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Basis
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Product
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.MainResults
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Countable.Defs
-import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Countable.Product
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Countable.Basic
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Countable.Presentation
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Countable.Mixture
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Countable.Basis
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Countable.MainResults
 
 /-!

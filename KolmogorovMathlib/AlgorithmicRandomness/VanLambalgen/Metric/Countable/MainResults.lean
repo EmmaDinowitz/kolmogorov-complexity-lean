@@ -4,7 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.MainResults
-import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Countable.Product
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Countable.Presentation
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Countable.Mixture
+import KolmogorovMathlib.AlgorithmicRandomness.VanLambalgen.Metric.Countable.Basis
 
 /-!
 # The countable van Lambalgen theorem on a presented metric space
