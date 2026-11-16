@@ -306,7 +306,7 @@ private lemma inv_two_pow_add_mul_le {a b : ℝ≥0∞} {n c : ℕ} (ha : a ≤ 
 
 /-- The interleaved product of almost decidable bases for `μ` and `ν` is an almost decidable basis
 for `μ.prod ν` in the product presentation. Blueprint node `vlm:prod-basis`. -/
-theorem IsAlmostDecidableBasisIn.prod [OpensMeasurableSpace X] [OpensMeasurableSpace Y]
+theorem IsAlmostDecidableBasisIn.prod
     {P : Presentation X} {Q : Presentation Y} {A : Set ℕ} {μ : Measure X} {ν : Measure Y}
     [IsFiniteMeasure μ] [IsFiniteMeasure ν] {B : ℕ → Set X} {C : ℕ → Set Y}
     (hP : ComputablePresentationIn P A) (hQ : ComputablePresentationIn Q A)

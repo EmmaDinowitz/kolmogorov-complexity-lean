@@ -185,9 +185,16 @@ cost time, numerical checks, abandoned approaches. Read at the start of every se
 * **Oracle bookkeeping made public.** `charOracle_le_of_computableIn`,
   `computableIn_nameOracle_oracleJoin` and `charOracle_nameOracle_le` in `Metric/Oracle.lean` are
   public, used also by `Countable/Presentation.lean` (a verbatim private copy there was removed).
-* **Unused hypothesis kept.** `IsAlmostDecidableBasisIn.pi` carries `[OpensMeasurableSpace X]`,
-  which its proof does not use and no linter flags; it is left as reviewed. Three proved lemmas
-  gained `omit [MetricSpace X] in` (unused instance arguments; the propositions are unchanged).
+* **Unused hypotheses removed.** `IsAlmostDecidableBasisIn.pi` and `IsAlmostDecidableBasisIn.prod`
+  carried `[OpensMeasurableSpace …]` instances their proofs do not use (no linter flags unused
+  instance hypotheses); they were removed, which only generalizes the lemmas. Three proved lemmas
+  (`map_prod_itinerary_prodBasis`, `isComputableRealFamilyIn_measure_univ`,
+  `map_infinitePi_itinerary_piBasis`) gained `omit [MetricSpace X] in`: a signature edit dropping
+  an unused instance argument; the propositions are unchanged.
+* **Public helpers.** `computableIn_nameOracle_oracleJoin`, `charOracle_nameOracle_le`
+  (`Metric/Oracle.lean`), `measurable_cantorPiJoin` (`Countable/Split.lean`) and
+  `exists_nestedRadii` (`Metric/Basis/Radius.lean`) are public because another file uses them;
+  `charOracle_le_of_computableIn` is used in one file only and stays private.
 * **Pitfalls (round 2).** `ComputableIn.nat_rec` with an anonymous step function can time out in
   `whnf`: name the step (`piStep`) and pass `(h := …)`. There is no `Primrec` rational addition,
   only `Computable₂` (`computable₂_ratAdd`): sum rationals with `nat_rec` over the list length.

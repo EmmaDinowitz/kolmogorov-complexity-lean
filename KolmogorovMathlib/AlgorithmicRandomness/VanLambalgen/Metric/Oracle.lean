@@ -29,9 +29,9 @@ Names are encoded by their graphs (`nameOracle`); oracles are joined with
 
 ## Main declarations
 
-* `charOracle_le_of_computableIn`, `computableIn_nameOracle_oracleJoin`,
-  `charOracle_nameOracle_le` (blueprint node `vlm:oracle`): oracle bookkeeping for graphs of
-  names and sets decided by relatively computable Boolean functions; also used by
+* `computableIn_nameOracle_oracleJoin`, `charOracle_nameOracle_le` (blueprint node
+  `vlm:oracle`): a function is computable relative to `A` joined with its graph, and the graph
+  of a relatively computable function is reducible to the oracle; also used by
   `Metric/Countable/Presentation.lean`.
 
 * `IsAlmostDecidableBasisIn.exists_isCauchyName_le_itinerary`,
@@ -51,8 +51,8 @@ variable {X : Type*} [MetricSpace X] [MeasurableSpace X] {P : Presentation X} {A
 /-! ### Oracle bookkeeping -/
 
 /-- A set whose membership is decided by a Boolean function computable relative to `J` is
-Turing reducible to `J`. Blueprint node `vlm:oracle`. -/
-theorem charOracle_le_of_computableIn {S J : Set ℕ} {c : ℕ → Bool}
+Turing reducible to `J`. -/
+private lemma charOracle_le_of_computableIn {S J : Set ℕ} {c : ℕ → Bool}
     (hc : ComputableIn {charOracle J} c) (hS : ∀ n, n ∈ S ↔ c n = true) :
     charOracle S ≤ᵀ charOracle J := by
   have h : ComputableIn {charOracle J} fun n ↦ cond (c n) 1 0 :=

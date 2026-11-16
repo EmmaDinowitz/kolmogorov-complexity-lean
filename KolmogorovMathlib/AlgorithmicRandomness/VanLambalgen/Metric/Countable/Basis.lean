@@ -363,7 +363,7 @@ private lemma two_pow_mul_le {a : ℝ≥0∞} {n c : ℕ} (ha : a ≤ (2 : ℝ�
 
 /-- The product over the coordinates of an almost decidable basis of the mixture is an almost
 decidable basis of the product measure. Blueprint node `vlm:pi-basis`. -/
-theorem IsAlmostDecidableBasisIn.pi [OpensMeasurableSpace X] [∀ i, IsProbabilityMeasure (μ i)]
+theorem IsAlmostDecidableBasisIn.pi [∀ i, IsProbabilityMeasure (μ i)]
     (hP : ComputablePresentationIn P A) (hB : IsAlmostDecidableBasisIn P A (mixMeasure μ) B) :
     IsAlmostDecidableBasisIn P.pi A (Measure.infinitePi μ) (piBasis B) := by
   obtain ⟨D, W, hD, hW, hBDW⟩ := hB.exists_exterior
