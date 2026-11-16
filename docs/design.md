@@ -178,3 +178,22 @@ cost time, numerical checks, abandoned approaches. Read at the start of every se
   ball as a union over its rational approximations instead. Lake waits for the machine-wide lock
   can exceed 30 minutes; run builds in the background with a log file.
 
+## 2026-11-16 — phase 3 complete
+
+* **All `vlm:*` nodes proved**; the chapter has no `sorry`. The countable node lemmas were proved
+  by three agents in parallel, one file each.
+* **Oracle bookkeeping made public.** `charOracle_le_of_computableIn`,
+  `computableIn_nameOracle_oracleJoin` and `charOracle_nameOracle_le` in `Metric/Oracle.lean` are
+  public, used also by `Countable/Presentation.lean` (a verbatim private copy there was removed).
+* **Unused hypothesis kept.** `IsAlmostDecidableBasisIn.pi` carries `[OpensMeasurableSpace X]`,
+  which its proof does not use and no linter flags; it is left as reviewed. Three proved lemmas
+  gained `omit [MetricSpace X] in` (unused instance arguments; the propositions are unchanged).
+* **Pitfalls (round 2).** `ComputableIn.nat_rec` with an anonymous step function can time out in
+  `whnf`: name the step (`piStep`) and pass `(h := …)`. There is no `Primrec` rational addition,
+  only `Computable₂` (`computable₂_ratAdd`): sum rationals with `nat_rec` over the list length.
+  `Measure.sum_apply_of_countable` holds for every set. `Measure.le_map_apply` needs
+  `(μ := …) (f := …)` explicitly. `exact_mod_cast` fails on `(2 : ℚ)⁻¹ ^ j` versus `(2 : ℝ)⁻¹ ^ j`
+  inside defs; use `(Rat.cast_lt (K := ℝ)).2 h` then `push_cast`. `measurable_pi_lambda` is
+  deprecated (`Measurable.of_eval`); `mul_le_mul_left'` is gone (`gcongr`); `ENNReal.inv_inv` does
+  not exist (`inv_inv`).
+

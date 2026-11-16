@@ -133,7 +133,7 @@ Source: the transfer method of [HoyrupRojas2009]. Spaces are `PointToSet.Present
 metric tables computable relative to `A` (`ComputablePresentationIn`); randomness is
 `PointToSet.randomPoints`; measures are finite Borel measures computable relative to `A`
 (`IsComputableMeasureIn`) with total mass computable relative to `A`. Declarations are in the
-namespace `PointToSet`. Status: definitions and statements; proofs are `sorry` except where noted.
+namespace `PointToSet`. Status (2026-11-16): every node below is proved; no `sorry`.
 
 | Node | Claim | Declaration | Mark | Reviewed |
 |---|---|---|---|---|
@@ -174,7 +174,7 @@ later addition, not formalized.
 
 One presented space `X` for all coordinates; `ℕ → X` with Mathlib's `PiCountable.metricSpace`
 (a local instance; its topology is the product topology). Probability measures `μ i`, computable
-relative to `A` uniformly in `i`. Statements approved by the author on 2026-11-16 (the "Reviewed" column is the author's). Node files: `Countable/Presentation.lean`, `Countable/Mixture.lean`, `Countable/Basis.lean`, sharing `Countable/Basic.lean`.
+relative to `A` uniformly in `i`. Statements approved by the author on 2026-11-16 (the "Reviewed" column is the author's). Node files: `Countable/Presentation.lean`, `Countable/Mixture.lean`, `Countable/Basis.lean`, sharing `Countable/Basic.lean`. All proved.
 
 | Node | Claim | Declaration | Mark | Reviewed |
 |---|---|---|---|---|

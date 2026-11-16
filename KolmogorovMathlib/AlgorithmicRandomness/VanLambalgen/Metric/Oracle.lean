@@ -29,6 +29,11 @@ Names are encoded by their graphs (`nameOracle`); oracles are joined with
 
 ## Main declarations
 
+* `charOracle_le_of_computableIn`, `computableIn_nameOracle_oracleJoin`,
+  `charOracle_nameOracle_le` (blueprint node `vlm:oracle`): oracle bookkeeping for graphs of
+  names and sets decided by relatively computable Boolean functions; also used by
+  `Metric/Countable/Presentation.lean`.
+
 * `IsAlmostDecidableBasisIn.exists_isCauchyName_le_itinerary`,
   `IsAlmostDecidableBasisIn.itinerary_le_of_mem_randomPoints` (blueprint node `vlm:oracle`).
 
@@ -46,8 +51,8 @@ variable {X : Type*} [MetricSpace X] [MeasurableSpace X] {P : Presentation X} {A
 /-! ### Oracle bookkeeping -/
 
 /-- A set whose membership is decided by a Boolean function computable relative to `J` is
-Turing reducible to `J`. -/
-private lemma charOracle_le_of_computableIn {S J : Set ℕ} {c : ℕ → Bool}
+Turing reducible to `J`. Blueprint node `vlm:oracle`. -/
+theorem charOracle_le_of_computableIn {S J : Set ℕ} {c : ℕ → Bool}
     (hc : ComputableIn {charOracle J} c) (hS : ∀ n, n ∈ S ↔ c n = true) :
     charOracle S ≤ᵀ charOracle J := by
   have h : ComputableIn {charOracle J} fun n ↦ cond (c n) 1 0 :=
@@ -80,8 +85,9 @@ private lemma computableIn_seq_oracleJoin (A : Set ℕ) (u : CantorSeq) :
   · simp [J, charOracle, oracleJoin, seqOracle, hodd, hodd', hun]
   · simp [J, charOracle, oracleJoin, seqOracle, hodd, hodd', hun]
 
-/-- A function is computable relative to `A` joined with its graph: search the graph. -/
-private lemma computableIn_nameOracle_oracleJoin (A : Set ℕ) (a : ℕ → ℕ) :
+/-- A function is computable relative to `A` joined with its graph: search the graph.
+Blueprint node `vlm:oracle`. -/
+theorem computableIn_nameOracle_oracleJoin (A : Set ℕ) (a : ℕ → ℕ) :
     ComputableIn {charOracle (oracleJoin A (nameOracle a))} a := by
   set K := oracleJoin A (nameOracle a)
   have hquery : PartrecIn {charOracle K}
@@ -106,8 +112,9 @@ private lemma computableIn_nameOracle_oracleJoin (A : Set ℕ) (a : ℕ → ℕ)
     have hK : 2 * Nat.pair p m + 1 ∉ K := fun h ↦ hne ((hmem m).mp h)
     simp [charOracle, hK]
 
-/-- The graph of a total function computable relative to `J` is Turing reducible to `J`. -/
-private lemma charOracle_nameOracle_le {J : Set ℕ} {a : ℕ → ℕ}
+/-- The graph of a total function computable relative to `J` is Turing reducible to `J`.
+Blueprint node `vlm:oracle`. -/
+theorem charOracle_nameOracle_le {J : Set ℕ} {a : ℕ → ℕ}
     (ha : ComputableIn {charOracle J} a) : charOracle (nameOracle a) ≤ᵀ charOracle J := by
   have h1 : ComputableIn {charOracle J} fun n : ℕ ↦ a (Nat.unpair n).1 :=
     ha.comp (Primrec.fst.comp Primrec.unpair).computableIn

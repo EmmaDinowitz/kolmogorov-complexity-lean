@@ -767,6 +767,24 @@ theorems are in the namespace `Kolmogorov`.
   `A` and `μ i` is computable relative to `A`, then `xᵢ` is random for `μ i` relative to `A` joined
   with all other coordinates, hence with the earlier ones; `exists_isMartinLofRandomIn_cantorPiJoin`
   shows random joins exist. The converse fails for infinitely many coordinates and is not stated.
+* **Presented metric spaces** (namespace `Kolmogorov.PointToSet`, randomness `randomPoints`):
+  `mem_randomPoints_prod_iff`: for presentations of `X`, `Y` with metric tables computable
+  relative to `A` and finite Borel measures `μ`, `ν` computable relative to `A` with total masses
+  computable relative to `A`, the pair `(x, y)` is `μ ⊗ ν`-random relative to `A` (product
+  presentation `P.prod Q`, sup metric) if and only if `x` is `μ`-random relative to `A` and `y`
+  is `ν`-random relative to `A ⊕ a` for some Cauchy name `a` of `x` (graph oracle `nameOracle a`).
+  The countable form `mem_randomPoints_coordinate_of_pi` (and `_below`): for probability measures
+  `μ i` on `X`, computable relative to `A` uniformly in `i`, a sequence random for
+  `Measure.infinitePi μ` (presentation `Presentation.pi P` of `ℕ → X`, Mathlib's
+  `PiCountable.metricSpace`) has each coordinate `x i` random for `μ i` relative to `A ⊕ a` for
+  some name `a` of the other (or of the earlier) coordinates; `exists_mem_randomPoints_pi` shows
+  random sequences exist.
+* **Randomness through itineraries** `mem_randomPoints_iff_itinerary` (Hoyrup–Rojas
+  [HoyrupRojas2009]): a finite measure computable relative to `A`, with computable mass, on a
+  presentation with computable metric table has an almost decidable basis
+  (`exists_isAlmostDecidableBasisIn`), and relative to every oracle above `A` a point is random
+  exactly when its itinerary in that basis is random for the image measure, which is computable
+  on Cantor space. This transfers Cantor-space randomness theorems to presented spaces.
 * **Tools** used on the way: randomness relative to an oracle and its basic facts
   (`IsMartinLofRandomIn.mono_oracle`, `isMartinLofRandomIn_empty_iff`,
   `measure_setOf_not_isMartinLofRandomIn`), pullback of relatively effectively open families
@@ -791,8 +809,12 @@ theorem isMartinLofRandom_cantorJoin_uniformMeasure_iff :
 
 ### Corrections
 
-None. The main statement is broader than the textbook one (any oracle, any finite `μ`, `ν`
-computable relative to the oracle); the textbook statement is the corollary above.
+None to the Cantor-space theorem. The main statement is broader than the textbook one (any
+oracle, any finite `μ`, `ν` computable relative to the oracle); the textbook statement is the
+corollary above. On presented spaces, "random relative to `x`" is stated through *some* Cauchy
+name of `x` ("every name" is false), both measures are computable relative to `A`, and the
+transfer lemma `IsAlmostDecidableBasisIn.mem_randomPoints_iff` assumes a computable metric table
+(false without it; counterexample in `docs/BLUEPRINT.md`).
 
 ### Main theorems
 
@@ -803,8 +825,10 @@ computable relative to the oracle); the textbook statement is the corollary abov
 `IsMartinLofRandomIn.coordinate_of_cantorPiJoin_below`, `exists_isMartinLofRandomIn_cantorPiJoin`,
 and the three directions
 `IsMartinLofRandomIn.left_of_cantorJoin`, `IsMartinLofRandomIn.right_of_cantorJoin`,
-`IsMartinLofRandomIn.cantorJoin`. Each depends only on the axioms `propext`, `Classical.choice`
-and `Quot.sound`.
+`IsMartinLofRandomIn.cantorJoin`; on presented spaces `PointToSet.mem_randomPoints_prod_iff`,
+`PointToSet.mem_randomPoints_iff_itinerary`, `PointToSet.mem_randomPoints_coordinate_of_pi`,
+`PointToSet.mem_randomPoints_coordinate_of_pi_below`, `PointToSet.exists_mem_randomPoints_pi`.
+Each depends only on the axioms `propext`, `Classical.choice` and `Quot.sound`.
 
 ### Map of the files
 
@@ -830,7 +854,15 @@ KolmogorovMathlib/AlgorithmicRandomness/
     │   ├── Left.lean                 #     random pair ⇒ random first coordinate
     │   ├── Right.lean                #     random pair ⇒ second coordinate random relative to the first
     │   └── Converse.lean             #     relatively random coordinates ⇒ random pair
-    └── MainResults.lean              #   the theorem, exchanged, mutual and countable forms, textbook form, non-vacuousness
+    ├── MainResults.lean              #   the theorem, exchanged, mutual and countable forms, textbook form, non-vacuousness
+    └── Metric.lean, Metric/          #   the theorem on presented metric spaces (Hoyrup–Rojas transfer)
+        ├── Defs.lean                 #     nameOracle, Presentation.prod, almost decidable bases, itineraries, prodBasis
+        ├── Basis.lean, Basis/        #     existence of almost decidable bases (nested-interval radius search)
+        ├── Transfer.lean             #     itineraries preserve randomness; the image measure is computable
+        ├── Oracle.lean               #     at a random point the itinerary is the least degree of a name
+        ├── Product.lean              #     products of presentations and of bases
+        ├── MainResults.lean          #     van Lambalgen on presented spaces; randomness through itineraries
+        └── Countable/                #     ℕ → X: presentation, mixture of measures, product basis, countable theorem
 ```
 
 ## Project Layout
