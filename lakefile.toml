@@ -22,7 +22,7 @@ rev = "v4.35.0"
 [[require]]
 name = "GeodesicInterface"
 git = "https://github.com/EmmaDinowitz/GeodesicInterface"
-rev = "aa6b9101ca22ea94ad6dca794a7099381c27707f"
+rev = "1daf0593af95cfa8801a6c9956a74b8e4ac42fc1"
 
 [[lean_lib]]
 name = "KolmogorovMathlib"

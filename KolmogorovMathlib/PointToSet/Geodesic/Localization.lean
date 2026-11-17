@@ -37,6 +37,7 @@ namespace Kolmogorov.PointToSet
 
 open Filter Set
 open scoped Topology ENNReal Computability
+open GeodesicInterface
 
 variable {X : Type*} [MetricSpace X] [CompactSpace X]
 
@@ -239,7 +240,15 @@ end core
 
 /-! ### Shrinkable plaques -/
 
-namespace GeodesicReconstructionData
+end Kolmogorov.PointToSet
+
+namespace GeodesicInterface.GeodesicReconstructionData
+
+open Kolmogorov.PointToSet
+open Filter Set
+open scoped Topology ENNReal Computability
+
+variable {X : Type*} [MetricSpace X] [CompactSpace X]
 
 variable (G : GeodesicReconstructionData X)
 
@@ -256,7 +265,15 @@ theorem Kplaque'_subset_closure_plaque {p : X} {r : ℚ} (hr : 0 < r)
   (G.Kplaque'_spec p r hr).2.2.trans
     (closure_mono fun _ hy ↦ ⟨hy.1, lt_of_lt_of_le hy.2 hrε⟩)
 
-end GeodesicReconstructionData
+end GeodesicInterface.GeodesicReconstructionData
+
+namespace Kolmogorov.PointToSet
+
+open GeodesicInterface
+open Filter Set
+open scoped Topology ENNReal Computability
+
+variable {X : Type*} [MetricSpace X] [CompactSpace X]
 
 /-! ### The UEL form: finite orbit data with a marked past and a marked future -/
 

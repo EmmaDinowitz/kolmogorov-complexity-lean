@@ -23,6 +23,7 @@ namespace Kolmogorov.PointToSet
 
 open Filter Set
 open scoped Topology ENNReal Computability
+open GeodesicInterface
 
 variable {X : Type*} [MetricSpace X] [CompactSpace X]
 
@@ -32,7 +33,15 @@ theorem bowenBall_mono_radius (T : X → X) (n : ℕ) (x : X) {ε ε' : ℝ} (hl
     bowenBall T n x ε ⊆ bowenBall T n x ε' := fun _ hy ↦
   Dynamics.dynEntourage_monotone T n (fun _ hz ↦ lt_of_lt_of_le hz hle) hy
 
-namespace GeodesicReconstructionData
+end Kolmogorov.PointToSet
+
+namespace GeodesicInterface.GeodesicReconstructionData
+
+open Kolmogorov.PointToSet
+open Filter Set
+open scoped Topology ENNReal Computability
+
+variable {X : Type*} [MetricSpace X] [CompactSpace X]
 
 variable (G : GeodesicReconstructionData X)
 
@@ -56,7 +65,15 @@ holds for every compact set and every threshold. -/
 theorem smallPlaques (Q : Set X) (ε₀ : ℝ) : G.SmallPlaques Q ε₀ := fun _ _ _ hr hrε ↦
   ⟨G.Kplaque_subset_closure_plaque hr hrε, G.Kplaque'_subset_closure_plaque hr hrε⟩
 
-end GeodesicReconstructionData
+end GeodesicInterface.GeodesicReconstructionData
+
+namespace Kolmogorov.PointToSet
+
+open GeodesicInterface
+open Filter Set
+open scoped Topology ENNReal Computability
+
+variable {X : Type*} [MetricSpace X] [CompactSpace X]
 
 namespace EffectiveGeodesicData
 

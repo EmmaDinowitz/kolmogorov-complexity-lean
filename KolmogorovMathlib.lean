@@ -81,10 +81,12 @@ import KolmogorovMathlib.Oracle.FinitePrefix
 import KolmogorovMathlib.Oracle.Joins
 import KolmogorovMathlib.Oracle.KraftChaitin
 import KolmogorovMathlib.Oracle.PrefixComplexity
+import KolmogorovMathlib.Oracle.PrefixComplexity.AsymmetricInformation
 import KolmogorovMathlib.Oracle.PrefixComplexity.Basic
 import KolmogorovMathlib.Oracle.PrefixComplexity.Decoders
 import KolmogorovMathlib.Oracle.PrefixComplexity.MonotonicityThreshold
 import KolmogorovMathlib.Oracle.PrefixComplexity.NatBounds
+import KolmogorovMathlib.Oracle.PrefixComplexity.SymmetryLower
 import KolmogorovMathlib.Oracle.Search
 import KolmogorovMathlib.Oracle.Universal
 import KolmogorovMathlib.Oracle.Universal.Enumeration
@@ -231,8 +233,6 @@ import KolmogorovMathlib.PointToSet.Pressure.Upper.EffectiveEqSup
 import KolmogorovMathlib.PointToSet.Pressure.Upper.PointToSetPrinciple
 import KolmogorovMathlib.PointToSet.Pressure.Upper.ScaleComparison
 import KolmogorovMathlib.PointToSet.Pressure.Upper.UniformNets
-import KolmogorovMathlib.Oracle.PrefixComplexity.AsymmetricInformation
-import KolmogorovMathlib.Oracle.PrefixComplexity.SymmetryLower
 import KolmogorovMathlib.PointToSet.SplitPrecision.EuclideanTheorems
 import KolmogorovMathlib.PointToSet.SplitPrecision.Tuples
 import KolmogorovMathlib.PointToSet.SymbolicSet

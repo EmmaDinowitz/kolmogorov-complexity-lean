@@ -28,14 +28,13 @@ input. The loss `ρ` is rational so that the program can form `R_±`. The orbit 
 `OrbitDatum`s of orders `Tp + 1`, `Tm + 1` and tolerance at most `min ε (r / 8)`.
 -/
 
-namespace Kolmogorov.PointToSet
+namespace GeodesicInterface.GeodesicReconstructionData
 
+open Kolmogorov.PointToSet
 open Filter Set
 open scoped Topology ENNReal Computability
 
 variable {X : Type*} [MetricSpace X] [CompactSpace X]
-
-namespace GeodesicReconstructionData
 
 variable (G : GeodesicReconstructionData X)
 
@@ -237,7 +236,15 @@ theorem perturbed_cover_scaled {ι : Type*} (L : List ι) (c y : ι → X) (S Z 
       _ < (C * κ + C₁) * R + a := add_lt_add_of_lt_of_le hwp (herr p hp)
       _ ≤ (C * κ + 2 * C₁) * R := by linarith
 
-end GeodesicReconstructionData
+end GeodesicInterface.GeodesicReconstructionData
+
+namespace Kolmogorov.PointToSet
+
+open GeodesicInterface
+open Filter Set
+open scoped Topology ENNReal Computability
+
+variable {X : Type*} [MetricSpace X] [CompactSpace X]
 
 namespace EffectiveGeodesicData
 

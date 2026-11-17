@@ -22,14 +22,13 @@ Conventions: integer return times (decision D6); `u^± ≥ 0` (G2) is load-beari
 `return_adjustment`.
 -/
 
-namespace Kolmogorov.PointToSet
+namespace GeodesicInterface.GeodesicReconstructionData
 
+open Kolmogorov.PointToSet
 open Filter Set
 open scoped Topology ENNReal Computability
 
 variable {X : Type*} [MetricSpace X] [CompactSpace X]
-
-namespace GeodesicReconstructionData
 
 variable (G : GeodesicReconstructionData X)
 
@@ -424,6 +423,4 @@ theorem return_adjustment {x : X} (hx : G.ControlledReturns x) (hpos : G.Positiv
     · rw [eq2]; linarith
     · rw [eq2]; linarith
 
-end GeodesicReconstructionData
-
-end Kolmogorov.PointToSet
+end GeodesicInterface.GeodesicReconstructionData

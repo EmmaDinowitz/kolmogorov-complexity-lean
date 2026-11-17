@@ -34,8 +34,9 @@ Signatures follow the API of `PointToSet/Dynamics/BowenBalls.lean`, `PointwiseQu
 and `ComputableMetric/Presentation.lean`.
 -/
 
-namespace Kolmogorov.PointToSet
+namespace GeodesicInterface
 
+open Kolmogorov.PointToSet
 open Filter
 open scoped Topology ENNReal Computability
 
@@ -187,6 +188,16 @@ end rates
 end FlowData
 
 end flowData
+
+end GeodesicInterface
+
+namespace Kolmogorov.PointToSet
+
+open GeodesicInterface
+open Filter
+open scoped Topology ENNReal Computability
+
+variable {X : Type*} [MetricSpace X]
 
 /-! ### `geo:orbit-complexity`: finite orbit complexity -/
 

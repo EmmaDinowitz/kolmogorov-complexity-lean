@@ -29,14 +29,13 @@ precision `max (Rp, Rm)`. OTL's remark applies: an arbitrary effectively closed 
 not justify this search; the dense computable sequence on `D` is what makes it terminate.
 -/
 
-namespace Kolmogorov.PointToSet
+namespace GeodesicInterface.GeodesicReconstructionData
 
+open Kolmogorov.PointToSet
 open Filter Set
 open scoped Topology ENNReal Computability
 
 variable {X : Type*} [MetricSpace X] [CompactSpace X]
-
-namespace GeodesicReconstructionData
 
 variable (G : GeodesicReconstructionData X)
 
@@ -93,7 +92,15 @@ theorem transverse_estimate_mono (x : X) (_hx : x ∈ G.Reg) {j : Fin G.nBoxes}
       Ltr * max (Metric.infDist y (G.Wloc .cs x)) (Metric.infDist y (G.Wloc .cu x)) := by
   exact fun y hy ↦ h y ⟨hy.1, hV' hy.2⟩
 
-end GeodesicReconstructionData
+end GeodesicInterface.GeodesicReconstructionData
+
+namespace Kolmogorov.PointToSet
+
+open GeodesicInterface
+open Filter Set
+open scoped Topology ENNReal Computability
+
+variable {X : Type*} [MetricSpace X] [CompactSpace X]
 
 namespace EffectiveGeodesicData
 

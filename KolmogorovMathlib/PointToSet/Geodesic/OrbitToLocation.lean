@@ -31,14 +31,13 @@ constant depending on `x` but not on the durations (decision D7). The time term 
 is respected by keeping the exact pair complexity in the main statement.
 -/
 
-namespace Kolmogorov.PointToSet
+namespace GeodesicInterface.GeodesicReconstructionData
 
+open Kolmogorov.PointToSet
 open Filter Set
 open scoped Topology ENNReal Computability
 
 variable {X : Type*} [MetricSpace X] [CompactSpace X]
-
-namespace GeodesicReconstructionData
 
 variable (G : GeodesicReconstructionData X)
 
@@ -64,7 +63,15 @@ theorem logb_combinedScale (ρ : ℝ) (Tp Tm : ℕ) (x : X) :
       -min (birkhoffSum G.f G.uPlus Tp x - ρ * Tp) (birkhoffSum G.finv G.uMinus Tm x - ρ * Tm) := by
   rw [G.combinedScale_eq, Real.logb_rpow (by norm_num) (by norm_num)]
 
-end GeodesicReconstructionData
+end GeodesicInterface.GeodesicReconstructionData
+
+namespace Kolmogorov.PointToSet
+
+open GeodesicInterface
+open Filter Set
+open scoped Topology ENNReal Computability
+
+variable {X : Type*} [MetricSpace X] [CompactSpace X]
 
 namespace EffectiveGeodesicData
 

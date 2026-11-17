@@ -85,11 +85,18 @@ Mathlib facts that were non-obvious to locate, for whoever continues:
 
 ---
 
-## 2. Chapter A — `Geodesic/FlowInterface.lean` (flow-to-map interface; since 2026-11-11 `FlowData` and the unit potentials are in `GeodesicInterface/FlowData.lean` of the package `GeodesicInterface`)
+## 2. Chapter A — `GeodesicInterface/FlowData.lean` and `Geodesic/FlowInterface.lean` (flow-to-map interface)
 
-Definitions: `FlowData` (flow `φ`, unit-time Lipschitz constant `L ≥ 1`, speed bound `V`),
-`FlowData.f`, `finv`, `unitPotential`, `unitPotentialBackward`, `accumulatedRate(Backward)`,
-`centeredBSCost`.
+The standing data and the unit potentials are in `GeodesicInterface/FlowData.lean` of the
+Mathlib-only package `GeodesicInterface` (since 2026-11-11; namespace `GeodesicInterface`
+since 2026-11-17): `FlowData` (flow `φ`, unit-time Lipschitz constant `L ≥ 1`, speed bound
+`V`), `FlowData.f`, `finv`, `unitPotential`, `unitPotentialBackward`,
+`accumulatedRate(Backward)`, the lemmas of the row `geo:flow-data` and those of the row
+`geo:unit-potentials` up to `abs_accumulatedRate_sub_le`. `Geodesic/FlowInterface.lean`
+holds the rest: the Bowen-ball comparison of `geo:bowen-flow-compare` and the last two lemmas
+of `geo:unit-potentials` (in namespace `GeodesicInterface.FlowData`), `centeredBSCost`, and
+the rows `geo:orbit-complexity` and `geo:bs-denominator-swap`; `geo:orbit-extension` is in
+`Geodesic/FlowInterface/OrbitExtension.lean`.
 
 | node | Lean | status | statement as formalized / proof note |
 |---|---|---|---|
@@ -125,7 +132,7 @@ Definitions: `LeafKind` (`u s cu cs`), `FlowBox φ` (`U, D, a, τ, proj` with `�
 | G7 `bracketS`, `bracketU`, `lps` | local products with leg bounds and uniqueness near every compact regular set | E, F |
 | G8 `branch_consistency` | `[p,y]_s = [p,x]_s` on centre-stable plaques | F |
 | G9 `rExp`, `expansive` | flat-strip expansivity on `Reg` | D |
-| G10 `periodic`, density, periods, `Kplaque`, `Kplaque'`, their specs | marked periodic points with compact plaques | C, D, E |
+| G10 `Kplaque`, `Kplaque'`, `Kplaque_spec`, `Kplaque'_spec` | compact plaques at every point and rational radius `r`, between the open plaques of radii `r/2` and `r` (periodicity and regularity of marked points were never used and were removed on 2026-11-05; the dense marked points are item 4 of `EffectiveGeodesicData`) | C, D, E |
 | G11 `transverse_estimate` (S4) | `dist y z ≤ Ltr · max(infDist y W^{cs}_loc, infDist y W^{cu}_loc)` on `D ∩ V` | G |
 | G12 `nBoxes`, `box`, `innerBox`, `isOpen_innerBox`, `closure_innerBox_subset`, `innerBox_cover` | finite flow-box atlas | C, E, G |
 
@@ -159,7 +166,7 @@ Proved so far (worker still active): oracle monotonicity for all notions, `isCom
 `IsRepresentedOnIn.map`, `IsComputablyCompactIn.subset_ceOpen_isREIn`, `isREIn_mem_basicBall`,
 `isCeOpenFamilyIn_ball`, `f_represented`, `finv_represented`, `isAdmissible_f/finv/rates`,
 `orbit_approximants(_backward)`, `birkhoff_uPlus/uMinus_computable`, `isComputablePointIn_pIdx`,
-`periodic_orbit_names`, `exists_pIdx_near`, `exists_innerBox_isREIn`, `isComputablePointIn_proj`,
+`marked_orbit_names`, `exists_pIdx_near`, `exists_innerBox_isREIn`, `isComputablePointIn_proj`,
 `isComputablePointIn_secPt`, `mono`, `mono_pIdx`, plus helper lemmas the worker added
 (`IsREIn.exists_computableIn_choice`, `exists_names_of_ballRel`, `isREIn_mem_basicBall_of_name`,
 `computableIn_table_row`, `isOpen_eq_biUnion_basicBall`, `exists_effectiveGeodesicData_of_nonempty`,
@@ -182,7 +189,7 @@ enumerations, compactness certificates and box data into one oracle; a condition
 | `localization_uniq_of_expansive` | proved | G9 + the rational-to-real lemma. |
 | `shadowSet`, `dist_flow_le_of_mem_shadowSet` | proved | integer samples `≤ 2ρ`, then `2Lρ`. |
 | `shadowSet_subsingleton` | proved | from `plaque_expansivity`. |
-| `shadowSet_compl_ceOpen` | open: library | finite conjunction of strict inequalities on computable reals; needs C's wrappers for the ideal orbit at integer times, the periodic orbit, and the candidate. |
+| `shadowSet_compl_ceOpen` | open: library | finite conjunction of strict inequalities on computable reals; needs C's wrappers for the ideal orbit at integer times, the orbit of the marked point, and the candidate. |
 | `localization_core`, `localization_decoder`, `localization_decoder_proj`, `localization_decoder_backward` | open: program | the certified search (Section 8.2). Correctness and termination inputs are all proved; the backward one uses `plaque_expansivity_backward`. |
 | `isComputablePointIn_of_shadowSet` | open | immediate from the decoder. |
 
@@ -196,10 +203,10 @@ enumerations, compactness certificates and box data into one oracle; a condition
 | `SmallPlaques Q ε₀` | definition | side condition for decoders (Section 8.1). |
 | `bracket_construction_error` | proved | `dist(φ(-T)[φT a, q]_s, a) ≤ CLeaf κ_P δ' · E₊(ρ)`: G5 along `a` (loss `β = ρ log 2/2`), rate comparison along the centre leg (loss `β`), `lps` at `Pp` and at `{x}`, nonexpansion to stay below `rLeaf`. Constants `C' = CLeaf κ_P δ'`, `η = δ'/2` independent of `x`; `δ` depends on `x` through `κ_x`. |
 | `bracket_construction_mem_shadowSet` | open: design | needs a plaque radius `r` with `plaque r p ⊆ Kplaque p` uniform over `p` near `x`; the field gives `r` per `p`. Middle and future constraints do follow from G4, G6 and the Bowen ball. |
-| `bracket_approx_forward/backward`, `bracket_approx` | open: program (+design) | periodic search near the terminal datum, decoder call, rounding to `2^{-(Λ'+1)T}`; correctness needs the membership lemma. |
+| `bracket_approx_forward/backward`, `bracket_approx` | open: program (+design) | search over marked points near the terminal datum, decoder call, rounding to `2^{-(Λ'+1)T}`; correctness needs the membership lemma. |
 | `exists_lebesgue_innerBox` | proved | `lebesgue_number_lemma_of_metric` on `univ`, radius halved. |
 | `Wloc_subset_closedBall_of_small` (S7) | proved | with `εx ≤ rLeaf`. |
-| `net_approx` | open: program | cover `closure (innerBox j)` by enumerated periodic points, keep those certified within `r` (dovetailed `< r` / `> 3r/4` tests), run both bracket programs. |
+| `net_approx` | open: program | cover `closure (innerBox j)` by enumerated marked points, keep those certified within `r` (dovetailed `< r` / `> 3r/4` tests), run both bracket programs. |
 
 ---
 

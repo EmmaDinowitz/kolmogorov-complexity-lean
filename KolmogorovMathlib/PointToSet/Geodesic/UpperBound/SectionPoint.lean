@@ -22,6 +22,7 @@ namespace Kolmogorov.PointToSet
 
 open Filter Set
 open scoped Topology ENNReal Computability
+open GeodesicInterface
 
 variable {X : Type*} [MetricSpace X] [CompactSpace X]
 

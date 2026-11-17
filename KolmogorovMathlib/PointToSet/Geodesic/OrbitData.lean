@@ -36,6 +36,7 @@ namespace Kolmogorov.PointToSet
 
 open Filter Set
 open scoped Topology ENNReal Computability
+open GeodesicInterface
 
 variable {X : Type*} [MetricSpace X]
 
@@ -112,9 +113,15 @@ theorem orbitComplexityNat_eq_iInf_orbitDatum (P : Presentation X) (T : X → X)
     rw [← hiK]
     exact h
 
-variable [CompactSpace X]
+end Kolmogorov.PointToSet
 
-namespace GeodesicReconstructionData
+namespace GeodesicInterface.GeodesicReconstructionData
+
+open Kolmogorov.PointToSet
+open Filter Set
+open scoped Topology ENNReal Computability
+
+variable {X : Type*} [MetricSpace X] [CompactSpace X]
 
 variable (G : GeodesicReconstructionData X)
 
@@ -277,7 +284,15 @@ theorem exists_nat_dyadicRadius_le_scaleMinus {ρ : ℝ} (hρ : 0 ≤ ρ) :
   push_cast
   linarith
 
-end GeodesicReconstructionData
+end GeodesicInterface.GeodesicReconstructionData
+
+namespace Kolmogorov.PointToSet
+
+open GeodesicInterface
+open Filter Set
+open scoped Topology ENNReal Computability
+
+variable {X : Type*} [MetricSpace X] [CompactSpace X]
 
 namespace OrbitDatum
 
