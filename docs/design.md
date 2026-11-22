@@ -204,3 +204,24 @@ cost time, numerical checks, abandoned approaches. Read at the start of every se
   deprecated (`Measurable.of_eval`); `mul_le_mul_left'` is gone (`gcongr`); `ENNReal.inv_inv` does
   not exist (`inv_inv`).
 
+
+## 2026-11-22 — port of the ergodic chapter (branch `ergodic`)
+
+* **User decision:** the ergodic chapter written in the Formalization working tree
+  (16–19 November; vendored tree on branch `ccr-359f2ff1-syi7ip` there) is the canonical copy
+  of the Measure chapter and of the Kolmogorov–Sinai/ergodic material. The independent work on
+  `brin-katok` (KS library `ks:*`, Birkhoff backport, Remarks 6.9 and 3.4(b),
+  Proposition 7.10(i), Example 5.5) is superseded and will be compared before it is retired.
+* **Port.** One three-way application of the vendored range `105f7b8..8732de7` on top of
+  `van-lambalgen` (`6dea4da`). The base `105f7b8` agrees with `measure-chapter` on the library
+  except for `Oracle/PrefixComplexity/AsymmetricInformation.lean`, which the vendored tree
+  lacked and which is kept. No conflict; `docs/RESULTS.md` and the root module merged
+  automatically. No public name of the port collides with the van Lambalgen chapter.
+* **Checks.** Full build (10,759 jobs) without warnings; no `sorry` in the tree; `#print axioms`
+  for the 124 theorems of `scripts/headline_theorems.txt` and the 13 van Lambalgen main results:
+  only `propext`, `Classical.choice`, `Quot.sound`. Docstring, module-docstring, import-hygiene
+  and forbidden-construct gates pass. The mechanical-cut gate reports 13 findings outside the
+  allow-list, 11 of them new with the port (listed in `docs/TECH_DEBT.md`).
+* **Pitfall.** Full builds on this machine lose a module or two to out-of-memory
+  (`std::bad_alloc`, or "failed to read file ….olean"); rerunning completes them.
+* **Tooling.** The lock wrapper moved to `C:\Users\emmad\code\tools\leanlock.py`.
