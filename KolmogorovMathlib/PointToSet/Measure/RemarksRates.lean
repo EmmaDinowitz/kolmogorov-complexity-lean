@@ -150,7 +150,7 @@ theorem informationRate_sum_eq (P : Presentation X) (T : X → X) (hT : Continuo
       norm_num
       linarith
     obtain ⟨c, hc⟩ := sum_bowenInformation_le P T hT C t μs ht hA ε hε
-    have hle := liminf_limsup_le_of_forall_lt_ofReal
+    have hle := liminf_limsup_le_of_forall_lt
       (a := fun n : ℕ ↦ bowenInformation μ T n ε / n) (b := fun n : ℕ ↦ W p n / n) ?_
     · have h3 := informationRateAt_le_informationRate μ T hε'
       exact ⟨hle.1.trans h3.1, hle.2.trans h3.2⟩

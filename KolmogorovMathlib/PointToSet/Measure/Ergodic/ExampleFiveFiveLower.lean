@@ -189,11 +189,6 @@ lemma ex55l_frequently_in {Ω : ℕ → Bool} (hconv : ∀ j, ∀ᶠ t in atTop,
 lemma ex55l_measurable_f : Measurable (ex55l_f W) :=
   cantorPres_measurable (ex55l_wordPrefix_f W)
 
-/-- The cylinders are measurable. -/
-lemma ex55l_measurableSet_cylinder (x : ℕ → Bool) (n : ℕ) :
-    MeasurableSet (PiNat.cylinder x n) :=
-  measurableSet_cantor_cylinder x n
-
 /-- **The cylinder estimate off the zero windows.** If every window of `x` from the block `i₀` on
 contains a `1`, then for `n` in the block `k`, `μ'[x↾n] ≤ 2^{-(n - (k+1) - N_{i₀})}`. -/
 lemma ex55l_map_cylinder_le {x : ℕ → Bool} {i₀ : ℕ}
@@ -201,7 +196,7 @@ lemma ex55l_map_cylinder_le {x : ℕ → Bool} {i₀ : ℕ}
     {k n : ℕ} (hn1 : ex55l_N k ≤ n) (hn2 : n < ex55l_N (k + 1)) :
     uniformMeasure.map (ex55l_f W) (PiNat.cylinder x n) ≤
       2⁻¹ ^ (n - (k + 1) - ex55l_N i₀) := by
-  rw [Measure.map_apply (ex55l_measurable_f W) (ex55l_measurableSet_cylinder x n)]
+  rw [Measure.map_apply (ex55l_measurable_f W) (measurableSet_cantor_cylinder x n)]
   set n' := if ex55l_N k + k + 1 ≤ n then n else ex55l_N k with hn'
   have hn'n : n' ≤ n := by rw [hn']; split_ifs <;> omega
   have hn'ge : n - (k + 1) ≤ n' := by rw [hn']; split_ifs <;> omega

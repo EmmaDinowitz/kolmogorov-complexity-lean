@@ -296,11 +296,6 @@ section cantor
 
 attribute [local instance] cantorMetricSpace
 
-/-- Cylinders of Cantor space are measurable (product σ-algebra). -/
-lemma noteSupp_measurableSet_cylinder_bool (x : ℕ → Bool) (n : ℕ) :
-    MeasurableSet (PiNat.cylinder x n) :=
-  measurableSet_cantor_cylinder x n
-
 /-- The cylinders of a point shrink to the point. -/
 lemma noteSupp_iInter_cylinder {α : Type*} (z : ℕ → α) : ⋂ n, PiNat.cylinder z n = {z} := by
   ext y
@@ -373,7 +368,7 @@ theorem noteSupp_not_mem_randomPoints_of_computableIn {A : Set ℕ} (μ : Measur
   -- but `z ∈ V m`, since `μ[z↾n] → μ{z} = 0`
   have ht : Tendsto (fun n ↦ μ (PiNat.cylinder z n)) atTop (𝓝 0) := by
     have := tendsto_measure_iInter_atTop (μ := μ)
-      (fun n ↦ (noteSupp_measurableSet_cylinder_bool z n).nullMeasurableSet)
+      (fun n ↦ (measurableSet_cantor_cylinder z n).nullMeasurableSet)
       (fun _ _ h ↦ PiNat.cylinder_anti z h) ⟨0, measure_ne_top μ _⟩
     rwa [noteSupp_iInter_cylinder, h0] at this
   have hpos : (0 : ℝ≥0∞) < ENNReal.ofReal ((2 : ℝ)⁻¹ ^ m) := by

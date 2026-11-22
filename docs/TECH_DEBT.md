@@ -12,7 +12,7 @@ Last updated: 2026-11-22 (branch `ergodic`, after the port of the ergodic chapte
 
 | Item | State | To clear |
 |---|---|---|
-| `ergodic` (off `van-lambalgen`) | Local only. Holds the ergodic chapter and the completed Measure chapter, ported from the Formalization working tree (branch `ccr-359f2ff1-syi7ip` there, vendored range `105f7b8..8732de7`), which the user declared canonical on 2026-11-22. Builds (10,759 jobs, no warnings), no `sorry`, 137 headline theorems on standard axioms | Push authorized by the user "when green"; held because the mechanical-cut gate has 11 new findings (section 5) |
+| `ergodic` (off `van-lambalgen`) | Holds the ergodic chapter and the completed Measure chapter, ported from the Formalization working tree (branch `ccr-359f2ff1-syi7ip` there, vendored range `105f7b8..8732de7`), which the user declared canonical on 2026-11-22. Builds (10,759 jobs, no warnings), no `sorry`, 137 headline theorems on standard axioms | Pushed to the fork on 2026-11-22 after all per-change gates passed |
 | `brin-katok` (off `van-lambalgen`) | Local only, superseded: its KS library (`ks:*`), Birkhoff backport, Remarks 6.9 and 3.4(b), Proposition 7.10(i) and Example 5.5 re-prove, under other names, what the ported chapter already has | Compare with `ergodic` by declaration and statement, report to the user, keep only what `ergodic` lacks, then retire the branch |
 | Stacked, unmerged branches | `ergodic` ⊃ `van-lambalgen` (pushed, `ef28bae`) ⊃ `measure-chapter` (`cedfa17`); merge of `van-lambalgen` into `measure-chapter` is on hold by the user's decision | Decide merge order (or fold into the reorganization) |
 | `ergodic` lacks `geodesic-interface` | Formalization `main` pins the fork's `geodesic-interface` branch (`d86fb81`), which has neither van Lambalgen nor the ergodic chapter | Merge or rebase when the Formalization repository is to use this work |
@@ -34,7 +34,6 @@ Last updated: 2026-11-22 (branch `ergodic`, after the port of the ergodic chapte
 | Helper | Where | Duplicate of / better home |
 |---|---|---|
 | Two computable presentations of Cantor space | `Measure/Ergodic/CantorPresentation.lean` (ported) and the product/itinerary machinery of `AlgorithmicRandomness/VanLambalgen/Metric/` | Check whether the transfer `mem_randomPoints_iff_itinerary` can replace hand-made Cantor-space arguments, or the reverse |
-| Wrapper lemmas flagged by the cut gate | see section 5 | Inline or allow-list |
 
 ## 4. Documentation
 
@@ -49,7 +48,7 @@ Last updated: 2026-11-22 (branch `ergodic`, after the port of the ergodic chapte
 
 | Item | Where | To clear |
 |---|---|---|
-| Mechanical-cut gate: 13 findings not on the allow-list (4 on `measure-chapter`, 2 of them the same). New with the port: WRAPPER `ae_compProd_localEntropy_eq_of_ergodicDecomposition` (`IntegralAffinity.lean`), `ae_localEntropy_eq_of_ergodic`, `ae_localEntropy_fst_eq_snd_of_measurePreserving` (`RemarksShift.lean`), `ex55l_measurableSet_cylinder` (`Ergodic/ExampleFiveFiveLower.lean`), `noteSupp_measurableSet_cylinder_bool` (`NoteSupplements.lean`), `liminf_limsup_le_of_forall_lt_ofReal`, `ofReal_two_rpow_neg_add_logb_eq`, `ofReal_two_rpow_neg_natCast_eq`, `tendsto_logb_natCast_div_nat` (`LocalPressureAux.lean`); RFL-BINDER `exists_isGenericPoint_upperOrbitComplexity_le` (`RemarksShift.lean`), `noteSupp_entropy_chain_strict` (`NoteSupplementsLate.lean`). Carried over: RFL-BINDER `ae_eventually_neg_two_logb_le_infoDensity`, `blockPattern_of_mem` | `PointToSet/Measure/` | Inline the helper wrappers; for the three theorems that restate a remark of the paper, add allow-list rows with reasons (user decision). List them with `python C:/Users/emmad/code/tools/cq_unlisted.py` |
+| Allow-list rows added for the mechanical-cut gate (2026-11-22) | Seven statements of the paper (Theorem 7.5(b), Remark 6.7 twice, Remark 7.11, the strictness statement of section 4.4, Proposition 7.6(i), `blockPattern_of_mem`) are allow-listed with reasons in `docs/history/cut_quality_allow.tsv`; six one-line wrapper lemmas were inlined. The gate now passes (0 unlisted) | User may review the seven reasons |
 | Long proofs (> 120 lines) | `isComputableCantorMeasureIn_map` (286, `VanLambalgen/Metric/Transfer.lean`), `exists_isAlmostDecidableBasisIn` (134, `Metric/Basis.lean`); the ported chapter has not been surveyed | Split into lemmas in a clean-up pass; survey the ported files |
 | Agent-written proofs in general | van Lambalgen phases, the ported chapter | One style pass before anything is published |
 

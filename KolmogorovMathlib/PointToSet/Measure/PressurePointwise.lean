@@ -128,7 +128,7 @@ theorem orbitBSRate_le_localBSDimensionAt (P : Presentation X) (T : X → X)
       limsup (fun n ↦ orbitBSRate P T u A x n (6 * (ε : ℝ))) atTop ≤
         (localBSDimensionAt μ T u x (ε : ℝ)).2 := by
   obtain ⟨c, hc⟩ := coding_by_measure P T hT A μ hμ hA ε hε
-  refine liminf_limsup_le_of_forall_lt_ofReal fun s hs ↦ ?_
+  refine liminf_limsup_le_of_forall_lt fun s hs ↦ ?_
   set C : ℝ := 1 + c + 2 * Real.logb 2 (s + 2) with hC
   refine ⟨fun n ↦ ENNReal.ofReal ((C + 2 * Real.logb 2 n +
     2 * Real.logb 2 (birkhoffSum T u n x)) / birkhoffSum T u n x),
@@ -190,7 +190,7 @@ theorem localPressureAt_le_orbitPressureRate (P : Presentation X) (T : X → X)
   set K := orbitComplexityNat P T A x n ε with hK
   have hge : ENNReal.ofReal ((2 : ℝ) ^ (-(((K + m : ℕ) : ℝ) + 2 * Real.logb 2 n))) ≤
       μ (bowenBall T n x (2 * ε)) := by
-    rw [ofReal_two_rpow_neg_add_logb_eq _ hn]
+    rw [ofReal_two_rpow_neg_eq _ hn]
     exact hm n hn
   have h0 : μ (bowenBall T n x (2 * ε)) ≠ 0 :=
     (lt_of_lt_of_le (ENNReal.ofReal_pos.2 (Real.rpow_pos_of_pos two_pos _)) hge).ne'
@@ -228,7 +228,7 @@ theorem localBSDimensionAt_le_orbitBSRate (P : Presentation X) (T : X → X)
     have hinfo : infoBits (μ (bowenBall T n x (2 * ε))) ≤
         ENNReal.ofReal (((K + m : ℕ) : ℝ) + 2 * Real.logb 2 n) := by
       refine infoBits_le_of_rpow_le (by positivity) ?_
-      rw [ofReal_two_rpow_neg_add_logb_eq _ hn]
+      rw [ofReal_two_rpow_neg_eq _ hn]
       exact hm n hn
     rw [localBSRate, orbitBSRate, natCast_div_ofReal_eq _ hS]
     calc infoBits (μ (bowenBall T n x (2 * ε))) / ENNReal.ofReal (birkhoffSum T u n x)
@@ -370,7 +370,7 @@ theorem pointwisePressure_eq_localPressure_universalMeasure (P : Presentation X)
     have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
     have hge : ENNReal.ofReal ((2 : ℝ) ^ (-(orbitComplexityNat P T A x n (dyadicRadius p) : ℝ)))
         ≤ universalMeasure P A (bowenBall T n x (dyadicRadius p)) := by
-      rw [ofReal_two_rpow_neg_natCast_eq]
+      rw [ofReal_two_rpow_neg_natCast]
       exact universalMeasure_bowenBall_ge P T hT A x hn (dyadicRadius_pos p)
     have h0 : universalMeasure P A (bowenBall T n x (dyadicRadius p)) ≠ 0 :=
       (lt_of_lt_of_le (ENNReal.ofReal_pos.2 (Real.rpow_pos_of_pos two_pos _)) hge).ne'
@@ -402,7 +402,7 @@ theorem pointwiseBSDimension_eq_localBSDimension_universalMeasure (P : Presentat
     calc infoBits (universalMeasure P A (bowenBall T n x (dyadicRadius p)))
         ≤ ENNReal.ofReal (orbitComplexityNat P T A x n (dyadicRadius p) : ℝ) := by
           refine infoBits_le_of_rpow_le (by positivity) ?_
-          rw [ofReal_two_rpow_neg_natCast_eq]
+          rw [ofReal_two_rpow_neg_natCast]
           exact universalMeasure_bowenBall_ge P T hT A x hn (dyadicRadius_pos p)
       _ = _ := ENNReal.ofReal_natCast _
   exact Prod.ext

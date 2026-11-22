@@ -15,14 +15,14 @@ Elementary facts used in `Measure.LocalPressure` and `Measure.PressurePointwise`
 * Comparison lemmas for lower and upper limits: additive real errors in `EReal`
   (`liminf_limsup_le_of_le_add_coe_tendsto_zero`), multiplicative errors in `ℝ≥0∞`
   (`liminf_limsup_le_mul_of_eventually_le`, `iSup_le_iSup_of_eventually_le_mul`), and threshold
-  comparisons in `EReal` and `ℝ≥0∞` (`liminf_limsup_le_of_forall_lt_coe`,
-  `liminf_limsup_le_of_forall_lt_ofReal`).
+  comparisons in `EReal` (`liminf_limsup_le_of_forall_lt_coe`; the `ℝ≥0∞` form is
+  `liminf_limsup_le_of_forall_lt` in `Measure/Pointwise.lean`).
 * Birkhoff sums: `exists_pos_eventually_mul_le_birkhoffSum` (an eventual linear lower bound at
   points of positive lower Birkhoff average), `tendsto_birkhoffSum_atTop`,
   `abs_birkhoffSum_sub_le_of_oscillation`, and vanishing error terms such as
   `tendsto_div_birkhoffSum_of_tendsto_div`.
 * Orbit complexity: `exists_orbitComplexityNat_eq`, `orbitComplexityNat_le_of_radius_le`.
-* Information: `neg_logb_toReal_le_of_rpow_le`, `ofReal_two_rpow_neg_add_logb_eq`.
+* Information: `neg_logb_toReal_le_of_rpow_le`.
 -/
 
 namespace Kolmogorov.PointToSet
@@ -195,20 +195,6 @@ theorem liminf_limsup_le_of_forall_lt_coe {a b : ℕ → EReal}
     filter_upwards [eventually_lt_of_limsup_lt hs1 (by isBoundedDefault),
       h s z (by exact_mod_cast hs2)] with n h1 h2 using h2 h1
 
-/-- Threshold comparison in `ℝ≥0∞`: if for every real `s > 0` there is an error `d → 0` such
-that eventually `a n < s` implies `b n ≤ s + d n`, then `liminf b ≤ liminf a` and
-`limsup b ≤ limsup a`. -/
-theorem liminf_limsup_le_of_forall_lt_ofReal {a b : ℕ → ℝ≥0∞}
-    (h : ∀ s : ℝ, 0 < s → ∃ d : ℕ → ℝ≥0∞, Tendsto d atTop (𝓝 0) ∧
-      ∀ᶠ n in atTop, a n < ENNReal.ofReal s → b n ≤ ENNReal.ofReal s + d n) :
-    liminf b atTop ≤ liminf a atTop ∧ limsup b atTop ≤ limsup a atTop :=
-  liminf_limsup_le_of_forall_lt h
-
-/-- `log₂ n / n → 0`. -/
-theorem tendsto_logb_natCast_div_nat :
-    Tendsto (fun n : ℕ ↦ Real.logb 2 n / n) atTop (𝓝 0) :=
-  tendsto_logb_div_nat
-
 /-- `log₂ t / t → 0` as `t → ∞`. -/
 theorem tendsto_logb_div_self_atTop :
     Tendsto (fun t : ℝ ↦ Real.logb 2 t / t) atTop (𝓝 0) := by
@@ -218,7 +204,7 @@ theorem tendsto_logb_div_self_atTop :
 theorem tendsto_add_mul_logb_div_nat (C D : ℝ) :
     Tendsto (fun n : ℕ ↦ (C + D * Real.logb 2 n) / n) atTop (𝓝 0) := by
   have h1 := tendsto_const_div_atTop_nhds_zero_nat C
-  have h2 := tendsto_logb_natCast_div_nat.const_mul D
+  have h2 := tendsto_logb_div_nat.const_mul D
   rw [mul_zero] at h2
   simpa [add_div, mul_div_assoc] using h1.add h2
 
@@ -253,7 +239,7 @@ theorem tendsto_logb_err_div_birkhoffSum {T : X → X} {u : X → ℝ} {x : X}
     tendsto_const_nhds.div_atTop hS
   have h2 : Tendsto (fun n : ℕ ↦ Real.logb 2 n / birkhoffSum T u n x) atTop (𝓝 0) :=
     tendsto_div_birkhoffSum_of_tendsto_div hx ((eventually_ge_atTop 1).mono fun n hn ↦
-      Real.logb_nonneg one_lt_two (by exact_mod_cast hn)) tendsto_logb_natCast_div_nat
+      Real.logb_nonneg one_lt_two (by exact_mod_cast hn)) tendsto_logb_div_nat
   have h3 := tendsto_logb_div_self_atTop.comp hS
   have h := h1.add ((h2.const_mul 2).add (h3.const_mul 2))
   simp only [mul_zero, add_zero] at h
@@ -268,16 +254,5 @@ theorem neg_logb_toReal_le_of_rpow_le {q : ℝ≥0∞} (hq : q ≠ ⊤) {t : ℝ
   have h' : (2 : ℝ) ^ (-t) ≤ q.toReal := (ENNReal.ofReal_le_iff_le_toReal hq).1 h
   have := (Real.le_logb_iff_rpow_le one_lt_two (h2pos.trans_le h')).2 h'
   linarith
-
-/-- `2^{-(j + 2 log₂ n)} = 2^{-j} / n²` for `n ≥ 1`. -/
-theorem ofReal_two_rpow_neg_add_logb_eq (j : ℕ) {n : ℕ} (hn : 1 ≤ n) :
-    ENNReal.ofReal ((2 : ℝ) ^ (-((j : ℝ) + 2 * Real.logb 2 n))) =
-      (2 : ℝ≥0∞)⁻¹ ^ j / (n : ℝ≥0∞) ^ 2 :=
-  ofReal_two_rpow_neg_eq j hn
-
-/-- `2^{-K}` as an extended real. -/
-theorem ofReal_two_rpow_neg_natCast_eq (K : ℕ) :
-    ENNReal.ofReal ((2 : ℝ) ^ (-(K : ℝ))) = (2 : ℝ≥0∞)⁻¹ ^ K :=
-  ofReal_two_rpow_neg_natCast K
 
 end Kolmogorov.PointToSet
