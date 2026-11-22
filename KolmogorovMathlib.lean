@@ -191,6 +191,66 @@ import KolmogorovMathlib.PointToSet.Measure.PressurePointwise
 import KolmogorovMathlib.PointToSet.Measure.ProbabilityRate
 import KolmogorovMathlib.PointToSet.Measure.RandomNonAtom
 import KolmogorovMathlib.PointToSet.Measure.Randomness
+import KolmogorovMathlib.PointToSet.Measure.Remarks
+import KolmogorovMathlib.PointToSet.Measure.RemarksRates
+import KolmogorovMathlib.PointToSet.Measure.RemarksShift
+import KolmogorovMathlib.Ergodic.PartitionEntropy
+import KolmogorovMathlib.Ergodic.FinePartitions
+import KolmogorovMathlib.Ergodic.MaximalInequality
+import KolmogorovMathlib.Ergodic.MeanErgodic
+import KolmogorovMathlib.Ergodic.BinomialEntropy
+import KolmogorovMathlib.Ergodic.ErgodicDecomposition
+import KolmogorovMathlib.Ergodic.BirkhoffNonErgodic
+import KolmogorovMathlib.Ergodic.Upcrossing
+import KolmogorovMathlib.Ergodic.Jacobs
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.WordRandomness
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.SymbolicLowerBound
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.BlockCoding
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.NullSphere
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.ComputablePartition
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.SymbolicCoding
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.TypicalPoints
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.OrbitUpper
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.OrbitLower
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.BrinKatokNonErgodic
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.ErgodicDecompositionEntropy
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.ShiftTransport
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.ShiftTranslation
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.ShiftRandomness
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.Proposition710
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.HoyrupBasic
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.HoyrupPoincareAux
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.HoyrupPoincare
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.HoyrupBirkhoff
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.HoyrupCondInfo
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.HoyrupChung
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.HoyrupMartingale
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.HoyrupEntropyLimit
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.HoyrupLower
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.OrbitLowerAux
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.SymbolicLowerBoundAux
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.SymbolicLowerBoundEffective
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.OrbitEntropy
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.VyuginFrequencies
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.VyuginGenericity
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.FengHuangLowerAux
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.FengHuangLower
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.FengHuangUpper
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.CantorLevinSchnorr
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.UniversalMeasureWords
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.BernoulliRandom
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.ConformalBallComparison
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.CantorPresentation
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.CantorInstances
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.ShiftKSEntropy
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.KSInvariant
+import KolmogorovMathlib.PointToSet.Measure.NoteSupplements
+import KolmogorovMathlib.PointToSet.Measure.NoteSupplementsAux
+import KolmogorovMathlib.PointToSet.Measure.NoteSupplementsLate
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.ExampleFiveFiveUpper
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.ExampleFiveFiveLowerAux
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.ExampleFiveFiveLower
+import KolmogorovMathlib.PointToSet.Measure.ExampleFiveFive
 import KolmogorovMathlib.PointToSet.Measure.Shift
 import KolmogorovMathlib.PointToSet.Measure.ShiftAntiPhase
 import KolmogorovMathlib.PointToSet.Measure.ShiftBaire
@@ -203,6 +263,7 @@ import KolmogorovMathlib.PointToSet.Measure.ShiftSmoothAux
 import KolmogorovMathlib.PointToSet.Measure.TestFunctionFinite
 import KolmogorovMathlib.PointToSet.Measure.UniversalMeasure
 import KolmogorovMathlib.PointToSet.Measure.Variational
+import KolmogorovMathlib.PointToSet.Measure.VariationalPacking
 import KolmogorovMathlib.PointToSet.Order
 import KolmogorovMathlib.PointToSet.Order.AchievingOracles
 import KolmogorovMathlib.PointToSet.Order.NormalizedSlack
@@ -376,6 +437,16 @@ import KolmogorovMathlib.Solomonoff.ShenQuestion.LowerBound
 import KolmogorovMathlib.StoppingComplexity.LengthBounds
 import KolmogorovMathlib.StoppingComplexity.MainTheorem
 import KolmogorovMathlib.StrongMerging.StatementsExtra
+import KolmogorovMathlib.Trusted.Bridge
+import KolmogorovMathlib.Trusted.StatementsEntropy
+import KolmogorovMathlib.Trusted.StatementsDecomposition
+import KolmogorovMathlib.Trusted.StatementsShift
+import KolmogorovMathlib.Trusted.StatementsPressure
+import KolmogorovMathlib.Trusted.BridgeEntropy
+import KolmogorovMathlib.Trusted.BridgeDecomposition
+import KolmogorovMathlib.Trusted.BridgeShift
+import KolmogorovMathlib.Trusted.BridgePressure
+import KolmogorovMathlib.Trusted.Statements
 
 
 /-!
@@ -441,6 +512,11 @@ This module is the aggregate root: it imports the whole library.  Its parts are
   in `PointToSet.Measure`, local entropies of non-invariant measures, Martin-Löf randomness on
   presented metric spaces and the identification of orbit complexity with local entropy at
   random points;
+* `Trusted` — a short self-contained restatement, in textbook vocabulary, of the headline
+  theorems of the note on non-invariant measures and of its companion note (`Trusted.Statements`
+  and `Trusted.Statements{Entropy,Decomposition,Shift,Pressure}`, importing only Mathlib and the
+  oracle foundations), proved from the library in the `Trusted.Bridge*` modules through
+  equivalences of the plain definitions with the library's;
 * `Deprecated` — the `@[deprecated] alias`es for names that have moved, generated from the
   rename tables.
 

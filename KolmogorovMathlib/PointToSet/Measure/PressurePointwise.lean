@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Measure.LocalPressure
-import KolmogorovMathlib.PointToSet.Measure.LocalPressureAux
 
 /-!
 # Pointwise pressure and BS dimension of random points (Theorem 8.3, Corollary 8.4)
@@ -24,7 +23,9 @@ are uniformly continuous.
   universal measure in place of `μ`, equality at every point.
 * Corollary 8.4: Billingsley-type bounds (`lowerPressure_le_of_localPressure_le`, …) and dual
   principles (`lowerPressure_eq_iInf_measure`, `lowerBSDimension_eq_iInf_measure`, …) for the
-  pressure and the BS dimension of arbitrary sets.
+  pressure and the BS dimension of arbitrary sets, with the infimum attained by a purely atomic
+  measure (`exists_atomic_measure_lowerPressure_eq`, `exists_atomic_measure_lowerBSDimension_eq`,
+  and the upper versions).
 
 Blueprint nodes `meas:pressure-pointwise`, `meas:pressure-billingsley`, `meas:pressure-dual`.
 -/
@@ -41,25 +42,6 @@ def BirkhoffBoundedBelow (T : X → X) (φ : X → ℝ) (x : X) : Prop :=
   ∃ L : ℝ, ∀ n : ℕ, 1 ≤ n → L ≤ birkhoffSum T φ n x / n
 
 /-! ### Comparison at a fixed scale -/
-
-omit [MeasurableSpace X] [BorelSpace X] in
-/-- At a fixed time, an oscillation-free bound on the orbit pressure rate: shrinking the radius
-increases the rate of `K_n^A(x, T, ε) + S_n φ(x)`. -/
-private theorem orbitPressureRate_le_of_le_radius (P : Presentation X) (T : X → X)
-    (hT : Continuous T) (φ : X → ℝ) (A : Set ℕ) (x : X) {n : ℕ} (hn : 1 ≤ n) {r r' : ℝ}
-    (hr : 0 < r) (h : r ≤ r') :
-    orbitPressureRate P T φ A x n r' ≤ orbitPressureRate P T φ A x n r := by
-  have hK : (orbitComplexityNat P T A x n r' : ℝ) ≤ orbitComplexityNat P T A x n r := by
-    exact_mod_cast orbitComplexityNat_le_of_radius_le P T hT A x hn hr h
-  exact EReal.coe_le_coe_iff.2 (div_le_div_of_nonneg_right (by linarith) (Nat.cast_nonneg n))
-
-omit [MeasurableSpace X] [BorelSpace X] in
-/-- Shrinking the radius increases the orbit BS rate. -/
-private theorem orbitBSRate_le_of_le_radius (P : Presentation X) (T : X → X)
-    (hT : Continuous T) (u : X → ℝ) (A : Set ℕ) (x : X) {n : ℕ} (hn : 1 ≤ n) {r r' : ℝ}
-    (hr : 0 < r) (h : r ≤ r') : orbitBSRate P T u A x n r' ≤ orbitBSRate P T u A x n r :=
-  ENNReal.div_le_div_right
-    (Nat.cast_le.2 (orbitComplexityNat_le_of_radius_le P T hT A x hn hr h)) _
 
 /-- `6 · 2^{-(p + 3)} ≤ 2^{-p}`. -/
 private theorem six_mul_dyadicRadius_add_three_le (p : ℕ) :
@@ -262,11 +244,6 @@ theorem localBSDimensionAt_le_orbitBSRate (P : Presentation X) (T : X → X)
   exact ⟨liminf_le_liminf_of_le_add_tendsto_zero hev hd,
     limsup_le_limsup_of_le_add_tendsto_zero hev hd⟩
 
-/-- `2 · 2^{-(p + 1)} = 2^{-p}`. -/
-private theorem two_mul_dyadicRadius_succ (p : ℕ) : 2 * dyadicRadius (p + 1) = dyadicRadius p := by
-  rw [dyadicRadius, dyadicRadius, pow_succ]
-  ring
-
 /-! ### Theorem 8.3 -/
 
 /-- Theorem 8.3(i), pressure: at every point with `inf_n S_n φ(x) / n > -∞` the pointwise
@@ -289,7 +266,7 @@ theorem pointwisePressure_le_localPressure (P : Presentation X) (T : X → X)
     rw [← dyadicRadius_eq_ratCast] at h
     have hmono : ∀ᶠ n in atTop, orbitPressureRate P T φ A x n (dyadicRadius p) ≤
         orbitPressureRate P T φ A x n (6 * dyadicRadius (p + 3)) :=
-      (eventually_ge_atTop 1).mono fun n hn ↦ orbitPressureRate_le_of_le_radius P T hT φ A x hn
+      (eventually_ge_atTop 1).mono fun n hn ↦ orbitPressureRate_antitone_radius P T hT φ A x hn
         (mul_pos (by norm_num) (dyadicRadius_pos _)) (six_mul_dyadicRadius_add_three_le p)
     exact ⟨(liminf_le_liminf hmono).trans (h.1.trans
         (le_iSup (fun q ↦ (localPressureAt μ T φ x (dyadicRadius q)).1) (p + 3))),
@@ -318,7 +295,7 @@ theorem pointwiseBSDimension_le_localBSDimension (P : Presentation X) (T : X →
     rw [← dyadicRadius_eq_ratCast] at h
     have hmono : ∀ᶠ n in atTop, orbitBSRate P T u A x n (dyadicRadius p) ≤
         orbitBSRate P T u A x n (6 * dyadicRadius (p + 3)) :=
-      (eventually_ge_atTop 1).mono fun n hn ↦ orbitBSRate_le_of_le_radius P T hT u A x hn
+      (eventually_ge_atTop 1).mono fun n hn ↦ orbitBSRate_antitone_radius P T hT u A x hn
         (mul_pos (by norm_num) (dyadicRadius_pos _)) (six_mul_dyadicRadius_add_three_le p)
     exact ⟨(liminf_le_liminf hmono).trans (h.1.trans
         (le_iSup (fun q ↦ (localBSDimensionAt μ T u x (dyadicRadius q)).1) (p + 3))),
@@ -580,56 +557,69 @@ private theorem exists_normalized_universalMeasure (P : Presentation X) (T : X �
   exact ⟨oracleJoin B C, oracle_joins B C, hAd.1, hAd.2.1, _, ENNReal.inv_ne_zero.2 htop,
     ENNReal.inv_ne_top.2 h0, ⟨by simp [Measure.smul_apply, ENNReal.inv_mul_cancel h0 htop]⟩⟩
 
-/-- Corollary 8.4(c), lower pressure: `P̲(Z, T, φ) = min_μ sup_{x ∈ Z} P̲_μ(x, T, φ)` over
-Borel probability measures. Blueprint node `meas:pressure-dual`. -/
-theorem lowerPressure_eq_iInf_measure (D : PressureData X) {Z : Set X}
+/-- The normalized universal measure `c • m^A` is carried by the countable set of ideal points. -/
+private theorem exists_countable_smul_universalMeasure_compl (P : Presentation X) (A : Set ℕ)
+    (c : ℝ≥0∞) : ∃ S : Set X, S.Countable ∧ (c • universalMeasure P A) Sᶜ = 0 :=
+  ⟨range P.ι, countable_range _, by simp [Measure.smul_apply, universalMeasure_compl_range]⟩
+
+/-- Corollary 8.4(c), lower pressure, attainment: there is a purely atomic Borel probability
+measure (carried by a countable set) whose lower local pressure has supremum over `Z` equal to
+the lower pressure of `Z`. The witness is a normalized universal measure `c • m^A`.
+Blueprint node `meas:pressure-dual`. -/
+theorem exists_atomic_measure_lowerPressure_eq (D : PressureData X) {Z : Set X}
     (hZ : ∀ x ∈ Z, BirkhoffBoundedBelow D.T D.φ x) :
-    lowerPressure D.T D.φ D.p₀ Z =
-      ⨅ (μ : Measure X) (_ : IsProbabilityMeasure μ),
-        ⨆ x ∈ Z, (localPressure μ D.T D.φ x).1 := by
-  refine le_antisymm (le_iInf₂ fun μ hμ ↦ lowerPressure_le_of_localPressure_le D μ Z hZ _
-    fun x hx ↦ le_iSup₂ (f := fun x _ ↦ (localPressure μ D.T D.φ x).1) x hx) ?_
+    ∃ μ : Measure X, IsProbabilityMeasure μ ∧ (∃ S : Set X, S.Countable ∧ μ Sᶜ = 0) ∧
+      lowerPressure D.T D.φ D.p₀ Z = ⨆ x ∈ Z, (localPressure μ D.T D.φ x).1 := by
   obtain ⟨B, hB⟩ := lowerPressure_pointToSet_cone D Z
   obtain ⟨A, hBA, hP, hTA, c, hc0, hc, hμ⟩ :=
     exists_normalized_universalMeasure D.presentation D.T D.continuous_T B
-  refine iInf₂_le_of_le (c • universalMeasure D.presentation A) hμ ?_
+  refine ⟨c • universalMeasure D.presentation A, hμ,
+    exists_countable_smul_universalMeasure_compl _ _ _, le_antisymm
+      (lowerPressure_le_of_localPressure_le D _ Z hZ _ fun x hx ↦
+        le_iSup₂ (f := fun x _ ↦ (localPressure (c • universalMeasure D.presentation A) D.T D.φ
+          x).1) x hx) ?_⟩
   rw [hB A hBA]
   refine iSup₂_le fun x hx ↦ ?_
   rw [localPressure_smul _ _ _ _ hc0 hc, ← pointwisePressure_eq_localPressure_universalMeasure
     D.presentation D.T D.continuous_T D.φ D.uniformContinuous_φ A hP hTA (hZ x hx)]
   exact le_iSup₂ (f := fun y _ ↦ (pointwisePressure D.presentation D.T D.φ A y).1) x hx
 
-/-- Corollary 8.4(c), upper pressure. Blueprint node `meas:pressure-dual`. -/
-theorem upperPressure_eq_iInf_measure (D : PressureData X) {Z : Set X}
+/-- Corollary 8.4(c), upper pressure, attainment: there is a purely atomic Borel probability
+measure (carried by a countable set) whose upper local pressure has supremum over `Z` equal to
+the upper pressure of `Z`. The witness is a normalized universal measure `c • m^A`.
+Blueprint node `meas:pressure-dual`. -/
+theorem exists_atomic_measure_upperPressure_eq (D : PressureData X) {Z : Set X}
     (hZ : ∀ x ∈ Z, BirkhoffBoundedBelow D.T D.φ x) :
-    upperPressure D.T D.φ D.p₀ Z =
-      ⨅ (μ : Measure X) (_ : IsProbabilityMeasure μ),
-        ⨆ x ∈ Z, (localPressure μ D.T D.φ x).2 := by
-  refine le_antisymm (le_iInf₂ fun μ hμ ↦ upperPressure_le_of_localPressure_le D μ Z hZ _
-    fun x hx ↦ le_iSup₂ (f := fun x _ ↦ (localPressure μ D.T D.φ x).2) x hx) ?_
+    ∃ μ : Measure X, IsProbabilityMeasure μ ∧ (∃ S : Set X, S.Countable ∧ μ Sᶜ = 0) ∧
+      upperPressure D.T D.φ D.p₀ Z = ⨆ x ∈ Z, (localPressure μ D.T D.φ x).2 := by
   obtain ⟨B, hB⟩ := upperPressure_pointToSet_cone D Z
   obtain ⟨A, hBA, hP, hTA, c, hc0, hc, hμ⟩ :=
     exists_normalized_universalMeasure D.presentation D.T D.continuous_T B
-  refine iInf₂_le_of_le (c • universalMeasure D.presentation A) hμ ?_
+  refine ⟨c • universalMeasure D.presentation A, hμ,
+    exists_countable_smul_universalMeasure_compl _ _ _, le_antisymm
+      (upperPressure_le_of_localPressure_le D _ Z hZ _ fun x hx ↦
+        le_iSup₂ (f := fun x _ ↦ (localPressure (c • universalMeasure D.presentation A) D.T D.φ
+          x).2) x hx) ?_⟩
   rw [hB A hBA]
   refine iSup₂_le fun x hx ↦ ?_
   rw [localPressure_smul _ _ _ _ hc0 hc, ← pointwisePressure_eq_localPressure_universalMeasure
     D.presentation D.T D.continuous_T D.φ D.uniformContinuous_φ A hP hTA (hZ x hx)]
   exact le_iSup₂ (f := fun y _ ↦ (pointwisePressure D.presentation D.T D.φ A y).2) x hx
 
-/-- Corollary 8.4(c), lower BS dimension: `dim_BS(Z, T, u) = min_μ sup_{x ∈ Z} d̲_μ(x, T, u)`.
+/-- Corollary 8.4(c), lower BS dimension, attainment: there is a purely atomic Borel probability
+measure (carried by a countable set) whose lower local BS dimension has supremum over `Z` equal
+to the BS dimension of `Z`. The witness is a normalized universal measure `c • m^A`.
 Blueprint node `meas:pressure-dual`. -/
-theorem lowerBSDimension_eq_iInf_measure (P : Presentation X) (T : X → X) (hT : Continuous T)
-    (u : X → ℝ) (hu : UniformContinuous u) {Z : Set X}
+theorem exists_atomic_measure_lowerBSDimension_eq (P : Presentation X) (T : X → X)
+    (hT : Continuous T) (u : X → ℝ) (hu : UniformContinuous u) {Z : Set X}
     (hZ : ∀ x ∈ Z, 0 < lowerBirkhoffAverage T u x) :
-    lowerBSDimension T u Z =
-      ⨅ (μ : Measure X) (_ : IsProbabilityMeasure μ),
-        ⨆ x ∈ Z, (localBSDimension μ T u x).1 := by
-  refine le_antisymm (le_iInf₂ fun μ hμ ↦ lowerBSDimension_le_of_localBSDimension_le P T hT u hu
-    μ Z hZ _ fun x hx ↦ le_iSup₂ (f := fun x _ ↦ (localBSDimension μ T u x).1) x hx) ?_
+    ∃ μ : Measure X, IsProbabilityMeasure μ ∧ (∃ S : Set X, S.Countable ∧ μ Sᶜ = 0) ∧
+      lowerBSDimension T u Z = ⨆ x ∈ Z, (localBSDimension μ T u x).1 := by
   obtain ⟨B, hB⟩ := bsPointToSet_cone P T hT u hu Z hZ
   obtain ⟨A, hBA, hP, hTA, c, hc0, hc, hμ⟩ := exists_normalized_universalMeasure P T hT B
-  refine iInf₂_le_of_le (c • universalMeasure P A) hμ ?_
+  refine ⟨c • universalMeasure P A, hμ, exists_countable_smul_universalMeasure_compl _ _ _,
+    le_antisymm (lowerBSDimension_le_of_localBSDimension_le P T hT u hu _ Z hZ _ fun x hx ↦
+      le_iSup₂ (f := fun x _ ↦ (localBSDimension (c • universalMeasure P A) T u x).1) x hx) ?_⟩
   have heq := (hB A hBA).2 LimitSide.lower
   simp only [LimitSide.choose] at heq
   rw [heq]
@@ -638,18 +628,20 @@ theorem lowerBSDimension_eq_iInf_measure (P : Presentation X) (T : X → X) (hT 
     ← pointwiseBSDimension_eq_localBSDimension_universalMeasure P T hT u hu A hP hTA (hZ x hx)]
   exact le_iSup₂ (f := fun y _ ↦ (pointwiseBSDimension P T u A y).1) x hx
 
-/-- Corollary 8.4(c), upper BS dimension. Blueprint node `meas:pressure-dual`. -/
-theorem upperBSDimension_eq_iInf_measure (P : Presentation X) (T : X → X) (hT : Continuous T)
-    (u : X → ℝ) (hu : UniformContinuous u) {Z : Set X}
+/-- Corollary 8.4(c), upper BS dimension, attainment: there is a purely atomic Borel probability
+measure (carried by a countable set) whose upper local BS dimension has supremum over `Z` equal
+to the upper BS dimension of `Z`. The witness is a normalized universal measure `c • m^A`.
+Blueprint node `meas:pressure-dual`. -/
+theorem exists_atomic_measure_upperBSDimension_eq (P : Presentation X) (T : X → X)
+    (hT : Continuous T) (u : X → ℝ) (hu : UniformContinuous u) {Z : Set X}
     (hZ : ∀ x ∈ Z, 0 < lowerBirkhoffAverage T u x) :
-    upperBSDimension T u Z =
-      ⨅ (μ : Measure X) (_ : IsProbabilityMeasure μ),
-        ⨆ x ∈ Z, (localBSDimension μ T u x).2 := by
-  refine le_antisymm (le_iInf₂ fun μ hμ ↦ upperBSDimension_le_of_localBSDimension_le P T hT u hu
-    μ Z hZ _ fun x hx ↦ le_iSup₂ (f := fun x _ ↦ (localBSDimension μ T u x).2) x hx) ?_
+    ∃ μ : Measure X, IsProbabilityMeasure μ ∧ (∃ S : Set X, S.Countable ∧ μ Sᶜ = 0) ∧
+      upperBSDimension T u Z = ⨆ x ∈ Z, (localBSDimension μ T u x).2 := by
   obtain ⟨B, hB⟩ := bsPointToSet_cone P T hT u hu Z hZ
   obtain ⟨A, hBA, hP, hTA, c, hc0, hc, hμ⟩ := exists_normalized_universalMeasure P T hT B
-  refine iInf₂_le_of_le (c • universalMeasure P A) hμ ?_
+  refine ⟨c • universalMeasure P A, hμ, exists_countable_smul_universalMeasure_compl _ _ _,
+    le_antisymm (upperBSDimension_le_of_localBSDimension_le P T hT u hu _ Z hZ _ fun x hx ↦
+      le_iSup₂ (f := fun x _ ↦ (localBSDimension (c • universalMeasure P A) T u x).2) x hx) ?_⟩
   have heq := (hB A hBA).2 LimitSide.upper
   simp only [LimitSide.choose] at heq
   rw [heq]
@@ -657,5 +649,61 @@ theorem upperBSDimension_eq_iInf_measure (P : Presentation X) (T : X → X) (hT 
   rw [localBSDimension_smul _ _ _ (hZ x hx) hc0 hc,
     ← pointwiseBSDimension_eq_localBSDimension_universalMeasure P T hT u hu A hP hTA (hZ x hx)]
   exact le_iSup₂ (f := fun y _ ↦ (pointwiseBSDimension P T u A y).2) x hx
+
+/-- Corollary 8.4(c) (dual principle), lower pressure:
+`P̲(Z, T, φ) = min_μ sup_{x ∈ Z} P̲_μ(x, T, φ)` over Borel probability measures, stated as an
+infimum; it is attained by a purely atomic measure (`exists_atomic_measure_lowerPressure_eq`).
+Blueprint node `meas:pressure-dual`. -/
+theorem lowerPressure_eq_iInf_measure (D : PressureData X) {Z : Set X}
+    (hZ : ∀ x ∈ Z, BirkhoffBoundedBelow D.T D.φ x) :
+    lowerPressure D.T D.φ D.p₀ Z =
+      ⨅ (μ : Measure X) (_ : IsProbabilityMeasure μ),
+        ⨆ x ∈ Z, (localPressure μ D.T D.φ x).1 := by
+  refine le_antisymm (le_iInf₂ fun μ hμ ↦ lowerPressure_le_of_localPressure_le D μ Z hZ _
+    fun x hx ↦ le_iSup₂ (f := fun x _ ↦ (localPressure μ D.T D.φ x).1) x hx) ?_
+  obtain ⟨μ, hμ, -, heq⟩ := exists_atomic_measure_lowerPressure_eq D hZ
+  exact iInf₂_le_of_le μ hμ heq.ge
+
+/-- Corollary 8.4(c) (dual principle), upper pressure, stated as an infimum over Borel
+probability measures; it is attained by a purely atomic measure
+(`exists_atomic_measure_upperPressure_eq`). Blueprint node `meas:pressure-dual`. -/
+theorem upperPressure_eq_iInf_measure (D : PressureData X) {Z : Set X}
+    (hZ : ∀ x ∈ Z, BirkhoffBoundedBelow D.T D.φ x) :
+    upperPressure D.T D.φ D.p₀ Z =
+      ⨅ (μ : Measure X) (_ : IsProbabilityMeasure μ),
+        ⨆ x ∈ Z, (localPressure μ D.T D.φ x).2 := by
+  refine le_antisymm (le_iInf₂ fun μ hμ ↦ upperPressure_le_of_localPressure_le D μ Z hZ _
+    fun x hx ↦ le_iSup₂ (f := fun x _ ↦ (localPressure μ D.T D.φ x).2) x hx) ?_
+  obtain ⟨μ, hμ, -, heq⟩ := exists_atomic_measure_upperPressure_eq D hZ
+  exact iInf₂_le_of_le μ hμ heq.ge
+
+/-- Corollary 8.4(c) (dual principle), lower BS dimension:
+`dim_BS(Z, T, u) = min_μ sup_{x ∈ Z} d̲_μ(x, T, u)`, stated as an infimum over Borel probability
+measures; it is attained by a purely atomic measure
+(`exists_atomic_measure_lowerBSDimension_eq`). Blueprint node `meas:pressure-dual`. -/
+theorem lowerBSDimension_eq_iInf_measure (P : Presentation X) (T : X → X) (hT : Continuous T)
+    (u : X → ℝ) (hu : UniformContinuous u) {Z : Set X}
+    (hZ : ∀ x ∈ Z, 0 < lowerBirkhoffAverage T u x) :
+    lowerBSDimension T u Z =
+      ⨅ (μ : Measure X) (_ : IsProbabilityMeasure μ),
+        ⨆ x ∈ Z, (localBSDimension μ T u x).1 := by
+  refine le_antisymm (le_iInf₂ fun μ hμ ↦ lowerBSDimension_le_of_localBSDimension_le P T hT u
+    hu μ Z hZ _ fun x hx ↦ le_iSup₂ (f := fun x _ ↦ (localBSDimension μ T u x).1) x hx) ?_
+  obtain ⟨μ, hμ, -, heq⟩ := exists_atomic_measure_lowerBSDimension_eq P T hT u hu hZ
+  exact iInf₂_le_of_le μ hμ heq.ge
+
+/-- Corollary 8.4(c) (dual principle), upper BS dimension, stated as an infimum over Borel
+probability measures; it is attained by a purely atomic measure
+(`exists_atomic_measure_upperBSDimension_eq`). Blueprint node `meas:pressure-dual`. -/
+theorem upperBSDimension_eq_iInf_measure (P : Presentation X) (T : X → X) (hT : Continuous T)
+    (u : X → ℝ) (hu : UniformContinuous u) {Z : Set X}
+    (hZ : ∀ x ∈ Z, 0 < lowerBirkhoffAverage T u x) :
+    upperBSDimension T u Z =
+      ⨅ (μ : Measure X) (_ : IsProbabilityMeasure μ),
+        ⨆ x ∈ Z, (localBSDimension μ T u x).2 := by
+  refine le_antisymm (le_iInf₂ fun μ hμ ↦ upperBSDimension_le_of_localBSDimension_le P T hT u
+    hu μ Z hZ _ fun x hx ↦ le_iSup₂ (f := fun x _ ↦ (localBSDimension μ T u x).2) x hx) ?_
+  obtain ⟨μ, hμ, -, heq⟩ := exists_atomic_measure_upperBSDimension_eq P T hT u hu hZ
+  exact iInf₂_le_of_le μ hμ heq.ge
 
 end Kolmogorov.PointToSet

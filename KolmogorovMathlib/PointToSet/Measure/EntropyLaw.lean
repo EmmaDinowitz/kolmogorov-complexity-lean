@@ -6,7 +6,6 @@ Authors: Emma Dinowitz
 import KolmogorovMathlib.PointToSet.Measure.Pointwise
 import KolmogorovMathlib.PointToSet.Measure.Decomposition
 import KolmogorovMathlib.PointToSet.BSDimension.Upper.PointToSetPrinciple
-import Mathlib.MeasureTheory.Function.EssSup
 
 /-!
 # The universal map and statistics of the entropy law (§6)

@@ -4,8 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Measure.Computable
-import KolmogorovMathlib.Oracle.KraftChaitin
-import KolmogorovMathlib.AlgorithmicRandomness.NatLogPrimrec
 
 /-!
 # Coding by measure (Lemma 3.1)

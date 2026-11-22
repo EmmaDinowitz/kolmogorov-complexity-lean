@@ -4,12 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Measure.Shift
-import KolmogorovMathlib.PointToSet.Measure.Decomposition
-import Mathlib.Probability.Martingale.Convergence
 import Mathlib.MeasureTheory.Measure.Decomposition.IntegralRNDeriv
 import Mathlib.Probability.BorelCantelli
-import Mathlib.Probability.Distributions.Bernoulli
-import Mathlib.Probability.ProductMeasure
 
 /-!
 # Cylinders on a shift: helper material for `ShiftDecomposition`
@@ -26,8 +22,9 @@ complexity of random points*) works with the partition into cylinders, with no c
   `c ν(C) < μ(C)` have total `ν`-mass at most `μ(X) / c`;
 * `ae_measure_cylinder_ne_zero`: `ν[x↾n] > 0` for all `n`, `ν`-almost everywhere.
 
-On Cantor space with `cantorMetricSpace`: `infoBits_two_inv_pow`, `cantor_hd`,
-`measurableSet_cantor_cylinder`, and `tendsto_natCast_add_div_natCast`.
+On Cantor space: `tendsto_natCast_add_div_natCast` (the Cantor-space facts `cantor_hd` and
+`measurableSet_cantor_cylinder` are in `Shift.lean`, `infoBits_two_inv_pow` in
+`LocalEntropy.lean`).
 
 Martingale convergence along cylinders (for Proposition 7.6(iii)): `prefixSigma` (the
 σ-algebra of `x↾n`), `setLIntegral_ratio_cylinder` and `ae_tendsto_logb_ratio_cylinder`
@@ -54,19 +51,6 @@ open scoped Topology ENNReal NNReal
 section cylinders
 
 variable {α : Type*} [MetricSpace (ℕ → α)] {β : ℝ}
-
-/-- For a first-difference metric the coordinates are locally constant: `{x | x i = a}` is
-open. -/
-theorem isOpen_setOf_apply_eq (hβ : 0 < β) (hβ₁ : β < 1)
-    (hd : ∀ x y : ℕ → α, x ≠ y → dist x y = β ^ PiNat.firstDiff x y) (i : ℕ) (a : α) :
-    IsOpen {x : ℕ → α | x i = a} := by
-  refine Metric.isOpen_iff.2 fun x hx ↦ ⟨β ^ i, pow_pos hβ i, fun y hy ↦ ?_⟩
-  simp only [mem_ofPred_eq] at hx ⊢
-  rw [← hx]
-  by_cases hxy : y = x
-  · rw [hxy]
-  rw [Metric.mem_ball, hd y x hxy] at hy
-  exact PiNat.apply_eq_of_lt_firstDiff ((pow_lt_pow_iff_right_of_lt_one₀ hβ hβ₁).1 hy)
 
 variable [MeasurableSpace (ℕ → α)] [BorelSpace (ℕ → α)]
 
@@ -204,12 +188,6 @@ section cantor
 
 attribute [local instance] cantorMetricSpace
 
-/-- The information of the mass `2^{-m}` is `m` bits. -/
-theorem infoBits_two_inv_pow (m : ℕ) : infoBits ((2 : ℝ≥0∞)⁻¹ ^ m) = m := by
-  rw [infoBits_of_ne (by simp), ENNReal.toReal_pow, ENNReal.toReal_inv, ENNReal.toReal_ofNat,
-    Real.logb_pow, Real.logb_inv, Real.logb_self_eq_one one_lt_two]
-  simp only [mul_neg, mul_one, neg_neg, ENNReal.ofReal_natCast]
-
 /-- `(n + k) / n → 1` in `ℝ≥0∞`. -/
 theorem tendsto_natCast_add_div_natCast (k : ℕ) :
     Tendsto (fun n : ℕ ↦ ((n + k : ℕ) : ℝ≥0∞) / n) atTop (𝓝 1) := by
@@ -222,15 +200,6 @@ theorem tendsto_natCast_add_div_natCast (k : ℕ) :
   have hn0 : (n : ℝ≥0∞) ≠ 0 := by exact_mod_cast (Nat.one_le_iff_ne_zero.1 hn)
   push_cast
   rw [ENNReal.add_div, ENNReal.div_self hn0 (ENNReal.natCast_ne_top n), div_eq_mul_inv]
-
-/-- The Cantor metric as a first-difference metric with ratio `1/2`. -/
-theorem cantor_hd : ∀ x y : ℕ → Bool, x ≠ y → dist x y = (1 / 2 : ℝ) ^ PiNat.firstDiff x y :=
-  fun _ _ ↦ cantorMetricSpace_dist_eq
-
-/-- Cylinders of Cantor space are measurable. -/
-theorem measurableSet_cantor_cylinder (x : ℕ → Bool) (n : ℕ) :
-    MeasurableSet (PiNat.cylinder x n) :=
-  measurableSet_cylinder (by norm_num) (by norm_num) cantor_hd x n
 
 end cantor
 

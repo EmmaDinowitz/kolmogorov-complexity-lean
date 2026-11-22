@@ -583,8 +583,8 @@ KolmogorovMathlib/
     │   │                                #     Lemma 3.1 (coding by measure), Lemma 3.2 (the test)
     │   ├── Pointwise.lean               #     Theorem 3.3, Corollary 3.6 (Billingsley-type bounds)
     │   ├── UniversalMeasure.lean        #     m^A, Proposition 6.12, Corollary 6.14 (dual principle)
-    │   ├── EssentialBounds.lean, Variational.lean
-    │   │                                #     Proposition 4.1, Theorem 4.3, Corollaries 4.2, 6.5(c), the chain of §4.4
+    │   ├── EssentialBounds.lean, Variational.lean, VariationalPacking.lean
+    │   │                                #     Proposition 4.1, Theorem 4.3, Corollaries 4.2, 6.5(c), the chain of §4.4, packing form
     │   ├── InformationRate.lean, ProbabilityRate.lean
     │   │                                #     Propositions 4.6, 4.7, 6.10, 6.16
     │   ├── EntropyLaw.lean              #     Proposition 6.2, Corollary 6.5(a), (b)
@@ -595,13 +595,52 @@ KolmogorovMathlib/
     │   ├── Shift.lean, ShiftBernoulli.lean, ShiftProduct.lean, ShiftAntiPhase.lean, ShiftBaire.lean
     │   │                                #     Examples 5.1–5.4, 6.8, 7.4(1)
     │   ├── ShiftDecomposition.lean, ShiftDecompositionAux.lean, ShiftSmoothAux.lean, ShiftGeneric.lean
-    │   │                                #     Examples 7.4(2), (3), 7.8, Remark 7.7, Propositions 7.6, 7.10
-    │   └── RandomNonAtom.lean           #     Example 5.5 (stated; the constructions are open)
+    │   │                                #     Examples 7.4(2), (3), 7.8, Remark 7.7, Proposition 7.6, definitions of 7.10
+    │   ├── RandomNonAtom.lean, ExampleFiveFive.lean
+    │   │                                #     Example 5.5 on the standard presentation of Cantor space
+    │   ├── NoteSupplements.lean, NoteSupplementsAux.lean, NoteSupplementsLate.lean
+    │   │                                #     Sentences of §4.3, §4.4 and Examples 5.2, 5.4, 5.5, 6.8
+    │   ├── Ergodic/                     #     Companion modules (docs/ml_random_orbit_complexity_blueprint.md)
+    │   └── Remarks.lean, RemarksRates.lean, RemarksShift.lean
+    │                                    #     The remarks of the note
     ├── SymbolicSet.lean                 #   Dimensions of subsets of symbolic shifts (countable alphabet)
     └── Examples.lean, Examples/         #   The middle-thirds Cantor set: presentation, pointwise and set dimensions
 ```
 
 The blueprint with the dependency graph of all nodes is [`docs/point_to_set_blueprint.md`](point_to_set_blueprint.md).
+
+## Orbit Complexity of Martin-Löf Random Points Equals Entropy
+
+`KolmogorovMathlib/Ergodic/` (classical) and `KolmogorovMathlib/PointToSet/Measure/Ergodic/`
+formalize the note *Orbit complexity of Martin-Löf random points equals entropy* (2026; blueprint
+[`docs/ml_random_orbit_complexity_blueprint.md`](ml_random_orbit_complexity_blueprint.md)).
+The same 53 modules (about 18,600 lines, 660 public declarations, no `sorry`)
+also prove Proposition 7.10, the former outside inputs and the last open leaves of the note on
+non-invariant measures, and Jacobs' theorem (next section).
+
+- `orbitComplexities_eq_ksEntropy` (`Measure/Ergodic/OrbitEntropy.lean`): on a compact space,
+  for an `A`-represented ergodic map and an `A`-computable invariant probability measure `μ`,
+  `K̲^A(x, T) = K̄^A(x, T) = h_μ(T)` at every point that is `μ`-random relative to `A`; the upper
+  bound is `upperOrbitComplexity_le_ksEntropy`, the lower bound rests on Hoyrup's theorem
+  (`shiftEntropy_le_liminf_wordComplexity_bool`), proved relative to any oracle in
+  `Measure/Ergodic/Hoyrup*.lean` from effective Poincaré recurrence
+  (`exists_iterate_notMem_of_mem_wordRandomPoints`), an effective upper Birkhoff bound
+  (`limsup_shiftAverage_le_lintegral`), Chung's lemma, supermartingale convergence of the
+  conditional information and the lower half of Levin–Schnorr. No `sorry`.
+- `ae_localEntropy_eq_ksEntropy`, `measureEntropy_eq_ksEntropy`: Brin–Katok for ergodic
+  measures and Feng–Huang entropy = Kolmogorov–Sinai entropy, by the same route (unconditional).
+- Classical: `Kolmogorov.Ergodic.ksEntropy` with `tendsto_entropyRate_ksEntropy` (Walters 8.3),
+  `measure_maximal_birkhoffAverage_le` (maximal inequality), `ae_tendsto_birkhoffAverage`
+  (Birkhoff, ergodic case, bounded functions), `ae_tendsto_birkhoffAverage_condExp` (Birkhoff
+  without ergodicity, bounded functions), `exists_ergodicDecomposition` (ergodic decomposition
+  on a compact metric space, through `condExpKernel μ (invariants T)`),
+  `measureReal_upcrossesAtLeast_le` (Bishop's upcrossing inequality for Birkhoff averages),
+  `jacobs_ksEntropy_bind` (Jacobs' theorem: the Kolmogorov–Sinai entropy is affine over
+  integral decompositions into invariant measures, `Ergodic/Jacobs.lean`).
+- Effective: `exists_nullSphere_radii`, `exists_computablePartition` (Lemma 2),
+  `symbolicCode_mem_wordRandomPoints` (Lemma 3), `measure_le_liminf_visitFrequency` (random
+  points visit effectively open sets with frequency at least their measure),
+  `limsup_wordComplexity_le_shiftEntropy` (block coding at generic sequences).
 
 ## Entropy of Non-Invariant Measures
 
@@ -639,11 +678,58 @@ are in the namespace `Kolmogorov.PointToSet`.
 - Examples on shifts (`Measure/Shift*.lean`): Bernoulli mixtures, non-stationary products and
   anti-phase mixtures, a product measure on Baire space for which `H̄_μ > h̄_μ`, and
   decompositions for which integral affinity fails.
+- `ae_compProd_localEntropy_eq_of_ergodicDecomposition` (`Measure/IntegralAffinity.lean`,
+  Theorem 7.5(b)) and `ae_localEntropy_fst_eq_snd_of_measurePreserving`
+  (`Measure/RemarksShift.lean`, Brin–Katok for invariant measures): along an ergodic
+  decomposition both local entropies of `μ` and of the component equal the entropy of the
+  component, almost everywhere; proved algorithmically (block coding at random points, no
+  Jacobs' theorem) in `Measure/Ergodic/ErgodicDecompositionEntropy.lean` and
+  `Measure/Ergodic/BrinKatokNonErgodic.lean`.
+- `exists_isGenericPoint_of_mem_randomPoints` (`Measure/RemarksShift.lean`, V'yugin's theorem,
+  Remark 7.11): every random point of a shift-invariant measure on a finite-alphabet shift is
+  generic for some shift-invariant measure; proved through Bishop's upcrossing inequality in
+  `Measure/Ergodic/VyuginFrequencies.lean` and `Measure/Ergodic/VyuginGenericity.lean`.
+- `lowerEntropy_eq_iSup_measureEntropy`, `upperEntropy_eq_iSup_measureEntropy`
+  (`Measure/Variational.lean`): the Feng–Huang variational principles for the Bowen and packing
+  entropies of a nonempty compact set, the hard halves proved in
+  `Measure/Ergodic/FengHuangLower.lean` and `Measure/Ergodic/FengHuangUpper.lean`;
+  `packingPressure_zero_le_iSup_measureEntropy` (`Measure/VariationalPacking.lean`) is the
+  hard inequality for the packing topological entropy, through `pressureEquivalence_upper`.
 
-Seven declarations are tracked `sorry`s (eleven more are derived from them): Theorem 7.5(b)
-(Brin–Katok, Jacobs), the hard half of the Feng–Huang variational principle (two statements),
-Proposition 7.10 (two statements) and the two constructions of Example 5.5. They are listed,
-with what each is missing, in the blueprint.
+- `jacobs_measureEntropy_eq_ksEntropy_of_measurePreserving` (`Measure/Ergodic/KSInvariant.lean`):
+  the Feng–Huang entropy of every invariant Borel probability measure on a compact metric space
+  is its Kolmogorov–Sinai entropy, from Jacobs' theorem (`Ergodic/Jacobs.lean`) and the ergodic
+  decomposition; so the mean of the entropy law is the Kolmogorov–Sinai entropy (Remark 6.7),
+  and the Bernoulli mixture of Example 5.3 has entropy `(H(p) + H(q))/2`
+  (`jacobs_ksEntropy_bernoulliMixture`).
+- `exampleFiveFive_upper`, `exampleFiveFive_lower` (`Measure/ExampleFiveFive.lean`, Example 5.5):
+  on Cantor space with its standard computable presentation `cantorPresentation`, a computable
+  purely atomic measure with a random point of upper orbit complexity `1`, and a computable
+  measure of local entropy `(1, 1)` almost everywhere with a random point of lower orbit
+  complexity `0`; so the optimization over oracles cannot be dropped in the essential bounds
+  (`not_forall_iSup_randomPoints_eq_essSup`, `not_forall_iInf_randomPoints_eq_essInf`).
+- The remarks on Cantor space: the Levin–Schnorr estimate with the complexity of the word,
+  `abs_oracleComplexity_cantorPrefix_sub_infoBits_le` (Remark 3.4);
+  `-log₂ m^A[w] = K^A(w) + O(log |w|)`,
+  `abs_infoBits_universalMeasure_cylinder_sub_oracleComplexity_le` (Remark 6.6);
+  local entropies of Bernoulli measures at every random point,
+  `localEntropy_bernoulliMeasure_eq_crossEntropy_of_mem_randomPoints` (Remark 7.2); and on
+  conformal systems the local BS dimension is the round-ball local dimension,
+  `localBSDimension_eq_localDimension_conformal` (Remark 8.5).
+- `exists_atomic_measure_lowerPressure_eq` and its three companions
+  (`Measure/PressurePointwise.lean`): the dual principles for pressure and BS dimension are
+  attained by purely atomic measures (Corollary 8.4(c)).
+
+The chapter (39 modules, about 18,100 lines, 807 public declarations) has no
+`sorry`, and 0 declarations depend on one: every declaration of the chapter and of its companion
+modules depends only on `propext`, `Classical.choice` and `Quot.sound`. Proposition 7.10, the
+former outside inputs (Theorem 7.5(b), Brin–Katok for invariant measures, the hard half of the
+Feng–Huang variational principle, V'yugin's theorem) and the last leaves (Example 5.5,
+Remarks 3.4, 6.6, 7.2, 8.5) are proved through the companion modules
+(`docs/ml_random_orbit_complexity_blueprint.md`). Sentences of the note that the first pass did
+not state (§4.3, §4.4, Examples 5.2, 5.4, 5.5, 6.8) are in `Measure/NoteSupplements*.lean`;
+the blueprint lists what is still not stated, among them the sentence of Example 5.2 on every
+random point for every admissible oracle, which is proved only on an upper cone of oracles.
 
 ## Mutual Information at Split Precisions
 
@@ -898,8 +984,11 @@ KolmogorovMathlib/
 ├── RandomStrings/               # Resource-bounded reductions to random strings: oracle machines, complexity classes, the Allender–Friedman–Gasarch EXPSPACE theorem
 │   └── Plain/                   # Milovanov's theorem: an optimal plain decompressor whose C-random strings do not compute the halting language in polynomial time
 ├── Oracle/                      # Oracle prefix machines, relative prefix complexity K^A, relative Kraft-Chaitin coding
+├── Ergodic/                     # Kolmogorov-Sinai entropy, Birkhoff's theorem, ergodic decomposition,
+│                                #   upcrossing inequality, Jacobs' theorem
 ├── PointToSet/                  # Point-to-set principles in dynamical systems: pressure, Barreira-Schmeling
 │   │                            #   dimension, Bowen equations, conformal dimension theorem
+│   ├── Measure/                 # Entropy of non-invariant measures, orbit complexity of random points
 │   └── SplitPrecision/          # Mutual information of points and tuples at split precisions
 ├── Restricted/                  # Description families and restricted profiles from Section 6
 │   ├── FamilyCurve/             # Effective multiscale construction and general curve realization

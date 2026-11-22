@@ -57,9 +57,26 @@ The development is based on Mathlib's computability infrastructure. Decompressor
   sets; the essential bounds of the local entropies as suprema and infima over random points;
   information rates along Bowen balls and their comparison with the Feng–Huang entropies; the
   domination lemma and the entropy law under absolute continuity, convex combinations and
-  integral decompositions; examples on shifts
+  integral decompositions, including ergodic decompositions; the Feng–Huang variational
+  principles for the Bowen and packing entropies of compact sets; Brin–Katok for invariant
+  measures, whose Feng–Huang entropy is their Kolmogorov–Sinai entropy (by Jacobs' theorem);
+  V'yugin's theorem that random points of an invariant measure on a shift are generic; examples
+  on shifts, including the constructions showing that Martin-Löf randomness is not enough for the
+  essential bounds; no `sorry`
   (`KolmogorovMathlib/PointToSet/Measure/`, blueprint `docs/entropy_noninvariant_blueprint.md`,
-  which lists the seven statements left as tracked `sorry`s).
+  which also lists the sentences of the note that are not stated).
+- **Orbit complexity of Martin-Löf random points equals entropy:** on a compact space, for a
+  computable ergodic invariant measure, both orbit complexities of every Martin-Löf random
+  point equal the Kolmogorov–Sinai entropy, which is defined here together with Walters 8.3,
+  the maximal ergodic inequality, Birkhoff's theorem (also without ergodicity), the ergodic
+  decomposition, Bishop's upcrossing inequality, null-sphere radii, computable partitions and
+  symbolic coding, and Hoyrup's theorem (the lower half of the effective
+  Shannon–McMillan–Breiman theorem, relativized), with effective Poincaré recurrence; the same
+  modules prove Proposition 7.10, Theorem 7.5(b), Brin–Katok, V'yugin's theorem, the hard
+  half of the Feng–Huang variational principle, Jacobs' theorem on the entropy of an integral
+  decomposition and the last leaves of the note on non-invariant measures; no `sorry`
+  (`KolmogorovMathlib/Ergodic/`, `KolmogorovMathlib/PointToSet/Measure/Ergodic/`, blueprint
+  `docs/ml_random_orbit_complexity_blueprint.md`).
 - **New strong-merging results:** the square-root merger of two strong sufficient
   statistics, its matching obstruction and the questions of survey Section 7.9.
 

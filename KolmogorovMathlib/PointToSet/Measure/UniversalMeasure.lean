@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Measure.Pointwise
-import Mathlib.MeasureTheory.Measure.Dirac.Basic
 
 /-!
 # The universal measure and the dual principle (§6.3)
@@ -91,7 +90,7 @@ theorem universalMeasure_bowenBall_ge (P : Presentation X) (T : X → X) (hT : C
   rw [indicator_of_mem hi]
 
 /-- `2^{-K}` as an extended real. -/
-private theorem ofReal_two_rpow_neg_natCast (K : ℕ) :
+theorem ofReal_two_rpow_neg_natCast (K : ℕ) :
     ENNReal.ofReal ((2 : ℝ) ^ (-(K : ℝ))) = (2 : ℝ≥0∞)⁻¹ ^ K := by
   rw [Real.rpow_neg zero_le_two, Real.rpow_natCast, ENNReal.ofReal_inv_of_pos (by positivity),
     ENNReal.ofReal_pow zero_le_two, ENNReal.ofReal_ofNat, ENNReal.inv_pow]

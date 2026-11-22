@@ -3,11 +3,8 @@ Copyright (c) 2026 Emma Dinowitz. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
-import KolmogorovMathlib.PointToSet.Measure.ShiftDecompositionAux
 import KolmogorovMathlib.PointToSet.Measure.ShiftSmoothAux
-import KolmogorovMathlib.PointToSet.Measure.ShiftGeneric
 import KolmogorovMathlib.PointToSet.Measure.IntegralAffinity
-import KolmogorovMathlib.PointToSet.Measure.Decomposition
 
 /-!
 # Integral decompositions on a shift
@@ -879,14 +876,6 @@ section smooth
 
 attribute [local instance] cantorMetricSpace
 
-/-- `log₂ n / n → 0`. -/
-private lemma tendsto_logb_div_natCast :
-    Tendsto (fun n : ℕ ↦ Real.logb 2 n / n) atTop (𝓝 0) := by
-  have := (Real.tendsto_pow_logb_div_mul_add_atTop (b := 2) 1 0 1
-    (by norm_num)).comp tendsto_natCast_atTop_atTop
-  refine this.congr fun n ↦ ?_
-  simp
-
 /-- Remark 7.7, the key bound: let `μ_θ = ⨂_i Bernoulli(β_i(θ))` with `β_i : [0, 1] → [δ, 1 - δ]`
 uniformly Lipschitz. For every probability measure `P` on `[0, 1]` and `M`-almost every
 `(θ, x)`, `i_n ≤ 3 log₂ n + O(1)`.
@@ -922,9 +911,9 @@ theorem integralAffinity_smoothFamily (β : ℕ → unitInterval → unitInterva
     ae_eventually_neg_two_logb_le_infoDensity (by norm_num) (by norm_num) cantor_hd P κ]
     with p ⟨C, hC⟩ hlow
   have hl : Tendsto (fun n : ℕ ↦ -(2 * Real.logb 2 n) / n) atTop (𝓝 0) := by
-    simpa [neg_div, mul_div_assoc] using (tendsto_logb_div_natCast.const_mul 2).neg
+    simpa [neg_div, mul_div_assoc] using (tendsto_logb_div_nat.const_mul 2).neg
   have hu : Tendsto (fun n : ℕ ↦ (3 * Real.logb 2 n + C) / n) atTop (𝓝 0) := by
-    have h1 := tendsto_logb_div_natCast.const_mul 3
+    have h1 := tendsto_logb_div_nat.const_mul 3
     have h2 := tendsto_const_nhds (x := C).div_atTop tendsto_natCast_atTop_atTop
     simpa [add_div, mul_div_assoc] using h1.add h2
   refine tendsto_of_tendsto_of_tendsto_of_le_of_le' hl hu ?_ ?_

@@ -4,12 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Measure.Shift
-import KolmogorovMathlib.PointToSet.Measure.InformationRate
 import Mathlib.Analysis.SpecialFunctions.BinaryEntropy
-import Mathlib.Analysis.PSeries
-import Mathlib.MeasureTheory.Integral.Indicator
-import Mathlib.MeasureTheory.OuterMeasure.BorelCantelli
-import Mathlib.Probability.ProductMeasure
 
 /-!
 # Compactness is needed in Proposition 4.7 (Example 5.4)
@@ -715,16 +710,6 @@ theorem map_shiftMap_baireMeasureOf_ne (L : ℕ → ℕ) :
   norm_num at h1
 
 /-! ### Rates in probability (remark after Proposition 6.10) -/
-
-/-- For a finite measure, if almost every point eventually leaves the measurable sets `s n`,
-their measures tend to `0`. -/
-private lemma tendsto_measure_zero_of_ae_eventually {X : Type*} [MeasurableSpace X]
-    {μ : Measure X} [IsFiniteMeasure μ] {s : ℕ → Set X} (hs : ∀ n, MeasurableSet (s n))
-    (h : ∀ᵐ x ∂μ, ∀ᶠ n in atTop, x ∉ s n) : Tendsto (fun n ↦ μ (s n)) atTop (𝓝 0) := by
-  have := tendsto_measure_of_ae_tendsto_indicator (μ := μ) atTop MeasurableSet.empty hs
-    MeasurableSet.univ (measure_ne_top μ _) (.of_forall fun _ ↦ subset_univ _)
-    (h.mono fun x hx ↦ hx.mono fun n hn ↦ by simp [hn])
-  simpa using this
 
 /-- Example 5.4: for almost every `x`, at every dyadic scale `ε`,
 `-(1/n) log₂ μ(B_n(x, σ, ε)) → 0`. Blueprint node `meas:examples`. -/

@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Measure.BowenCeOpen
-import Mathlib.MeasureTheory.Measure.Typeclasses.Finite
 
 /-!
 # Measures computable relative to an oracle

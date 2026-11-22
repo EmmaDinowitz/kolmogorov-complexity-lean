@@ -4,8 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Measure.LocalEntropy
-import Mathlib.MeasureTheory.OuterMeasure.BorelCantelli
-import Mathlib.MeasureTheory.Measure.Typeclasses.Finite
 
 /-!
 # Domination along Bowen balls (Lemma 7.1)
@@ -126,24 +124,6 @@ theorem ae_eventually_measure_bowenBall_le {T : X → X} (hT : Continuous T) (μ
   filter_upwards [hx, eventually_ge_atTop 1] with n hn h1
   simpa [s, h1] using hn
 
-/-- If `a n ≤ b n + d n` eventually and `d n → 0`, then `liminf a ≤ liminf b` and
-`limsup a ≤ limsup b`. -/
-private lemma liminf_limsup_le_of_eventually_le_add {a b d : ℕ → ℝ≥0∞}
-    (hd : Tendsto d atTop (𝓝 0)) (h : ∀ᶠ n in atTop, a n ≤ b n + d n) :
-    liminf a atTop ≤ liminf b atTop ∧ limsup a atTop ≤ limsup b atTop := by
-  have hev : ∀ δ : NNReal, 0 < δ → ∀ᶠ n in atTop, a n ≤ b n + δ := by
-    intro δ hδ
-    filter_upwards [h, hd.eventually (gt_mem_nhds (by exact_mod_cast hδ : (0 : ℝ≥0∞) < δ))]
-      with n h1 h2
-    exact h1.trans (by gcongr)
-  constructor <;> refine ENNReal.le_of_forall_pos_le_add fun δ hδ _ ↦ ?_
-  · calc liminf a atTop ≤ liminf (fun n ↦ b n + δ) atTop := liminf_le_liminf (hev δ hδ)
-      _ = liminf b atTop + δ := liminf_add_const atTop b _ (by isBoundedDefault)
-          (by isBoundedDefault)
-  · calc limsup a atTop ≤ limsup (fun n ↦ b n + δ) atTop := limsup_le_limsup (hev δ hδ)
-      _ = limsup b atTop + δ := limsup_add_const atTop b _ (by isBoundedDefault)
-          (by isBoundedDefault)
-
 /-- `2 log₂ n / n → 0`, in `ℝ≥0∞`. -/
 private lemma tendsto_ofReal_two_mul_logb_div :
     Tendsto (fun n : ℕ ↦ ENNReal.ofReal (2 * Real.logb 2 n) / n) atTop (𝓝 0) := by
@@ -166,7 +146,7 @@ theorem ae_localEntropyAt_le {T : X → X} (hT : Continuous T) (μ ν : Measure 
     ∀ᵐ x ∂ν, (localEntropyAt ν T x (2 * ε)).1 ≤ (localEntropyAt μ T x ε).1 ∧
       (localEntropyAt ν T x (2 * ε)).2 ≤ (localEntropyAt μ T x ε).2 := by
   filter_upwards [ae_eventually_measure_bowenBall_le hT μ ν hε] with x hx
-  refine liminf_limsup_le_of_eventually_le_add tendsto_ofReal_two_mul_logb_div ?_
+  refine liminf_limsup_le_of_le_add tendsto_ofReal_two_mul_logb_div ?_
   filter_upwards [hx, eventually_ge_atTop 1] with n hn h1
   unfold localEntropyRate
   rw [← ENNReal.add_div]

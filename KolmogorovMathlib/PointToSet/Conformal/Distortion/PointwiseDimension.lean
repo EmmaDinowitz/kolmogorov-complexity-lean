@@ -353,7 +353,7 @@ private lemma choose_staticPointDimensions_squeeze_timeLimit
 
 /-- Uniform continuity of `u` makes the variation `potentialVariation u δ` finite and smaller
 than `ε` for all sufficiently small positive radii `δ`. -/
-private lemma exists_potentialVariation_toReal_lt (u : X → ℝ) (hu : UniformContinuous u)
+lemma exists_potentialVariation_toReal_lt (u : X → ℝ) (hu : UniformContinuous u)
     (ε : ℝ) (hε : 0 < ε) :
     ∃ δ₀ : ℝ, 0 < δ₀ ∧ ∀ δ : ℝ, 0 < δ → δ < δ₀ →
       potentialVariation u δ < ⊤ ∧ (potentialVariation u δ).toReal < ε := by
@@ -371,7 +371,7 @@ private lemma exists_potentialVariation_toReal_lt (u : X → ℝ) (hu : UniformC
 `τ` and a ball constant `η` such that, for all small radii `δ`, the potential variation is
 finite, the denominator error `(τ + ω_u(δ)) / (α / 2 - τ)` is below `c`, and the Bowen ball of
 order `n + 1` lies between the metric balls of the orbit radii `r_n^-` and `r_n^+`. -/
-private lemma exists_orbit_scale_parameters
+lemma exists_orbit_scale_parameters
     (C : UniformConformalData X) (x : X) (hx : HasTemperedContraction C.T C.potential x)
     (α c : ℝ) (hα : 0 < α) (hc : 0 < c) (hc1 : c < 1) :
     ∃ τ η δ₀ : ℝ, 0 < τ ∧ τ < α / 4 ∧ 0 < η ∧ η ≤ 1 ∧ 0 < δ₀ ∧
@@ -406,7 +406,7 @@ private lemma monotone_timeLimit_finiteScaleBSCost (σ : LimitSide) (P : Present
 
 /-- A fixed multiplicative squeeze of `d` by an eventually monotone sequence passes to its
 supremum. -/
-private lemma squeeze_iSup_of_monotone (f : ℕ → ℝ≥0∞) (hf : Monotone f) (d : ℝ≥0∞) (c : ℝ)
+lemma squeeze_iSup_of_monotone (f : ℕ → ℝ≥0∞) (hf : Monotone f) (d : ℝ≥0∞) (c : ℝ)
     (hbound : ∀ᶠ p in atTop,
       d ≤ ENNReal.ofReal (1 + c) * f p ∧ ENNReal.ofReal (1 - c) * f p ≤ d) :
     d ≤ ENNReal.ofReal (1 + c) * ⨆ p, f p ∧ ENNReal.ofReal (1 - c) * ⨆ p, f p ≤ d := by
@@ -419,7 +419,7 @@ private lemma squeeze_iSup_of_monotone (f : ℕ → ℝ≥0∞) (hf : Monotone f
 
 /-- If `d` is squeezed between `(1 - c) * b` and `(1 + c) * b` for every `c ∈ (0, 1)`, then
 `d = b`; this includes the cases `b = 0` and `b = ∞`. -/
-private lemma eq_of_forall_mul_ofReal_squeeze (d b : ℝ≥0∞)
+lemma eq_of_forall_mul_ofReal_squeeze (d b : ℝ≥0∞)
     (h : ∀ c : ℝ, 0 < c → c < 1 →
       d ≤ ENNReal.ofReal (1 + c) * b ∧ ENNReal.ofReal (1 - c) * b ≤ d) :
     d = b := by

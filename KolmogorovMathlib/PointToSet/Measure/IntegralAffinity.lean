@@ -3,9 +3,7 @@ Copyright (c) 2026 Emma Dinowitz. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
-import KolmogorovMathlib.PointToSet.Measure.Decomposition
-import Mathlib.Dynamics.Ergodic.Ergodic
-import Mathlib.Probability.Kernel.RadonNikodym
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.ErgodicDecompositionEntropy
 import Mathlib.Probability.Kernel.Composition.AbsolutelyContinuous
 
 /-!
@@ -21,8 +19,11 @@ complexity of random points*, in that almost-everywhere form.
   absolutely continuous with respect to `μ`; `compProd_absolutelyContinuous_prod_iff`: this
   is equivalent to `M ≪ Q ⊗ μ`.
 * `ae_compProd_localEntropy_eq_of_ergodicDecomposition` (Theorem 7.5(b)): `X` compact, `μ`
-  invariant of finite entropy and `κ` its ergodic decomposition. This rests on the Brin–Katok
-  theorem and on Jacobs' theorem, which are not available; it is a tracked `sorry`.
+  invariant and `κ` its ergodic decomposition. It is proved by an algorithmic route in
+  `Ergodic/ErgodicDecompositionEntropy.lean`
+  (`ae_compProd_localEntropy_eq_measureEntropy_of_ergodicDecomposition`), without the
+  Brin–Katok theorem for `μ` and without Jacobs' theorem (which is now available separately as
+  `Kolmogorov.Ergodic.jacobs_ksEntropy_bind` in `Ergodic/Jacobs.lean`).
 * `ae_compProd_localEntropy_eq_of_ratio` (Theorem 7.5(c)): for every `ε` there is `ε'` with
   `limsup_n (1/n) log (μ_ω(B_n(x, T, ε')) / μ(B_n(x, T, ε))) ≤ 0` almost everywhere. The
   pointwise step is `localEntropyAt_le_of_ratio`.
@@ -126,24 +127,28 @@ theorem ae_compProd_localEntropy_eq_of_ratio {T : X → X} (hT : Continuous T)
   exact Prod.ext (le_antisymm hle.1 (iSup_le fun p ↦ (key p).1))
     (le_antisymm hle.2 (iSup_le fun p ↦ (key p).2))
 
+omit [SecondCountableTopology X] in
 /-- Theorem 7.5(b): let `X` be compact, `μ = ∫ μ_ω dQ(ω)` a `T`-invariant probability measure
-with `h̄_μ(T) < ∞` and `μ_ω` ergodic for `Q`-almost every `ω`. Then for `M`-almost every
+and `μ_ω` ergodic for `Q`-almost every `ω`. Then for `M`-almost every
 `(ω, x)` the lower and upper local entropies of `μ` at `x` both equal the entropy of the
 component `μ_ω` (the common value of its Feng–Huang entropies), and so do those of `μ_ω`; in
 particular integral affinity holds and `Λ_μ` is carried by the diagonal.
 
-This rests on the Brin–Katok theorem and on Jacobs' theorem on the entropy of an ergodic
-decomposition; neither is available in Mathlib or in this library.
+Proved by an algorithmic route in `Measure/Ergodic/ErgodicDecompositionEntropy.lean`
+(`ae_compProd_localEntropy_eq_measureEntropy_of_ergodicDecomposition`), without the Brin–Katok
+theorem for `μ` and without Jacobs' theorem: Theorem 7.3(a) and the ergodic Brin–Katok formula
+bound `Φ_μ` from below, and at `μ`-random points block coding along the generic itinerary of the
+component bounds `h̄_μ(T, x)` by the Kolmogorov–Sinai entropy of the component. The hypothesis
+`h̄_μ(T) < ∞` of the first formalization is not needed and has been dropped.
 Blueprint node `meas:integral-affinity`. -/
 theorem ae_compProd_localEntropy_eq_of_ergodicDecomposition [CompactSpace X] {T : X → X}
     (hT : Continuous T) (Q : Measure Ω) [IsProbabilityMeasure Q] (κ : Kernel Ω X)
     [IsMarkovKernel κ] (hinv : MeasurePreserving T (Q.bind κ) (Q.bind κ))
-    (herg : ∀ᵐ ω ∂Q, Ergodic T (κ ω)) (hfin : (measureEntropy (Q.bind κ) T).2 ≠ ⊤) :
+    (herg : ∀ᵐ ω ∂Q, Ergodic T (κ ω)) :
     ∀ᵐ p ∂(Q ⊗ₘ κ),
       localEntropy (Q.bind κ) T p.2 =
           ((measureEntropy (κ p.1) T).1, (measureEntropy (κ p.1) T).1) ∧
-        localEntropy (κ p.1) T p.2 = localEntropy (Q.bind κ) T p.2 := by
-  -- TODO(sorry): external input — the Brin–Katok theorem and Jacobs' theorem
-  sorry
+        localEntropy (κ p.1) T p.2 = localEntropy (Q.bind κ) T p.2 :=
+  ae_compProd_localEntropy_eq_measureEntropy_of_ergodicDecomposition hT Q κ hinv herg
 
 end Kolmogorov.PointToSet

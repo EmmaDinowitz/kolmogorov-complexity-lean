@@ -4,8 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Measure.InformationRate
-import Mathlib.MeasureTheory.Function.EssSup
-import Mathlib.MeasureTheory.Integral.Indicator
 
 /-!
 # Rates in probability (§6.2, Proposition 6.10)
@@ -55,17 +53,6 @@ noncomputable def upperProbRate (μ : Measure X) (g : ℕ → X → ℝ≥0∞) 
   sInf {β : ℝ≥0∞ | Tendsto (fun n ↦ μ {x | β < g n x}) atTop (𝓝 0)}
 
 /-! ### Generalities -/
-
-omit [MetricSpace X] [BorelSpace X] in
-/-- If almost every point eventually leaves the measurable sets `s n`, then their measures tend
-to `0` (finite measure). -/
-private theorem tendsto_measure_zero_of_ae_eventually {μ : Measure X} [IsFiniteMeasure μ]
-    {s : ℕ → Set X} (hs : ∀ n, MeasurableSet (s n)) (h : ∀ᵐ x ∂μ, ∀ᶠ n in atTop, x ∉ s n) :
-    Tendsto (fun n ↦ μ (s n)) atTop (𝓝 0) := by
-  have := tendsto_measure_of_ae_tendsto_indicator (μ := μ) atTop MeasurableSet.empty hs
-    MeasurableSet.univ (measure_ne_top μ _) (.of_forall fun _ ↦ subset_univ _)
-    (h.mono fun x hx ↦ hx.mono fun n hn ↦ by simp [hn])
-  simpa using this
 
 omit [MetricSpace X] [BorelSpace X] in
 /-- If eventually `s n ⊆ t n ∪ E n` and the measures of `t n` and `E n` tend to `0`, so do
@@ -131,60 +118,7 @@ private theorem probDominated_of_le_add {μ : Measure X} {g h : ℕ → X → �
 
 /-! ### Error terms -/
 
-/-- `log₂ n / n → 0`. -/
-private theorem tendsto_logb_div_nat :
-    Tendsto (fun n : ℕ ↦ Real.logb 2 n / n) atTop (𝓝 0) := by
-  have h := (Real.tendsto_pow_log_div_mul_add_atTop 1 0 1 one_ne_zero).comp
-    tendsto_natCast_atTop_atTop
-  have h2 := h.div_const (Real.log 2)
-  simp only [zero_div] at h2
-  refine h2.congr fun n ↦ ?_
-  simp [Real.logb]
-  ring
-
-/-- An error term `(C + D log₂ n) / n` tends to zero. -/
-private theorem tendsto_ofReal_err (C D : ℝ) :
-    Tendsto (fun n : ℕ ↦ ENNReal.ofReal ((C + D * Real.logb 2 n) / n)) atTop (𝓝 0) := by
-  rw [← ENNReal.ofReal_zero]
-  refine ENNReal.tendsto_ofReal ?_
-  have h1 := tendsto_const_div_atTop_nhds_zero_nat C
-  have h2 := tendsto_logb_div_nat.const_mul D
-  rw [mul_zero] at h2
-  simpa [add_div, mul_div_assoc] using h1.add h2
-
-/-- A natural number divided by a positive natural number, as an extended real. -/
-private theorem natCast_div_natCast_eq_ofReal (K : ℕ) {n : ℕ} (hn : 1 ≤ n) :
-    (K : ℝ≥0∞) / n = ENNReal.ofReal ((K : ℝ) / n) := by
-  rw [ENNReal.ofReal_div_of_pos (by exact_mod_cast hn), ENNReal.ofReal_natCast,
-    ENNReal.ofReal_natCast]
-
-/-- `2^{-(j + 2 log₂ n)} = 2^{-j} / n²` for `n ≥ 1`. -/
-private theorem ofReal_two_rpow_neg_eq (j : ℕ) {n : ℕ} (hn : 1 ≤ n) :
-    ENNReal.ofReal ((2 : ℝ) ^ (-((j : ℝ) + 2 * Real.logb 2 n))) =
-      (2 : ℝ≥0∞)⁻¹ ^ j / (n : ℝ≥0∞) ^ 2 := by
-  have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
-  have h2 : (2 : ℝ) ^ ((j : ℝ) + 2 * Real.logb 2 n) = 2 ^ j * (n : ℝ) ^ 2 := by
-    rw [Real.rpow_add two_pos, Real.rpow_natCast, mul_comm (2 : ℝ), Real.rpow_mul zero_le_two,
-      Real.rpow_logb two_pos (by norm_num) hn0, Real.rpow_two]
-  rw [Real.rpow_neg zero_le_two, h2, ENNReal.ofReal_inv_of_pos (by positivity),
-    ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_pow zero_le_two, ENNReal.ofReal_pow hn0.le,
-    ENNReal.ofReal_ofNat, ENNReal.ofReal_natCast, div_eq_mul_inv, ENNReal.inv_pow,
-    ENNReal.mul_inv (Or.inl (by simp)) (Or.inl (by simp))]
-  simp only [ENNReal.inv_pow]
-
 /-! ### The two dominations -/
-
-/-- The test function of Lemma 3.2 is a Borel function: a countable sum of constants times
-indicators of open sets. -/
-private theorem measurable_testFunction' (P : Presentation X) {T : X → X} (hT : Continuous T)
-    (A : Set ℕ) (μ : Measure X) (ε : ℝ) : Measurable (testFunction P T A μ ε) := by
-  refine Measurable.tsum fun n ↦ Measurable.tsum fun i ↦ ?_
-  by_cases hn : n = 0
-  · simp only [hn, ↓reduceIte]
-    exact measurable_const
-  · simp only [hn, ↓reduceIte]
-    exact measurable_const.mul ((measurable_const.indicator
-      (bowen_ball_dense_open T hT n _ ε).measurableSet).div_const _)
 
 /-- The coding bound in probability: `K_n^A(x, T, 6ε) / n` is dominated by
 `f_n^ε(x) = -(1/n) log₂ μ(B_n(x, T, ε))` at all thresholds, for rational `ε > 0`. -/
@@ -262,7 +196,7 @@ private theorem probDominated_localEntropyRate_orbitComplexity (P : Presentation
   have hE : Tendsto (fun n ↦ μ (E n)) atTop (𝓝 0) := by
     have hmark : ∀ n, μ (E n) ≤ 2 * (2 : ℝ≥0∞)⁻¹ ^ j n := fun n ↦ by
       have h1 := mul_meas_ge_le_lintegral₀ (μ := μ)
-        (measurable_testFunction' P hT A μ ε).aemeasurable ((2 : ℝ≥0∞) ^ j n)
+        (measurable_testFunction P hT A μ ε).aemeasurable ((2 : ℝ≥0∞) ^ j n)
       have h2 := h1.trans (lintegral_testFunction_lt_two P T hT A μ ε).le
       calc μ (E n) ≤ 2 / 2 ^ j n :=
             (ENNReal.le_div_iff_mul_le (Or.inl (by simp)) (Or.inl (by simp))).2
@@ -459,11 +393,6 @@ private theorem six_mul_le_dyadicRadius (p : ℕ) :
   rw [pow_add]
   norm_num
   linarith
-
-/-- `2 · 2^{-(p + 1)} = 2^{-p}`. -/
-private theorem two_mul_dyadicRadius_succ (p : ℕ) : 2 * dyadicRadius (p + 1) = dyadicRadius p := by
-  simp only [dyadicRadius, pow_succ]
-  ring
 
 /-- The rational dyadic radius `2^{-p}` cast to the reals. -/
 private theorem cast_dyadic (p : ℕ) : (((2 : ℚ)⁻¹ ^ p : ℚ) : ℝ) = dyadicRadius p := by

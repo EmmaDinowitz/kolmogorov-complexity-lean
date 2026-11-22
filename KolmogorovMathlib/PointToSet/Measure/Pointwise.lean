@@ -5,7 +5,6 @@ Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Measure.CodingByMeasure
 import KolmogorovMathlib.PointToSet.Measure.DeficiencyTest
-import KolmogorovMathlib.PointToSet.Pressure.Lower.EntropyPointToSet
 
 /-!
 # Orbit complexity of random points (Theorem 3.3 and Corollary 3.6)
@@ -38,21 +37,10 @@ variable {X : Type*} [MetricSpace X] [MeasurableSpace X] [BorelSpace X]
 
 /-! ### Comparison lemmas for limits inferior and superior -/
 
-/-- If `a n ≤ b n + d n` eventually with `d n → 0`, then `liminf a ≤ liminf b` and
-`limsup a ≤ limsup b`. -/
-private theorem liminf_limsup_le_of_le_add {a b d : ℕ → ℝ≥0∞} (hd : Tendsto d atTop (𝓝 0))
-    (h : ∀ᶠ n in atTop, a n ≤ b n + d n) :
-    liminf a atTop ≤ liminf b atTop ∧ limsup a atTop ≤ limsup b atTop := by
-  constructor
-  · calc liminf a atTop ≤ liminf (b + d) atTop := liminf_le_liminf h
-      _ = liminf b atTop := ENNReal.liminf_add_of_right_tendsto_zero hd b
-  · calc limsup a atTop ≤ limsup (b + d) atTop := limsup_le_limsup h
-      _ = limsup b atTop := ENNReal.limsup_add_of_right_tendsto_zero hd b
-
 /-- Threshold comparison: if for every real `s > 0` there is an error `d → 0` such that
 eventually `a n < s` implies `b n ≤ s + d n`, then `liminf b ≤ liminf a` and
 `limsup b ≤ limsup a`. -/
-private theorem liminf_limsup_le_of_forall_lt {a b : ℕ → ℝ≥0∞}
+theorem liminf_limsup_le_of_forall_lt {a b : ℕ → ℝ≥0∞}
     (h : ∀ s : ℝ, 0 < s → ∃ d : ℕ → ℝ≥0∞, Tendsto d atTop (𝓝 0) ∧
       ∀ᶠ n in atTop, a n < ENNReal.ofReal s → b n ≤ ENNReal.ofReal s + d n) :
     liminf b atTop ≤ liminf a atTop ∧ limsup b atTop ≤ limsup a atTop := by
@@ -90,7 +78,7 @@ private theorem liminf_limsup_le_of_forall_lt {a b : ℕ → ℝ≥0∞}
     exact (himp han).trans (by gcongr)
 
 /-- `log₂ n / n → 0`. -/
-private theorem tendsto_logb_div_nat :
+theorem tendsto_logb_div_nat :
     Tendsto (fun n : ℕ ↦ Real.logb 2 n / n) atTop (𝓝 0) := by
   have h := (Real.tendsto_pow_log_div_mul_add_atTop 1 0 1 one_ne_zero).comp
     tendsto_natCast_atTop_atTop
@@ -101,7 +89,7 @@ private theorem tendsto_logb_div_nat :
   ring
 
 /-- An error term `(C + D log₂ n) / n` tends to zero. -/
-private theorem tendsto_ofReal_err (C D : ℝ) :
+theorem tendsto_ofReal_err (C D : ℝ) :
     Tendsto (fun n : ℕ ↦ ENNReal.ofReal ((C + D * Real.logb 2 n) / n)) atTop (𝓝 0) := by
   rw [← ENNReal.ofReal_zero]
   refine ENNReal.tendsto_ofReal ?_
@@ -111,13 +99,13 @@ private theorem tendsto_ofReal_err (C D : ℝ) :
   simpa [add_div, mul_div_assoc] using h1.add h2
 
 /-- A natural number divided by a positive natural number, as an extended real. -/
-private theorem natCast_div_natCast_eq_ofReal (K : ℕ) {n : ℕ} (hn : 1 ≤ n) :
+theorem natCast_div_natCast_eq_ofReal (K : ℕ) {n : ℕ} (hn : 1 ≤ n) :
     (K : ℝ≥0∞) / n = ENNReal.ofReal ((K : ℝ) / n) := by
   rw [ENNReal.ofReal_div_of_pos (by exact_mod_cast hn), ENNReal.ofReal_natCast,
     ENNReal.ofReal_natCast]
 
 /-- `2^{-(j + 2 log₂ n)} = 2^{-j} / n²` for `n ≥ 1`. -/
-private theorem ofReal_two_rpow_neg_eq (j : ℕ) {n : ℕ} (hn : 1 ≤ n) :
+theorem ofReal_two_rpow_neg_eq (j : ℕ) {n : ℕ} (hn : 1 ≤ n) :
     ENNReal.ofReal ((2 : ℝ) ^ (-((j : ℝ) + 2 * Real.logb 2 n))) =
       (2 : ℝ≥0∞)⁻¹ ^ j / (n : ℝ≥0∞) ^ 2 := by
   have hn0 : (0 : ℝ) < n := by exact_mod_cast hn

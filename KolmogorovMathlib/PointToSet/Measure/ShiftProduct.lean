@@ -5,10 +5,7 @@ Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Measure.Shift
 import KolmogorovMathlib.PointToSet.Measure.EntropyLaw
-import KolmogorovMathlib.PointToSet.Measure.InformationRate
-import Mathlib.Probability.Independence.InfinitePi
 import Mathlib.Analysis.SpecialFunctions.BinaryEntropy
-import Mathlib.MeasureTheory.OuterMeasure.BorelCantelli
 
 /-!
 # Non-stationary product measures on the shift (Example 5.1)
@@ -245,12 +242,6 @@ theorem liminf_limsup_ofReal_congr {u v : ℕ → ℝ}
       (liminf_le_liminf_of_le_add_tendsto_zero (.of_forall fun n ↦ h1 _ _) hd'),
     le_antisymm (limsup_le_limsup_of_le_add_tendsto_zero (.of_forall fun n ↦ h1 _ _) hd)
       (limsup_le_limsup_of_le_add_tendsto_zero (.of_forall fun n ↦ h1 _ _) hd')⟩
-
-/-- `ofReal S / n = ofReal (S / n)` for `n ≥ 1`. -/
-lemma ofReal_div_natCast {S : ℝ} {n : ℕ} (hn : 1 ≤ n) :
-    ENNReal.ofReal S / n = ENNReal.ofReal (S / n) := by
-  rw [ENNReal.ofReal_div_of_pos (by exact_mod_cast hn)]
-  simp
 
 /-! ### The block pattern `⋃_j [4^j, 2·4^j)` -/
 
@@ -610,8 +601,8 @@ lemma bernoulli_singleton (q : I) (b : Bool) :
 
 /-- A cylinder is a finite box. -/
 lemma cylinder_eq_pi (x : ℕ → Bool) (n : ℕ) :
-    PiNat.cylinder x n = Set.pi (Finset.range n : Set ℕ) fun i ↦ {x i} := by
-  ext y; simp [PiNat.mem_cylinder_iff]
+    PiNat.cylinder x n = Set.pi (Finset.range n : Set ℕ) fun i ↦ {x i} :=
+  PiNat.cylinder_eq_pi x n
 
 /-- Example 5.1: `μ_β[x↾n] = ∏_{i<n} β_i^{x_i} (1 - β_i)^{1 - x_i}`.
 Blueprint node `meas:examples`. -/

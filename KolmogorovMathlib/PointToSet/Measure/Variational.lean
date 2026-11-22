@@ -4,7 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Measure.EssentialBounds
-import KolmogorovMathlib.PointToSet.Measure.InformationRate
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.FengHuangLower
+import KolmogorovMathlib.PointToSet.Measure.Ergodic.FengHuangUpper
 
 /-!
 # Variational forms and the comparison chain (Corollaries 4.2 and 6.5(c), §4.4)
@@ -17,9 +18,12 @@ Huang follows from Theorem 4.3. The other half, for a compact subset `K` of a co
 `h̲(K, T) ≤ sup {h̲_μ(T) : μ(K) = 1}`, `h̄(K, T) ≤ sup {h̄_μ(T) : μ(K) = 1}`,
 
 is the theorem of Feng and Huang (*Variational principles for topological entropies of
-subsets*, J. Funct. Anal. 263 (2012)); it is not available here and is recorded as the tracked
-`sorry`s `lowerEntropy_le_iSup_measureEntropy` and `upperEntropy_le_iSup_measureEntropy`.
-The remaining statements are derived from these two.
+subsets*, J. Funct. Anal. 263 (2012)): `lowerEntropy_le_iSup_measureEntropy` and
+`upperEntropy_le_iSup_measureEntropy`, proved in `Ergodic/FengHuangLower.lean` (weighted Bowen
+content and a dynamical Frostman lemma) and `Ergodic/FengHuangUpper.lean` (a thin-set kernel and
+a Cantor tree of separated sets). The remaining statements are derived from these two; the
+packing form (`h^P_top(T, K)`, via the library's packing equivalence) is in
+`VariationalPacking.lean`.
 
 * `lowerEntropy_eq_iSup_measureEntropy`, `upperEntropy_eq_iSup_measureEntropy`: the
   variational principles.
@@ -80,24 +84,25 @@ theorem measureEntropy_snd_le_upperEntropy (P : Presentation X) (T : X → X)
     _ ≤ upperEntropy P T Z := iInf₂_le Z hZ
 
 /-- The Feng–Huang variational principle for the Bowen entropy of a compact set, hard half.
-Outside input: D.-J. Feng and W. Huang, J. Funct. Anal. 263 (2012), Theorem 1.2.
+D.-J. Feng and W. Huang, J. Funct. Anal. 263 (2012), Theorem 1.2; proved in
+`Ergodic/FengHuangLower.lean`.
 Blueprint node `meas:variational`. -/
 theorem lowerEntropy_le_iSup_measureEntropy [CompactSpace X] {T : X → X} (hT : Continuous T)
     {K : Set X} (hK : IsCompact K) (hne : K.Nonempty) :
     lowerEntropy T K ≤
-      ⨆ (μ : Measure X) (_ : IsProbabilityMeasure μ) (_ : μ K = 1), (measureEntropy μ T).1 := by
-  -- TODO(sorry): external input — the Feng–Huang variational principle (Bowen entropy)
-  sorry
+      ⨆ (μ : Measure X) (_ : IsProbabilityMeasure μ) (_ : μ K = 1), (measureEntropy μ T).1 :=
+  lowerEntropy_le_iSup_measureEntropy' hT hK hne
 
 /-- The Feng–Huang variational principle for the packing entropy of a compact set, hard half.
-Outside input: D.-J. Feng and W. Huang, J. Funct. Anal. 263 (2012), Theorem 1.3.
+D.-J. Feng and W. Huang, J. Funct. Anal. 263 (2012), Theorem 1.3 (stated here for the
+modified upper capacity entropy, equal to their packing entropy by `pressureEquivalence_upper`);
+proved in `Ergodic/FengHuangUpper.lean`.
 Blueprint node `meas:variational`. -/
 theorem upperEntropy_le_iSup_measureEntropy [CompactSpace X] (P : Presentation X) {T : X → X}
     (hT : Continuous T) {K : Set X} (hK : IsCompact K) (hne : K.Nonempty) :
     upperEntropy P T K ≤
-      ⨆ (μ : Measure X) (_ : IsProbabilityMeasure μ) (_ : μ K = 1), (measureEntropy μ T).2 := by
-  -- TODO(sorry): external input — the Feng–Huang variational principle (packing entropy)
-  sorry
+      ⨆ (μ : Measure X) (_ : IsProbabilityMeasure μ) (_ : μ K = 1), (measureEntropy μ T).2 :=
+  upperEntropy_le_iSup_measureEntropy' P hT hK hne
 
 /-- The variational principle of Feng and Huang for the Bowen entropy of a compact set.
 Blueprint node `meas:variational`. -/

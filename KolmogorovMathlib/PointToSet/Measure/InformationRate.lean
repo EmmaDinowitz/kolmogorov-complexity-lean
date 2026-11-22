@@ -5,6 +5,7 @@ Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Measure.Pointwise
 import KolmogorovMathlib.PointToSet.Measure.Decomposition
+import Mathlib.MeasureTheory.Integral.Indicator
 
 /-!
 # Information rates along Bowen balls (§4.3, Proposition 6.16)
@@ -356,79 +357,22 @@ theorem expectedOrbitComplexity_le_bowenInformation (P : Presentation X) (T : X 
           rw [ENNReal.ofReal_mul ha0, hIb, ENNReal.ofReal_toReal hItop]
   exact (ENNReal.add_le_add_iff_right ENNReal.ofReal_ne_top).1 hint
 
-/-! ### Comparison lemmas for limits inferior and superior -/
+/-! ### Auxiliary limit lemmas -/
 
-/-- If `a n ≤ b n + d n` eventually with `d n → 0`, then `liminf a ≤ liminf b` and
-`limsup a ≤ limsup b`. -/
-private theorem liminf_limsup_le_of_le_add' {a b d : ℕ → ℝ≥0∞} (hd : Tendsto d atTop (𝓝 0))
-    (h : ∀ᶠ n in atTop, a n ≤ b n + d n) :
-    liminf a atTop ≤ liminf b atTop ∧ limsup a atTop ≤ limsup b atTop :=
-  ⟨liminf_le_liminf_of_le_add_tendsto_zero h hd, limsup_le_limsup_of_le_add_tendsto_zero h hd⟩
+omit [MetricSpace X] [BorelSpace X] in
+/-- If almost every point eventually leaves the measurable sets `s n`, then their measures tend
+to `0` (finite measure). -/
+theorem tendsto_measure_zero_of_ae_eventually {μ : Measure X} [IsFiniteMeasure μ]
+    {s : ℕ → Set X} (hs : ∀ n, MeasurableSet (s n)) (h : ∀ᵐ x ∂μ, ∀ᶠ n in atTop, x ∉ s n) :
+    Tendsto (fun n ↦ μ (s n)) atTop (𝓝 0) := by
+  have := tendsto_measure_of_ae_tendsto_indicator (μ := μ) atTop MeasurableSet.empty hs
+    MeasurableSet.univ (measure_ne_top μ _) (.of_forall fun _ ↦ subset_univ _)
+    (h.mono fun x hx ↦ hx.mono fun n hn ↦ by simp [hn])
+  simpa using this
 
-/-- Threshold comparison: if for every real `s > 0` there is an error `d → 0` such that
-eventually `a n < s` implies `b n ≤ s + d n`, then `liminf b ≤ liminf a` and
-`limsup b ≤ limsup a`. -/
-private theorem liminf_limsup_le_of_forall_lt' {a b : ℕ → ℝ≥0∞}
-    (h : ∀ s : ℝ, 0 < s → ∃ d : ℕ → ℝ≥0∞, Tendsto d atTop (𝓝 0) ∧
-      ∀ᶠ n in atTop, a n < ENNReal.ofReal s → b n ≤ ENNReal.ofReal s + d n) :
-    liminf b atTop ≤ liminf a atTop ∧ limsup b atTop ≤ limsup a atTop := by
-  have key : ∀ (t : ℝ≥0∞) (η : NNReal), 0 < η → t < ⊤ →
-      ∃ s : ℝ, 0 < s ∧ t < ENNReal.ofReal s ∧ ∃ d : ℕ → ℝ≥0∞, (∀ᶠ n in atTop, d n < η / 2) ∧
-        (ENNReal.ofReal s + η / 2 = t + η) ∧
-        ∀ᶠ n in atTop, a n < ENNReal.ofReal s → b n ≤ ENNReal.ofReal s + d n := by
-    intro t η hη ht
-    have hη2 : (0 : ℝ) < (η : ℝ) / 2 := by positivity
-    refine ⟨t.toReal + η / 2, by positivity, ?_, ?_⟩
-    · rw [ENNReal.lt_ofReal_iff_toReal_lt ht.ne]
-      linarith
-    obtain ⟨d, hd, hev⟩ := h (t.toReal + η / 2) (by positivity)
-    have hpos : (0 : ℝ≥0∞) < (η : ℝ≥0∞) / 2 :=
-      ENNReal.div_pos (by exact_mod_cast hη.ne') (by norm_num)
-    refine ⟨d, (tendsto_order.1 hd).2 _ hpos, ?_, hev⟩
-    rw [ENNReal.ofReal_add ENNReal.toReal_nonneg hη2.le, ENNReal.ofReal_toReal ht.ne, add_assoc]
-    congr 1
-    rw [ENNReal.ofReal_div_of_pos two_pos, ENNReal.ofReal_coe_nnreal, ENNReal.ofReal_ofNat,
-      ENNReal.add_halves]
-  constructor
-  · refine ENNReal.le_of_forall_pos_le_add fun η hη ht ↦ ?_
-    obtain ⟨s, -, hs, d, hd, heq, hev⟩ := key _ η hη ht
-    rw [← heq]
-    refine liminf_le_of_frequently_le' ?_
-    have hfr := frequently_lt_of_liminf_lt (by isBoundedDefault) hs
-    refine (hfr.and_eventually (hd.and hev)).mono fun n ⟨han, hdn, himp⟩ ↦ ?_
-    exact (himp han).trans (by gcongr)
-  · refine ENNReal.le_of_forall_pos_le_add fun η hη ht ↦ ?_
-    obtain ⟨s, -, hs, d, hd, heq, hev⟩ := key _ η hη ht
-    rw [← heq]
-    refine limsup_le_of_le (by isBoundedDefault) ?_
-    have hfr := eventually_lt_of_limsup_lt hs (by isBoundedDefault)
-    filter_upwards [hfr, hd, hev] with n han hdn himp
-    exact (himp han).trans (by gcongr)
-
-/-- `log₂ n / n → 0`. -/
-private theorem tendsto_logb_div_nat' :
-    Tendsto (fun n : ℕ ↦ Real.logb 2 n / n) atTop (𝓝 0) := by
-  have h := (Real.tendsto_pow_log_div_mul_add_atTop 1 0 1 one_ne_zero).comp
-    tendsto_natCast_atTop_atTop
-  have h2 := h.div_const (Real.log 2)
-  simp only [zero_div] at h2
-  refine h2.congr fun n ↦ ?_
-  simp [Real.logb]
-  ring
-
-/-- An error term `(C + D log₂ n) / n` tends to zero. -/
-private theorem tendsto_ofReal_err' (C D : ℝ) :
-    Tendsto (fun n : ℕ ↦ ENNReal.ofReal ((C + D * Real.logb 2 n) / n)) atTop (𝓝 0) := by
-  rw [← ENNReal.ofReal_zero]
-  refine ENNReal.tendsto_ofReal ?_
-  have h1 := tendsto_const_div_atTop_nhds_zero_nat C
-  have h2 := tendsto_logb_div_nat'.const_mul D
-  rw [mul_zero] at h2
-  simpa [add_div, mul_div_assoc] using h1.add h2
-
-/-- `ofReal r / n = ofReal (r / n)` for `n ≥ 1`. -/
-private theorem ofReal_div_natCast {r : ℝ} {n : ℕ} (hn : 1 ≤ n) :
-    ENNReal.ofReal r / n = ENNReal.ofReal (r / n) := by
+/-- `ofReal S / n = ofReal (S / n)` for `n ≥ 1`. -/
+lemma ofReal_div_natCast {S : ℝ} {n : ℕ} (hn : 1 ≤ n) :
+    ENNReal.ofReal S / n = ENNReal.ofReal (S / n) := by
   rw [ENNReal.ofReal_div_of_pos (by exact_mod_cast hn), ENNReal.ofReal_natCast]
 
 omit [MeasurableSpace X] [BorelSpace X] in
@@ -473,7 +417,7 @@ theorem informationRate_eq_expectedOrbitComplexity_rate (P : Presentation X) (T 
     have heq : dyadicRadius p = 2 * dyadicRadius (p + 1) := by
       rw [dyadicRadius, dyadicRadius, pow_succ]
       ring
-    refine liminf_limsup_le_of_le_add' (tendsto_ofReal_err' 1 2) ?_
+    refine liminf_limsup_le_of_le_add (tendsto_ofReal_err 1 2) ?_
     filter_upwards [eventually_ge_atTop 1] with n hn
     have h := bowenInformation_le_expectedOrbitComplexity P T hT A μ (dyadicRadius_pos (p + 1)) hn
     rw [← heq] at h
@@ -497,14 +441,14 @@ theorem informationRate_eq_expectedOrbitComplexity_rate (P : Presentation X) (T 
       norm_num
       linarith
     obtain ⟨c, hc⟩ := expectedOrbitComplexity_le_bowenInformation P T hT A μ hA ε hε
-    have hle := liminf_limsup_le_of_forall_lt'
+    have hle := liminf_limsup_le_of_forall_lt
       (a := fun n : ℕ ↦ bowenInformation μ T n ε / n)
       (b := fun n : ℕ ↦ expectedOrbitComplexity P T A μ n (dyadicRadius p) / n) ?_
     · have h3 := informationRateAt_le_informationRate μ T hε'
       exact ⟨hle.1.trans h3.1, hle.2.trans h3.2⟩
     intro s hs
     refine ⟨fun n ↦ ENNReal.ofReal ((c + 2 * Real.logb 2 (s + 2) + 4 * Real.logb 2 n) / n),
-      tendsto_ofReal_err' _ _, ?_⟩
+      tendsto_ofReal_err _ _, ?_⟩
     filter_upwards [eventually_ge_atTop 1] with n hn hlt
     have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
     have hnE : (n : ℝ≥0∞) ≠ 0 := by exact_mod_cast (by omega : n ≠ 0)

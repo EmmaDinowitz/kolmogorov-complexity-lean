@@ -4,8 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Pressure.Upper.PointToSetPrinciple
-import Mathlib.MeasureTheory.Constructions.BorelSpace.Metric
-import Mathlib.MeasureTheory.Measure.Typeclasses.Probability
 
 /-!
 # Local entropies of a Borel measure along Bowen balls
@@ -61,6 +59,31 @@ theorem infoBits_top : infoBits ⊤ = 0 := by
 theorem infoBits_of_ne {q : ℝ≥0∞} (hq0 : q ≠ 0) :
     infoBits q = ENNReal.ofReal (-Real.logb 2 q.toReal) := by
   simp [infoBits, hq0]
+
+/-- The information of a positive mass at most one, as a real number, is `-log₂` of the mass. -/
+theorem toReal_infoBits {q : ℝ≥0∞} (hq0 : q ≠ 0) (hq1 : q ≤ 1) :
+    (infoBits q).toReal = -Real.logb 2 q.toReal := by
+  rw [infoBits_of_ne hq0, ENNReal.toReal_ofReal]
+  have h1 : q.toReal ≤ 1 := by simpa using ENNReal.toReal_mono ENNReal.one_ne_top hq1
+  have := Real.logb_nonpos one_lt_two ENNReal.toReal_nonneg h1
+  linarith
+
+/-- The information of the mass `2^{-m}` is `m` bits. -/
+theorem infoBits_two_inv_pow (m : ℕ) : infoBits ((2 : ℝ≥0∞)⁻¹ ^ m) = m := by
+  rw [infoBits_of_ne (by simp), ENNReal.toReal_pow, ENNReal.toReal_inv, ENNReal.toReal_ofNat,
+    Real.logb_pow, Real.logb_inv, Real.logb_self_eq_one one_lt_two]
+  simp only [mul_neg, mul_one, neg_neg, ENNReal.ofReal_natCast]
+
+/-- `2 · 2^{-(p + 1)} = 2^{-p}`. -/
+theorem two_mul_dyadicRadius_succ (p : ℕ) : 2 * dyadicRadius (p + 1) = dyadicRadius p := by
+  rw [dyadicRadius, dyadicRadius, pow_succ]
+  ring
+
+/-- `log₂ n ≥ 0` for a natural number `n` (with `log₂ 0 = 0`). -/
+theorem logb_natCast_nonneg (n : ℕ) : 0 ≤ Real.logb 2 n := by
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · simp
+  · exact Real.logb_nonneg one_lt_two (by exact_mod_cast hn)
 
 /-- The information of a positive real mass `r` is `-log₂ r`. -/
 theorem infoBits_ofReal {r : ℝ} (hr : 0 < r) :
@@ -333,6 +356,13 @@ theorem limsup_le_limsup_of_le_add_tendsto_zero {a b d : ℕ → ℝ≥0∞}
     (h : ∀ᶠ n in atTop, a n ≤ b n + d n) (hd : Tendsto d atTop (𝓝 0)) :
     limsup a atTop ≤ limsup b atTop :=
   (limsup_le_limsup h).trans_eq (ENNReal.limsup_add_of_right_tendsto_zero hd b)
+
+/-- If `a n ≤ b n + d n` eventually with `d n → 0`, then `liminf a ≤ liminf b` and
+`limsup a ≤ limsup b` in `ℝ≥0∞`. -/
+theorem liminf_limsup_le_of_le_add {a b d : ℕ → ℝ≥0∞} (hd : Tendsto d atTop (𝓝 0))
+    (h : ∀ᶠ n in atTop, a n ≤ b n + d n) :
+    liminf a atTop ≤ liminf b atTop ∧ limsup a atTop ≤ limsup b atTop :=
+  ⟨liminf_le_liminf_of_le_add_tendsto_zero h hd, limsup_le_limsup_of_le_add_tendsto_zero h hd⟩
 
 /-- Rescaling a measure by a positive finite constant does not change its local entropies at
 a fixed scale: the information changes by a bounded amount.

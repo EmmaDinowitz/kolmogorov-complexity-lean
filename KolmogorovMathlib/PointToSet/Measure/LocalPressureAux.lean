@@ -201,46 +201,13 @@ that eventually `a n < s` implies `b n ≤ s + d n`, then `liminf b ≤ liminf a
 theorem liminf_limsup_le_of_forall_lt_ofReal {a b : ℕ → ℝ≥0∞}
     (h : ∀ s : ℝ, 0 < s → ∃ d : ℕ → ℝ≥0∞, Tendsto d atTop (𝓝 0) ∧
       ∀ᶠ n in atTop, a n < ENNReal.ofReal s → b n ≤ ENNReal.ofReal s + d n) :
-    liminf b atTop ≤ liminf a atTop ∧ limsup b atTop ≤ limsup a atTop := by
-  have key : ∀ (t : ℝ≥0∞) (η : NNReal), 0 < η → t < ⊤ →
-      ∃ s : ℝ, 0 < s ∧ t < ENNReal.ofReal s ∧ ∃ d : ℕ → ℝ≥0∞, (∀ᶠ n in atTop, d n < η / 2) ∧
-        (ENNReal.ofReal s + η / 2 = t + η) ∧
-        ∀ᶠ n in atTop, a n < ENNReal.ofReal s → b n ≤ ENNReal.ofReal s + d n := by
-    intro t η hη ht
-    have hη2 : (0 : ℝ) < (η : ℝ) / 2 := by positivity
-    refine ⟨t.toReal + η / 2, by positivity, ?_, ?_⟩
-    · rw [ENNReal.lt_ofReal_iff_toReal_lt ht.ne]
-      linarith
-    obtain ⟨d, hd, hev⟩ := h (t.toReal + η / 2) (by positivity)
-    have hpos : (0 : ℝ≥0∞) < (η : ℝ≥0∞) / 2 :=
-      ENNReal.div_pos (by exact_mod_cast hη.ne') (by norm_num)
-    refine ⟨d, (tendsto_order.1 hd).2 _ hpos, ?_, hev⟩
-    rw [ENNReal.ofReal_add ENNReal.toReal_nonneg hη2.le, ENNReal.ofReal_toReal ht.ne, add_assoc]
-    congr 1
-    rw [ENNReal.ofReal_div_of_pos two_pos, ENNReal.ofReal_coe_nnreal, ENNReal.ofReal_ofNat,
-      ENNReal.add_halves]
-  constructor
-  · refine ENNReal.le_of_forall_pos_le_add fun η hη ht ↦ ?_
-    obtain ⟨s, -, hs, d, hd, heq, hev⟩ := key _ η hη ht
-    rw [← heq]
-    refine liminf_le_of_frequently_le' ?_
-    have hfr := frequently_lt_of_liminf_lt (by isBoundedDefault) hs
-    refine (hfr.and_eventually (hd.and hev)).mono fun n ⟨han, hdn, himp⟩ ↦ ?_
-    exact (himp han).trans (by gcongr)
-  · refine ENNReal.le_of_forall_pos_le_add fun η hη ht ↦ ?_
-    obtain ⟨s, -, hs, d, hd, heq, hev⟩ := key _ η hη ht
-    rw [← heq]
-    refine limsup_le_of_le (by isBoundedDefault) ?_
-    have hfr := eventually_lt_of_limsup_lt hs (by isBoundedDefault)
-    filter_upwards [hfr, hd, hev] with n han hdn himp
-    exact (himp han).trans (by gcongr)
+    liminf b atTop ≤ liminf a atTop ∧ limsup b atTop ≤ limsup a atTop :=
+  liminf_limsup_le_of_forall_lt h
 
 /-- `log₂ n / n → 0`. -/
 theorem tendsto_logb_natCast_div_nat :
-    Tendsto (fun n : ℕ ↦ Real.logb 2 n / n) atTop (𝓝 0) := by
-  have h := (Real.tendsto_pow_logb_div_mul_add_atTop (b := 2) 1 0 1 one_ne_zero).comp
-    tendsto_natCast_atTop_atTop
-  simpa [Function.comp_def] using h
+    Tendsto (fun n : ℕ ↦ Real.logb 2 n / n) atTop (𝓝 0) :=
+  tendsto_logb_div_nat
 
 /-- `log₂ t / t → 0` as `t → ∞`. -/
 theorem tendsto_logb_div_self_atTop :
@@ -305,21 +272,12 @@ theorem neg_logb_toReal_le_of_rpow_le {q : ℝ≥0∞} (hq : q ≠ ⊤) {t : ℝ
 /-- `2^{-(j + 2 log₂ n)} = 2^{-j} / n²` for `n ≥ 1`. -/
 theorem ofReal_two_rpow_neg_add_logb_eq (j : ℕ) {n : ℕ} (hn : 1 ≤ n) :
     ENNReal.ofReal ((2 : ℝ) ^ (-((j : ℝ) + 2 * Real.logb 2 n))) =
-      (2 : ℝ≥0∞)⁻¹ ^ j / (n : ℝ≥0∞) ^ 2 := by
-  have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
-  have h2 : (2 : ℝ) ^ ((j : ℝ) + 2 * Real.logb 2 n) = 2 ^ j * (n : ℝ) ^ 2 := by
-    rw [Real.rpow_add two_pos, Real.rpow_natCast, mul_comm (2 : ℝ), Real.rpow_mul zero_le_two,
-      Real.rpow_logb two_pos (by norm_num) hn0, Real.rpow_two]
-  rw [Real.rpow_neg zero_le_two, h2, ENNReal.ofReal_inv_of_pos (by positivity),
-    ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_pow zero_le_two, ENNReal.ofReal_pow hn0.le,
-    ENNReal.ofReal_ofNat, ENNReal.ofReal_natCast, div_eq_mul_inv, ENNReal.inv_pow,
-    ENNReal.mul_inv (Or.inl (by simp)) (Or.inl (by simp))]
-  simp only [ENNReal.inv_pow]
+      (2 : ℝ≥0∞)⁻¹ ^ j / (n : ℝ≥0∞) ^ 2 :=
+  ofReal_two_rpow_neg_eq j hn
 
 /-- `2^{-K}` as an extended real. -/
 theorem ofReal_two_rpow_neg_natCast_eq (K : ℕ) :
-    ENNReal.ofReal ((2 : ℝ) ^ (-(K : ℝ))) = (2 : ℝ≥0∞)⁻¹ ^ K := by
-  rw [Real.rpow_neg zero_le_two, Real.rpow_natCast, ENNReal.ofReal_inv_of_pos (by positivity),
-    ENNReal.ofReal_pow zero_le_two, ENNReal.ofReal_ofNat, ENNReal.inv_pow]
+    ENNReal.ofReal ((2 : ℝ) ^ (-(K : ℝ))) = (2 : ℝ≥0∞)⁻¹ ^ K :=
+  ofReal_two_rpow_neg_natCast K
 
 end Kolmogorov.PointToSet

@@ -4,9 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Measure.Shift
-import KolmogorovMathlib.PointToSet.Measure.EntropyLaw
 import KolmogorovMathlib.PointToSet.Measure.EssentialBounds
-import KolmogorovMathlib.AlgorithmicRandomness.StrongLaw
 import Mathlib.Analysis.SpecialFunctions.BinaryEntropy
 
 /-!
@@ -102,17 +100,11 @@ private lemma bernoulli_singleton (b : Bool) :
       (measurableSet_singleton _) rfl (by simp)]
     rfl
 
-/-- A cylinder of length `n` is the box fixing the first `n` coordinates. -/
-private lemma cylinder_eq_pi (x : ℕ → Bool) (n : ℕ) :
-    PiNat.cylinder x n = Set.pi (Finset.range n : Set ℕ) fun i ↦ {x i} := by
-  ext y
-  simp [PiNat.mem_cylinder_iff]
-
 /-- The Bernoulli mass of a cylinder as a product of per-symbol weights. -/
 theorem bernoulliMeasure_cylinder_prod (x : ℕ → Bool) (n : ℕ) :
     bernoulliMeasure p hp (PiNat.cylinder x n) =
       ∏ i ∈ Finset.range n, if x i then (p : ℝ≥0∞) else 1 - (p : ℝ≥0∞) := by
-  rw [cylinder_eq_pi, bernoulliMeasure, Measure.infinitePi_pi _
+  rw [PiNat.cylinder_eq_pi, bernoulliMeasure, Measure.infinitePi_pi _
     fun _ _ ↦ measurableSet_singleton _]
   exact Finset.prod_congr rfl fun i _ ↦ bernoulli_singleton p hp (x i)
 
@@ -196,10 +188,6 @@ theorem ae_tendsto_bitInfo :
     ← Finset.mul_sum]
   field_simp
 
-/-- The Cantor metric is the first-difference metric with ratio `1/2`. -/
-private lemma hd_cantor : ∀ x y : ℕ → Bool, x ≠ y →
-    dist x y = (1 / 2 : ℝ) ^ PiNat.firstDiff x y := fun _ _ ↦ cantorMetricSpace_dist_eq
-
 /-- If `a n / n → c` in `ℝ` and `a n ≥ 0`, the `ℝ≥0∞` rates of `ofReal (a n)` both equal
 `ofReal c`. -/
 private lemma liminf_limsup_ofReal_div {a : ℕ → ℝ} {c : ℝ}
@@ -219,7 +207,7 @@ theorem ae_localEntropy_bernoulliMeasure (hp0 : 0 < p) (hp1 : p < 1) :
     ∀ᵐ x ∂bernoulliMeasure p hp,
       localEntropy (bernoulliMeasure p hp) shiftMap x = (binEntropyBits p, binEntropyBits p) := by
   filter_upwards [ae_tendsto_bitInfo p hp] with x hx
-  rw [localEntropy_shiftMap (by norm_num) (by norm_num) hd_cantor]
+  rw [localEntropy_shiftMap (by norm_num) (by norm_num) cantor_hd]
   simp only [infoBits_bernoulliMeasure_cylinder p hp hp0 hp1]
   obtain ⟨h1, h2⟩ := liminf_limsup_ofReal_div hx
   rw [h1, h2, binEntropyBits]
@@ -290,7 +278,7 @@ private lemma liminf_limsup_mul_div {a : ℕ → ℝ≥0∞} {c : ℝ≥0∞}
 shift are both `H(p)`. Blueprint node `meas:examples`. -/
 theorem informationRate_bernoulliMeasure (hp0 : 0 < p) (hp1 : p < 1) :
     informationRate (bernoulliMeasure p hp) shiftMap = (binEntropyBits p, binEntropyBits p) := by
-  rw [informationRate_shiftMap (by norm_num) (by norm_num) hd_cantor]
+  rw [informationRate_shiftMap (by norm_num) (by norm_num) cantor_hd]
   obtain ⟨h1, h2⟩ := liminf_limsup_mul_div
     (lintegral_infoBits_bernoulliMeasure_cylinder p hp hp0 hp1)
   rw [h1, h2, binEntropyBits]
@@ -515,8 +503,10 @@ private lemma lintegral_fst_snd_of_ae {ν : Measure (ℕ → Bool)} [IsProbabili
       measure_univ, mul_one]
 
 /-- Example 5.3: the Feng–Huang entropies of `μ = ½ (ν_p + ν_q)` (`0 < p, q < 1`) are both
-`(H(p) + H(q))/2`. (The paper also identifies this with the Kolmogorov–Sinai entropy `h_μ(σ)`,
-which this library does not define.) Blueprint node `meas:examples`. -/
+`(H(p) + H(q))/2`. The paper also identifies this with the Kolmogorov–Sinai entropy `h_μ(σ)`.
+That identification is `jacobs_ksEntropy_bernoulliMixture` (`Ergodic/KSInvariant.lean`), from
+Jacobs' theorem (`Kolmogorov.Ergodic.jacobs_ksEntropy_bind`, `Ergodic/Jacobs.lean`).
+Blueprint node `meas:examples`. -/
 theorem measureEntropy_bernoulliMixture (hp0 : 0 < p) (hp1 : p < 1) (hq0 : 0 < q)
     (hq1 : q < 1) :
     measureEntropy (bernoulliMixture p hp q hq) shiftMap =
@@ -690,7 +680,7 @@ theorem informationRate_bernoulliMixture (hp0 : 0 < p) (hp1 : p < 1) (hq0 : 0 < 
         (lintegral_infoBits_bernoulliMixture_cylinder p hp q hq hp0 hp1 hq0 hq1 n).2 _).trans_eq ?_
       rw [ENNReal.add_div, mul_comm, ENNReal.mul_div_cancel_right hn0 (ENNReal.natCast_ne_top n),
         one_div]
-  rw [informationRate_shiftMap (by norm_num) (by norm_num) hd_cantor, hT.liminf_eq,
+  rw [informationRate_shiftMap (by norm_num) (by norm_num) cantor_hd, hT.liminf_eq,
     hT.limsup_eq]
 
 end mixture

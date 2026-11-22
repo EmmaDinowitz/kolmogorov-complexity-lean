@@ -5,7 +5,6 @@ Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Measure.Shift
 import KolmogorovMathlib.PointToSet.Measure.EssentialBounds
-import KolmogorovMathlib.PointToSet.Measure.Pointwise
 
 /-!
 # Martin-Löf randomness is not enough in Theorem 4.3(b), (c) (Example 5.5)
@@ -29,17 +28,21 @@ Cantor space with `μ = λ ∘ f⁻¹`.
 "Computable" is `IsMeasureAdmissible P shiftMap μ ∅`: the empty oracle computes the metric table
 of the presentation `P`, represents the shift and computes the measure; "random" is
 `randomPoints P ∅ μ`. The presentation `P` of Cantor space (with the metric `cantorMetricSpace`)
-is quantified existentially: the library has no fixed computable presentation of Cantor space
-(the one in `PointToSet/SymbolicSet.lean` is private and not chosen computably).
+is the standard computable presentation `cantorPresentation`.
+
+The two constructions and their consequences are in `ExampleFiveFive.lean`, which imports this
+file and the proofs `Ergodic/ExampleFiveFiveUpper.lean`, `Ergodic/ExampleFiveFiveLower.lean`
+(built on the computable presentation `cantorPresentation` of `Ergodic/CantorPresentation.lean`):
 
 * `exists_countable_atomic_random_upperLocalEntropy_eq_one`,
-  `exists_random_lowerLocalEntropy_eq_zero` — the two constructions, reduced to their core
-  (tracked `sorry`s, external input: the `Ω` construction).
+  `exists_random_lowerLocalEntropy_eq_zero` — the two constructions;
 * `exampleFiveFive_upper`, `exampleFiveFive_lower` — Example 5.5 (1), (2) in the vocabulary of
-  Theorem 4.3, derived from the cores.
+  Theorem 4.3;
 * `exists_iSup_randomPoints_gt_essSup`, `not_forall_iSup_randomPoints_eq_essSup`,
   `exists_iInf_randomPoints_lt_essInf`, `not_forall_iInf_randomPoints_eq_essInf` — the oracle
   cannot be fixed in Theorem 4.3(b), (c).
+
+This file holds the measure-theoretic input.
 
 Proved measure-theoretic input:
 
@@ -128,11 +131,6 @@ end atoms
 section cantor
 
 attribute [local instance] cantorMetricSpace
-
-/-- The first-difference formula for the Cantor metric, in the form used by `Shift.lean`. -/
-private lemma cantor_hd :
-    ∀ x y : ℕ → Bool, x ≠ y → dist x y = (1 / 2 : ℝ) ^ PiNat.firstDiff x y :=
-  fun _ _ ↦ cantorMetricSpace_dist_eq
 
 /-- The eventually-`0` binary sequences form a countable set. Blueprint node `meas:examples`. -/
 theorem countable_setOf_eventually_false :
@@ -236,164 +234,5 @@ theorem one_le_upperLocalEntropy_of_frequently (μ : Measure (ℕ → Bool)) (z 
 
 end cantor
 
-/-! ### Example 5.5 -/
-
-section example55
-
-attribute [local instance] cantorMetricSpace
-
-/-- Example 5.5(1), core construction. Let `Ω` be a left-c.e. `λ`-random real with computable
-approximations `Ω_t ↑ Ω`, `S_n = {Ω_t↾n : t > n}`, `(σ_i)` a computable enumeration of `⋃ S_n`,
-`E_i = [σ_i]`, `N_1 = |σ_1|`, `N_{i+1} ≥ (i+1) max(N_i, |σ_{i+1}|)`, `J_i = [N_i, N_{i+1})`, and
-`f(y)↾J_i = y↾J_i` if `y ∈ E_i`, `0^{|J_i|}` otherwise. Then `μ = λ ∘ f⁻¹` is computable, carried
-by the countable set of eventually-`0` sequences, and `z = f(Ω)` is `μ`-random with
-`h̄_μ(σ, z) = 1`.
-
-Divergences from the paper: the presentation `P` of Cantor space is existential; "computable"
-is `IsMeasureAdmissible P shiftMap μ ∅`, "random" is `randomPoints P ∅ μ`; the conclusion is
-stated with the upper *local entropy* at `z` (the paper then passes to `K̄(z, σ)` by
-Theorem 3.3, which is done in `exampleFiveFive_upper`). Blueprint node `meas:examples`. -/
-theorem exists_countable_atomic_random_upperLocalEntropy_eq_one :
-    ∃ (P : Presentation (ℕ → Bool)) (μ : Measure (ℕ → Bool)), IsProbabilityMeasure μ ∧
-      IsMeasureAdmissible P shiftMap μ ∅ ∧
-      (∃ S : Set (ℕ → Bool), S.Countable ∧ μ Sᶜ = 0) ∧
-      ∃ z ∈ randomPoints P ∅ μ, (localEntropy μ shiftMap z).2 = 1 := by
-  -- TODO(sorry): external input — the Ω construction of Example 5.5(1): a computable
-  -- presentation of Cantor space, computability of `λ ∘ f⁻¹` for the computable causal map `f`,
-  -- preservation of randomness under computable maps in the chapter's sense of randomness
-  -- (relating `randomPoints` with `IsMartinLofRandom` and `omega_binary_isMartinLofRandom`),
-  -- `f(y)` eventually `0` for `y ≠ Ω`, and the cylinder estimate at `f(Ω)`.
-  sorry
-
-/-- Example 5.5(2), core construction. With the notation of
-`exists_countable_atomic_random_upperLocalEntropy_eq_one`, let `f'(y)↾J_i = 0^{|J_i|}` if
-`y ∈ E_i` and `y↾J_i` otherwise. Then `μ' = λ ∘ f'⁻¹` is computable, `Φ_{μ'} = (1, 1)`
-`μ'`-almost everywhere, and `z' = f'(Ω)` is `μ'`-random with `h̲_{μ'}(σ, z') = 0`, since
-`μ'[z'↾N_{i+1}] ≥ 2^{-N_i}` for the infinitely many `i` with `Ω ∈ E_i`.
-
-Divergences from the paper: as for Example 5.5(1); the conclusion is stated with the lower
-local entropy at `z'`. Blueprint node `meas:examples`. -/
-theorem exists_random_lowerLocalEntropy_eq_zero :
-    ∃ (P : Presentation (ℕ → Bool)) (μ' : Measure (ℕ → Bool)), IsProbabilityMeasure μ' ∧
-      IsMeasureAdmissible P shiftMap μ' ∅ ∧
-      (∀ᵐ x ∂μ', localEntropy μ' shiftMap x = (1, 1)) ∧
-      ∃ z' ∈ randomPoints P ∅ μ', (localEntropy μ' shiftMap z').1 = 0 := by
-  -- TODO(sorry): external input — the Ω construction of Example 5.5(2): a computable
-  -- presentation of Cantor space, computability of `λ ∘ f'⁻¹`, preservation of randomness under
-  -- computable maps in the chapter's sense, the estimate `-log₂ μ'[f'(y)↾n] ≥ n - O(log n)` for
-  -- `λ`-almost every `y`, and the cylinder estimate at `f'(Ω)`.
-  sorry
-
-/-- Example 5.5(1): there are a presentation `P` of Cantor space and a probability measure `μ`
-computable from the empty oracle, carried by a countable set, with `Φ_μ = (0, 0)` almost
-everywhere (so `ess sup h̄_μ = 0`), and a `μ`-random point `z` which is not an atom and has
-upper orbit complexity `K̄(z, σ) = 1`; hence `ess sup h̄_μ < sup_{x ∈ R^μ} K̄(x, σ)`.
-
-Divergences from the paper: `P` is existential (see the module docstring); the paper's
-"computable" and "random" are `IsMeasureAdmissible P shiftMap μ ∅` and `randomPoints P ∅ μ`.
-Proved from `exists_countable_atomic_random_upperLocalEntropy_eq_one`.
-Blueprint node `meas:examples`. -/
-theorem exampleFiveFive_upper :
-    ∃ (P : Presentation (ℕ → Bool)) (μ : Measure (ℕ → Bool)), IsProbabilityMeasure μ ∧
-      IsMeasureAdmissible P shiftMap μ ∅ ∧
-      (∃ S : Set (ℕ → Bool), S.Countable ∧ μ Sᶜ = 0) ∧
-      (∀ᵐ x ∂μ, localEntropy μ shiftMap x = (0, 0)) ∧
-      essSup (fun x ↦ (localEntropy μ shiftMap x).2) μ = 0 ∧
-      (∃ z ∈ randomPoints P ∅ μ, μ {z} = 0 ∧ (orbitComplexities P shiftMap ∅ z).2 = 1) ∧
-      essSup (fun x ↦ (localEntropy μ shiftMap x).2) μ <
-        ⨆ x ∈ randomPoints P ∅ μ, (orbitComplexities P shiftMap ∅ x).2 := by
-  obtain ⟨P, μ, hμ, hA, ⟨S, hS, hSμ⟩, z, hz, hz1⟩ :=
-    exists_countable_atomic_random_upperLocalEntropy_eq_one
-  have hae := ae_localEntropy_eq_zero_of_countable μ shiftMap hS hSμ
-  have hess := (essBounds_eq_zero_of_countable μ shiftMap hS hSμ).2.1
-  have hK : (orbitComplexities P shiftMap ∅ z).2 = 1 := by
-    rw [orbitComplexities_eq_localEntropy P shiftMap continuous_shiftMap_cantor ∅ μ hA hz]
-    exact hz1
-  have hatom : μ {z} = 0 := by
-    by_contra h
-    rw [localEntropy_eq_zero_of_measure_singleton_ne_zero μ shiftMap h] at hz1
-    exact zero_ne_one hz1
-  refine ⟨P, μ, hμ, hA, ⟨S, hS, hSμ⟩, hae, hess, ⟨z, hz, hatom, hK⟩, ?_⟩
-  rw [hess]
-  exact zero_lt_one.trans_le
-    (hK ▸ le_iSup₂ (f := fun x _ ↦ (orbitComplexities P shiftMap ∅ x).2) z hz)
-
-/-- Example 5.5(2): there are a presentation `P` of Cantor space and a probability measure `μ'`
-computable from the empty oracle with `Φ_{μ'} = (1, 1)` almost everywhere, so
-`ess inf h̲_{μ'} = 1`, and a `μ'`-random point `z'` of lower orbit complexity `K̲(z', σ) = 0`;
-hence `inf_{x ∈ R^{μ'}} K̲(x, σ) < ess inf h̲_{μ'}`.
-
-Divergences from the paper: as for `exampleFiveFive_upper`. Proved from
-`exists_random_lowerLocalEntropy_eq_zero`. Blueprint node `meas:examples`. -/
-theorem exampleFiveFive_lower :
-    ∃ (P : Presentation (ℕ → Bool)) (μ' : Measure (ℕ → Bool)), IsProbabilityMeasure μ' ∧
-      IsMeasureAdmissible P shiftMap μ' ∅ ∧
-      (∀ᵐ x ∂μ', localEntropy μ' shiftMap x = (1, 1)) ∧
-      essInf (fun x ↦ (localEntropy μ' shiftMap x).1) μ' = 1 ∧
-      (∃ z' ∈ randomPoints P ∅ μ', (orbitComplexities P shiftMap ∅ z').1 = 0) ∧
-      ⨅ x ∈ randomPoints P ∅ μ', (orbitComplexities P shiftMap ∅ x).1 <
-        essInf (fun x ↦ (localEntropy μ' shiftMap x).1) μ' := by
-  obtain ⟨P, μ', hμ, hA, hae, z', hz, hz0⟩ := exists_random_lowerLocalEntropy_eq_zero
-  have hess : essInf (fun x ↦ (localEntropy μ' shiftMap x).1) μ' = 1 := by
-    rw [essInf_congr_ae (g := fun _ ↦ (1 : ℝ≥0∞)) (hae.mono fun x hx ↦ by simp [hx]),
-      essInf_const' 1]
-  have hK : (orbitComplexities P shiftMap ∅ z').1 = 0 := by
-    rw [orbitComplexities_eq_localEntropy P shiftMap continuous_shiftMap_cantor ∅ μ' hA hz]
-    exact hz0
-  refine ⟨P, μ', hμ, hA, hae, hess, ⟨z', hz, hK⟩, ?_⟩
-  rw [hess]
-  exact (hK ▸ iInf₂_le (f := fun x _ ↦ (orbitComplexities P shiftMap ∅ x).1) z' hz).trans_lt
-    zero_lt_one
-
-/-! ### The oracle cannot be fixed in Theorem 4.3(b), (c) -/
-
-/-- Consequence of Example 5.5(1) for Theorem 4.3(b): for a fixed admissible oracle `A` the
-supremum of the upper orbit complexity over the `A`-random points can exceed `ess sup h̄_μ`
-(compare `essSup_upperLocalEntropy_le_iSup_randomPoints`, which gives `≤` for every admissible
-`A`). Blueprint node `meas:examples`. -/
-theorem exists_iSup_randomPoints_gt_essSup :
-    ∃ (P : Presentation (ℕ → Bool)) (μ : Measure (ℕ → Bool)) (A : Set ℕ),
-      IsProbabilityMeasure μ ∧ IsMeasureAdmissible P shiftMap μ A ∧
-      essSup (fun x ↦ (localEntropy μ shiftMap x).2) μ <
-        ⨆ x ∈ randomPoints P A μ, (orbitComplexities P shiftMap A x).2 := by
-  obtain ⟨P, μ, hμ, hA, -, -, -, -, hlt⟩ := exampleFiveFive_upper
-  exact ⟨P, μ, ∅, hμ, hA, hlt⟩
-
-/-- The optimisation over oracles cannot be dropped in Theorem 4.3(b): it is not true that
-`ess sup h̄_μ = sup_{x ∈ R_A} K̄^A(x, σ)` for every admissible oracle `A`, already on Cantor space
-with the shift. Blueprint node `meas:examples`. -/
-theorem not_forall_iSup_randomPoints_eq_essSup :
-    ¬ ∀ (P : Presentation (ℕ → Bool)) (μ : Measure (ℕ → Bool)) (A : Set ℕ),
-      IsProbabilityMeasure μ → IsMeasureAdmissible P shiftMap μ A →
-        ⨆ x ∈ randomPoints P A μ, (orbitComplexities P shiftMap A x).2 =
-          essSup (fun x ↦ (localEntropy μ shiftMap x).2) μ := by
-  intro h
-  obtain ⟨P, μ, A, hμ, hA, hlt⟩ := exists_iSup_randomPoints_gt_essSup
-  exact hlt.ne' (h P μ A hμ hA)
-
-/-- Consequence of Example 5.5(2) for Theorem 4.3(c): for a fixed admissible oracle `A` the
-infimum of the lower orbit complexity over the `A`-random points can be below `ess inf h̲_μ`
-(compare `iInf_randomPoints_orbitComplexities_le_essInf`). Blueprint node `meas:examples`. -/
-theorem exists_iInf_randomPoints_lt_essInf :
-    ∃ (P : Presentation (ℕ → Bool)) (μ : Measure (ℕ → Bool)) (A : Set ℕ),
-      IsProbabilityMeasure μ ∧ IsMeasureAdmissible P shiftMap μ A ∧
-      ⨅ x ∈ randomPoints P A μ, (orbitComplexities P shiftMap A x).1 <
-        essInf (fun x ↦ (localEntropy μ shiftMap x).1) μ := by
-  obtain ⟨P, μ, hμ, hA, -, -, -, hlt⟩ := exampleFiveFive_lower
-  exact ⟨P, μ, ∅, hμ, hA, hlt⟩
-
-/-- The optimisation over oracles cannot be dropped in Theorem 4.3(c) for the lower
-complexity: it is not true that `ess inf h̲_μ = inf_{x ∈ R_A} K̲^A(x, σ)` for every admissible
-oracle `A`. Blueprint node `meas:examples`. -/
-theorem not_forall_iInf_randomPoints_eq_essInf :
-    ¬ ∀ (P : Presentation (ℕ → Bool)) (μ : Measure (ℕ → Bool)) (A : Set ℕ),
-      IsProbabilityMeasure μ → IsMeasureAdmissible P shiftMap μ A →
-        ⨅ x ∈ randomPoints P A μ, (orbitComplexities P shiftMap A x).1 =
-          essInf (fun x ↦ (localEntropy μ shiftMap x).1) μ := by
-  intro h
-  obtain ⟨P, μ, A, hμ, hA, hlt⟩ := exists_iInf_randomPoints_lt_essInf
-  exact hlt.ne (h P μ A hμ hA)
-
-end example55
 
 end Kolmogorov.PointToSet

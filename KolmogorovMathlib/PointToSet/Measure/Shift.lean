@@ -5,8 +5,6 @@ Authors: Emma Dinowitz
 -/
 import KolmogorovMathlib.PointToSet.Measure.InformationRate
 import KolmogorovMathlib.PointToSet.SymbolicSet
-import KolmogorovMathlib.AlgorithmicRandomness.ComputableMeasure
-import Mathlib.MeasureTheory.Measure.Dirac.Basic
 
 /-!
 # Local entropies on a one-sided shift
@@ -125,7 +123,7 @@ variable {α : Type*} [MetricSpace (ℕ → α)] {β : ℝ}
 
 omit [MetricSpace (ℕ → α)] in
 /-- The iterates of the shift: `σ^j x = (x (i + j))_i`. -/
-private lemma iterate_shiftMap (x : ℕ → α) (j : ℕ) :
+lemma iterate_shiftMap (x : ℕ → α) (j : ℕ) :
     shiftMap^[j] x = fun i ↦ x (i + j) := by
   induction j generalizing x with
   | zero => rfl
@@ -136,7 +134,7 @@ private lemma iterate_shiftMap (x : ℕ → α) (j : ℕ) :
     ring_nf
 
 /-- For a first-difference metric, `d(x, y) < β^k` iff `x` and `y` agree up to the index `k`. -/
-private lemma dist_lt_pow_iff (hβ : 0 < β) (hβ₁ : β < 1)
+lemma dist_lt_pow_iff_of_firstDiff (hβ : 0 < β) (hβ₁ : β < 1)
     (hd : ∀ x y : ℕ → α, x ≠ y → dist x y = β ^ PiNat.firstDiff x y) {x y : ℕ → α} {k : ℕ} :
     dist x y < β ^ k ↔ ∀ i ≤ k, x i = y i := by
   constructor
@@ -157,6 +155,19 @@ private lemma dist_lt_pow_iff (hβ : 0 < β) (hβ₁ : β < 1)
     calc β ^ PiNat.firstDiff x y ≤ β ^ (k + 1) := pow_le_pow_of_le_one hβ.le hβ₁.le hk
       _ < β ^ k := pow_lt_pow_right_of_lt_one₀ hβ hβ₁ (Nat.lt_succ_self k)
 
+/-- For a first-difference metric the coordinates are locally constant: `{x | x i = a}` is
+open. -/
+theorem isOpen_setOf_apply_eq (hβ : 0 < β) (hβ₁ : β < 1)
+    (hd : ∀ x y : ℕ → α, x ≠ y → dist x y = β ^ PiNat.firstDiff x y) (i : ℕ) (a : α) :
+    IsOpen {x : ℕ → α | x i = a} := by
+  refine Metric.isOpen_iff.2 fun x hx ↦ ⟨β ^ i, pow_pos hβ i, fun y hy ↦ ?_⟩
+  simp only [mem_ofPred_eq] at hx ⊢
+  rw [← hx]
+  by_cases hxy : y = x
+  · rw [hxy]
+  rw [Metric.mem_ball, hd y x hxy] at hy
+  exact PiNat.apply_eq_of_lt_firstDiff ((pow_lt_pow_iff_right_of_lt_one₀ hβ hβ₁).1 hy)
+
 /-- The left shift is continuous for a first-difference metric. -/
 theorem continuous_shiftMap (hβ : 0 < β) (hβ₁ : β < 1)
     (hd : ∀ x y : ℕ → α, x ≠ y → dist x y = β ^ PiNat.firstDiff x y) :
@@ -165,8 +176,8 @@ theorem continuous_shiftMap (hβ : 0 < β) (hβ₁ : β < 1)
   obtain ⟨k, hk⟩ := exists_pow_lt_of_lt_one hε hβ₁
   refine ⟨β ^ (k + 1), by positivity, fun y hy ↦ ?_⟩
   rw [dist_comm] at hy ⊢
-  have h := (dist_lt_pow_iff hβ hβ₁ hd).1 hy
-  exact ((dist_lt_pow_iff hβ hβ₁ hd).2 fun i hi ↦ h (i + 1) (by omega)).trans hk
+  have h := (dist_lt_pow_iff_of_firstDiff hβ hβ₁ hd).1 hy
+  exact ((dist_lt_pow_iff_of_firstDiff hβ hβ₁ hd).2 fun i hi ↦ h (i + 1) (by omega)).trans hk
 
 /-- On a shift with a first-difference metric the Bowen ball of order `n ≥ 1` and radius
 `β^k` about `x` is the cylinder `[x↾(n + k)]`. Blueprint node `meas:shift`. -/
@@ -175,7 +186,7 @@ theorem bowenBall_shiftMap_eq_cylinder (hβ : 0 < β) (hβ₁ : β < 1)
     (hn : 1 ≤ n) (k : ℕ) : bowenBall shiftMap n x (β ^ k) = PiNat.cylinder x (n + k) := by
   ext y
   simp only [mem_bowenBall_iff, PiNat.mem_cylinder_iff, iterate_shiftMap,
-    dist_lt_pow_iff hβ hβ₁ hd]
+    dist_lt_pow_iff_of_firstDiff hβ hβ₁ hd]
   constructor
   · intro h m hm
     by_cases hmk : m ≤ k
@@ -286,6 +297,17 @@ attribute [local instance] cantorMetricSpace
 theorem cantorMetricSpace_dist_eq {x y : ℕ → Bool} (h : x ≠ y) :
     dist x y = (1 / 2 : ℝ) ^ PiNat.firstDiff x y :=
   PiNat.dist_eq_of_ne h
+
+/-- The Cantor metric as a first-difference metric with ratio `1/2`, in the form taken by the
+lemmas on first-difference metrics. -/
+theorem cantor_hd : ∀ x y : ℕ → Bool, x ≠ y → dist x y = (1 / 2 : ℝ) ^ PiNat.firstDiff x y :=
+  fun _ _ ↦ cantorMetricSpace_dist_eq
+
+/-- Cylinders of Cantor space are measurable. -/
+theorem measurableSet_cantor_cylinder (x : ℕ → Bool) (n : ℕ) :
+    MeasurableSet (PiNat.cylinder x n) := by
+  rw [PiNat.cylinder_eq_pi]
+  exact MeasurableSet.pi (Set.to_countable _) fun _ _ ↦ measurableSet_singleton _
 
 /-- The left shift is continuous on Cantor space. -/
 theorem continuous_shiftMap_cantor : Continuous (shiftMap : (ℕ → Bool) → ℕ → Bool) :=

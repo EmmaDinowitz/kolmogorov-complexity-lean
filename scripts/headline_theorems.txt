@@ -1,0 +1,142 @@
+# Headline theorems checked by scripts/kernel_check.sh (fully qualified names, one per line).
+# Main results of "Entropy of non-invariant measures and orbit complexity of random points"
+# and of its companion note; see notes/lean_translation.pdf for each statement read as
+# mathematics. Lines starting with '#' are ignored.
+
+# Theorem 2.1 (point-to-set principle)
+Kolmogorov.PointToSet.entropy_effectiveCharacterization_allOracles_pointToSet
+Kolmogorov.PointToSet.entropy_effectiveCharacterization_allOracles_cone
+Kolmogorov.PointToSet.upperEntropy_pointToSet
+Kolmogorov.PointToSet.upperEntropy_pointToSet_cone
+# Theorem 3.3 (orbit complexity of random points)
+Kolmogorov.PointToSet.orbitComplexities_le_localEntropy
+Kolmogorov.PointToSet.orbitComplexities_eq_localEntropy
+Kolmogorov.PointToSet.orbitComplexityAt_le_localEntropyAt
+Kolmogorov.PointToSet.ae_orbitComplexities_eq_localEntropy
+# Corollary 4.2 and the variational principle
+Kolmogorov.PointToSet.iInf_iSup_orbitComplexities_eq_iSup_lintegral
+Kolmogorov.PointToSet.lowerEntropy_eq_iSup_measureEntropy
+Kolmogorov.PointToSet.upperEntropy_eq_iSup_measureEntropy
+Kolmogorov.PointToSet.packingPressure_zero_le_iSup_measureEntropy
+# Theorem 4.3
+Kolmogorov.PointToSet.essSup_lowerLocalEntropy_eq_iInf_lowerEntropy
+Kolmogorov.PointToSet.essSup_upperLocalEntropy_eq_iInf_upperEntropy
+Kolmogorov.PointToSet.essSup_upperLocalEntropy_eq_iInf_oracle
+Kolmogorov.PointToSet.essSup_upperLocalEntropy_le_iSup_randomPoints
+Kolmogorov.PointToSet.lowerEntropy_randomPoints
+Kolmogorov.PointToSet.iSup_randomPoints_orbitComplexities_fst
+Kolmogorov.PointToSet.exists_cone_iSup_randomPoints_snd
+Kolmogorov.PointToSet.essInf_localEntropy_eq_iInf_entropy
+Kolmogorov.PointToSet.essInf_localEntropy_eq_iSup_oracle
+Kolmogorov.PointToSet.iInf_randomPoints_orbitComplexities_le_essInf
+Kolmogorov.PointToSet.exists_cone_iInf_randomPoints
+# Corollary 6.5 and the entropy law
+Kolmogorov.PointToSet.measureEntropy_eq_lintegral_entropyLaw
+Kolmogorov.PointToSet.essSup_localEntropy_eq_essSup_entropyLaw
+Kolmogorov.PointToSet.lowerEntropy_eq_iSup_essInf
+Kolmogorov.PointToSet.lowerEntropy_eq_iSup_essSup
+# Theorems 7.3 and 7.5
+Kolmogorov.PointToSet.ae_compProd_localEntropy_le
+Kolmogorov.PointToSet.ae_compProd_localEntropy_eq_of_absolutelyContinuous
+Kolmogorov.PointToSet.ae_compProd_localEntropy_eq_of_ergodicDecomposition
+Kolmogorov.PointToSet.ae_compProd_localEntropy_eq_ksEntropy_of_ergodicDecomposition
+# Proposition 7.10
+Kolmogorov.PointToSet.upperOrbitComplexity_le_shiftEntropy
+Kolmogorov.PointToSet.orbitComplexities_eq_shiftEntropy
+Kolmogorov.PointToSet.upperOrbitComplexity_le_shiftEntropy_cantor
+Kolmogorov.PointToSet.orbitComplexities_eq_shiftEntropy_cantor
+Kolmogorov.PointToSet.shiftKS_upperOrbitComplexity_le_ksEntropy
+Kolmogorov.PointToSet.shiftKS_orbitComplexities_eq_ksEntropy
+# Theorem 8.3 and Corollary 8.4
+Kolmogorov.PointToSet.pointwisePressure_eq_localPressure
+Kolmogorov.PointToSet.pointwiseBSDimension_eq_localBSDimension
+Kolmogorov.PointToSet.lowerPressure_eq_iInf_measure
+Kolmogorov.PointToSet.upperPressure_eq_iInf_measure
+Kolmogorov.PointToSet.lowerBSDimension_eq_iInf_measure
+Kolmogorov.PointToSet.upperBSDimension_eq_iInf_measure
+Kolmogorov.PointToSet.exists_atomic_measure_lowerPressure_eq
+Kolmogorov.PointToSet.exists_atomic_measure_upperPressure_eq
+Kolmogorov.PointToSet.exists_atomic_measure_lowerBSDimension_eq
+Kolmogorov.PointToSet.exists_atomic_measure_upperBSDimension_eq
+# Example 5.5
+Kolmogorov.PointToSet.exists_countable_atomic_random_upperLocalEntropy_eq_one
+Kolmogorov.PointToSet.exists_random_lowerLocalEntropy_eq_zero
+# Companion note, Theorem 1
+Kolmogorov.PointToSet.orbitComplexities_eq_ksEntropy
+Kolmogorov.PointToSet.upperOrbitComplexity_le_ksEntropy
+Kolmogorov.PointToSet.ksEntropy_le_lowerOrbitComplexity
+Kolmogorov.PointToSet.orbitComplexityAt_snd_le_ksEntropy
+# Jacobs' theorem
+Kolmogorov.Ergodic.jacobs_ksEntropy_bind
+# Trusted statements (KolmogorovMathlib/Trusted/): bridge theorems
+Kolmogorov.Trusted.theorem3_3_upper
+Kolmogorov.Trusted.theorem3_3
+Kolmogorov.Trusted.theorem1
+Kolmogorov.Trusted.theorem3_3_fixedScale
+Kolmogorov.Trusted.theorem3_3_ae
+Kolmogorov.Trusted.theorem7_3_a
+Kolmogorov.Trusted.theorem7_5_a
+Kolmogorov.Trusted.theorem7_5_b
+Kolmogorov.Trusted.theorem7_5_b_fengHuang
+Kolmogorov.Trusted.jacobsTheorem
+Kolmogorov.Trusted.theorem2_1_lower
+Kolmogorov.Trusted.theorem2_1_upper
+Kolmogorov.Trusted.variationalPrinciple
+Kolmogorov.Trusted.packingVariationalInequality
+Kolmogorov.Trusted.corollary4_2
+Kolmogorov.Trusted.theorem4_3_a
+Kolmogorov.Trusted.theorem4_3_b
+Kolmogorov.Trusted.theorem4_3_c
+Kolmogorov.Trusted.corollary6_5_a
+Kolmogorov.Trusted.corollary6_5_b
+Kolmogorov.Trusted.corollary6_5_c
+Kolmogorov.Trusted.theorem8_3_pressure
+Kolmogorov.Trusted.theorem8_3_bsDimension
+Kolmogorov.Trusted.corollary8_4_pressure
+Kolmogorov.Trusted.corollary8_4_bsDimension
+Kolmogorov.Trusted.proposition7_10_i
+Kolmogorov.Trusted.proposition7_10_ii
+Kolmogorov.Trusted.proposition7_10_i_ks
+Kolmogorov.Trusted.proposition7_10_ii_ks
+Kolmogorov.Trusted.proposition7_10_i_cantor
+Kolmogorov.Trusted.proposition7_10_ii_cantor
+Kolmogorov.Trusted.example5_5_1
+Kolmogorov.Trusted.example5_5_2
+Kolmogorov.Trusted.theorem1_a
+Kolmogorov.Trusted.theorem1_b
+# The statement definitions themselves, so that nanoda prints them in statements.txt
+Kolmogorov.Trusted.Theorem3_3_upper
+Kolmogorov.Trusted.Theorem3_3
+Kolmogorov.Trusted.Theorem1
+Kolmogorov.Trusted.Theorem3_3_fixedScale
+Kolmogorov.Trusted.Theorem3_3_ae
+Kolmogorov.Trusted.Theorem7_3_a
+Kolmogorov.Trusted.Theorem7_5_a
+Kolmogorov.Trusted.Theorem7_5_b
+Kolmogorov.Trusted.Theorem7_5_b_fengHuang
+Kolmogorov.Trusted.JacobsTheorem
+Kolmogorov.Trusted.Theorem2_1_lower
+Kolmogorov.Trusted.Theorem2_1_upper
+Kolmogorov.Trusted.VariationalPrinciple
+Kolmogorov.Trusted.PackingVariationalInequality
+Kolmogorov.Trusted.Corollary4_2
+Kolmogorov.Trusted.Theorem4_3_a
+Kolmogorov.Trusted.Theorem4_3_b
+Kolmogorov.Trusted.Theorem4_3_c
+Kolmogorov.Trusted.Corollary6_5_a
+Kolmogorov.Trusted.Corollary6_5_b
+Kolmogorov.Trusted.Corollary6_5_c
+Kolmogorov.Trusted.Theorem8_3_pressure
+Kolmogorov.Trusted.Theorem8_3_bsDimension
+Kolmogorov.Trusted.Corollary8_4_pressure
+Kolmogorov.Trusted.Corollary8_4_bsDimension
+Kolmogorov.Trusted.Proposition7_10_i
+Kolmogorov.Trusted.Proposition7_10_ii
+Kolmogorov.Trusted.Proposition7_10_i_ks
+Kolmogorov.Trusted.Proposition7_10_ii_ks
+Kolmogorov.Trusted.Proposition7_10_i_cantor
+Kolmogorov.Trusted.Proposition7_10_ii_cantor
+Kolmogorov.Trusted.Example5_5_1
+Kolmogorov.Trusted.Example5_5_2
+Kolmogorov.Trusted.Theorem1_a
+Kolmogorov.Trusted.Theorem1_b
